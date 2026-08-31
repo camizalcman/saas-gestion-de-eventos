@@ -3,7 +3,7 @@ import Link from "next/link";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { getCurrentUser } from "@/lib/firebase/session";
-import { listUserItems } from "@/lib/items/items";
+import { listUserEvents } from "@/lib/events/events";
 import { getCurrentUserProfile, listUserProfiles } from "@/lib/users/users";
 
 export const dynamic = "force-dynamic";
@@ -15,9 +15,9 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const items = await listUserItems(user.uid);
   const profile = await getCurrentUserProfile(user);
   const isAdmin = profile?.user_type === "admin";
+  const events = isAdmin ? await listUserEvents(user.uid) : [];
   const users = isAdmin ? await listUserProfiles() : [];
 
   return (
@@ -56,21 +56,31 @@ export default async function DashboardPage() {
       </section>
 
       <section className="mx-auto mt-7 grid w-[calc(100%-2rem)] max-w-6xl gap-px overflow-hidden border border-zinc-800 bg-zinc-800 sm:w-[calc(100%-3rem)] lg:w-[calc(100%-4rem)] lg:grid-cols-2">
-        <div className="bg-zinc-950 p-5">
-          <span className="block text-sm text-zinc-500">Items propios</span>
-          <strong className="mt-3 block text-3xl font-semibold text-zinc-100">
-            {items.length}
-          </strong>
-          <p className="mt-3 text-sm leading-6 text-zinc-400">
-            Documentos de Firestore filtrados por el usuario autenticado.
-          </p>
-          <Link
-            className="mt-5 inline-flex h-10 w-full items-center justify-center border border-cyan-400 bg-cyan-400 px-4 text-sm font-semibold text-zinc-950 transition hover:border-cyan-300 hover:bg-cyan-300 sm:w-auto"
-            href="/dashboard/items"
-          >
-            Ver items
-          </Link>
-        </div>
+        {isAdmin ? (
+          <div className="bg-zinc-950 p-5">
+            <span className="block text-sm text-zinc-500">Eventos propios</span>
+            <strong className="mt-3 block text-3xl font-semibold text-zinc-100">
+              {events.length}
+            </strong>
+            <p className="mt-3 text-sm leading-6 text-zinc-400">
+              Eventos creados y administrados por el anfitrion.
+            </p>
+            <Link
+              className="mt-5 inline-flex h-10 w-full items-center justify-center border border-cyan-400 bg-cyan-400 px-4 text-sm font-semibold text-zinc-950 transition hover:border-cyan-300 hover:bg-cyan-300 sm:w-auto"
+              href="/dashboard/events"
+            >
+              Ver eventos
+            </Link>
+          </div>
+        ) : (
+          <div className="bg-zinc-950 p-5">
+            <span className="block text-sm text-zinc-500">Mis eventos</span>
+            <strong className="mt-3 block text-3xl font-semibold text-zinc-100">0</strong>
+            <p className="mt-3 text-sm leading-6 text-zinc-400">
+              Todavia no tenes eventos asignados. Cuando el anfitrion te invite, apareceran aqui.
+            </p>
+          </div>
+        )}
 
         {isAdmin ? (
           <div className="bg-zinc-950 p-5">
