@@ -20,8 +20,8 @@ function NavLink({ href, label, onClick, pathname }) {
     <Link
       className={`block border px-3 py-2 text-sm font-medium transition ${
         active
-          ? "border-zinc-700 bg-zinc-900 text-zinc-100"
-          : "border-transparent text-zinc-400 hover:border-zinc-800 hover:bg-zinc-900 hover:text-zinc-100"
+          ? "border-brand bg-accent/30 text-surface"
+          : "border-transparent text-surface/80 hover:bg-accent/20 hover:text-surface"
       }`}
       href={href}
       onClick={onClick}
@@ -52,11 +52,11 @@ export default function Navbar({ actions, profile, user }) {
   }
 
   return (
-    <nav className="border-b border-zinc-800 bg-zinc-950">
+    <nav className="border-b border-brand bg-brand">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex min-h-16 items-center justify-between gap-3 py-3">
           <Link
-            className="min-w-0 overflow-wrap-anywhere text-sm font-semibold uppercase tracking-[0.14em] text-zinc-100"
+            className="min-w-0 overflow-wrap-anywhere text-sm font-semibold uppercase tracking-[0.14em] text-surface"
             href="/"
             onClick={closeMenu}
           >
@@ -79,12 +79,12 @@ export default function Navbar({ actions, profile, user }) {
               {actions}
               {user ? (
                 <>
-                  <span className="min-w-0 max-w-64 overflow-wrap-anywhere text-right text-sm text-zinc-500">
+                  <span className="min-w-0 max-w-64 overflow-wrap-anywhere text-right text-sm text-surface/80">
                     {user.email || "Sin email"} ({userType})
                   </span>
                   <form action={logout}>
                     <button
-                      className="h-10 border border-zinc-700 bg-transparent px-4 text-sm font-semibold text-zinc-100 transition hover:border-zinc-500 hover:bg-zinc-900"
+                      className="h-10 rounded-md border border-accent bg-transparent px-4 text-sm font-semibold text-surface transition hover:border-surface hover:bg-accent/20"
                       type="submit"
                     >
                       Cerrar sesion
@@ -93,7 +93,7 @@ export default function Navbar({ actions, profile, user }) {
                 </>
               ) : (
                 <Link
-                  className="inline-flex h-10 items-center justify-center border border-cyan-400 bg-cyan-400 px-4 text-sm font-semibold text-zinc-950 transition hover:border-cyan-300 hover:bg-cyan-300"
+                  className="inline-flex h-10 items-center justify-center rounded-md border border-surface bg-surface px-4 text-sm font-semibold text-brand transition hover:border-accent hover:bg-accent"
                   href="/login"
                 >
                   Login
@@ -105,15 +105,15 @@ export default function Navbar({ actions, profile, user }) {
           <button
             aria-controls="mobile-menu"
             aria-expanded={isOpen}
-            className="grid size-10 place-items-center border border-zinc-700 bg-transparent text-zinc-100 transition hover:border-zinc-500 hover:bg-zinc-900 md:hidden"
+            className="grid size-10 place-items-center rounded-md border border-accent bg-transparent text-surface transition hover:border-surface hover:bg-accent/20 md:hidden"
             onClick={() => setIsOpen((value) => !value)}
             type="button"
           >
             <span className="sr-only">Abrir menu</span>
             <span className="grid gap-1.5">
-              <span className="block h-px w-5 bg-zinc-100" />
-              <span className="block h-px w-5 bg-zinc-100" />
-              <span className="block h-px w-5 bg-zinc-100" />
+              <span className="block h-px w-5 bg-surface" />
+              <span className="block h-px w-5 bg-surface" />
+              <span className="block h-px w-5 bg-surface" />
             </span>
           </button>
         </div>
@@ -125,7 +125,7 @@ export default function Navbar({ actions, profile, user }) {
           id="mobile-menu"
         >
           <div className="min-h-0 overflow-hidden">
-            <div className="grid gap-1 border-t border-zinc-800 pt-3">
+            <div className="grid gap-1 border-t border-surface/20 pt-3">
               {links.map((link) => (
                 <NavLink
                   href={link.href}
@@ -137,10 +137,10 @@ export default function Navbar({ actions, profile, user }) {
               ))}
             </div>
 
-            <div className="mt-3 grid min-w-0 gap-3 border-t border-zinc-800 pt-3">
+            <div className="mt-3 grid min-w-0 gap-3 border-t border-surface/20 pt-3">
               {actions}
               {user ? (
-                <span className="overflow-wrap-anywhere text-sm text-zinc-500">
+                <span className="overflow-wrap-anywhere text-sm text-surface/80">
                   {user.email || "Sin email"} ({userType})
                 </span>
               ) : null}
@@ -149,7 +149,7 @@ export default function Navbar({ actions, profile, user }) {
           {user ? (
             <form action={logout} className="mt-3">
               <button
-                className="h-10 w-full border border-zinc-700 bg-transparent px-4 text-sm font-semibold text-zinc-100 transition hover:border-zinc-500 hover:bg-zinc-900"
+                className="h-10 w-full rounded-md border border-accent bg-transparent px-4 text-sm font-semibold text-surface transition hover:border-surface hover:bg-accent/20"
                 type="submit"
               >
                 Cerrar sesion
@@ -157,7 +157,7 @@ export default function Navbar({ actions, profile, user }) {
             </form>
           ) : (
             <Link
-              className="mt-3 inline-flex h-10 w-full items-center justify-center border border-cyan-400 bg-cyan-400 px-4 text-sm font-semibold text-zinc-950 transition hover:border-cyan-300 hover:bg-cyan-300"
+              className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-md border border-surface bg-surface px-4 text-sm font-semibold text-brand transition hover:border-accent hover:bg-accent"
               href="/login"
               onClick={closeMenu}
             >
