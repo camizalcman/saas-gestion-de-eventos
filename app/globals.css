@@ -3,6 +3,13 @@
 @theme {
   --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   --font-mono: var(--font-geist-mono), "SFMono-Regular", Consolas, monospace;
+
+   /*Paleta del proyecto*/
+  --color-brand: #3b3735;      
+  --color-surface: #f7f4e6;    
+  --color-secondary: #96a88f;  
+  --color-accent: #cfcfcf;     
+  --color-ink: #242424;        
 }
 
 @layer base {
