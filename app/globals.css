@@ -15,14 +15,14 @@
 @layer base {
   html {
     height: 100%;
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   body {
     min-height: 100%;
     overflow-x: hidden;
-    background: #05070a;
-    color: #e6edf3;
+    background: var(--color-surface);
+    color: var(--color-ink);
     font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
