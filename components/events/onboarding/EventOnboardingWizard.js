@@ -57,8 +57,8 @@ export default function EventOnboardingWizard({ useFirebaseStorage }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           alt="Celebración"
-          className="h-full w-full object-cover"
-          src="/fotoLoginFiesta.jpg"
+          className="h-full w-full object-cover object-[50%_35%]"
+          src="/fiesta.jpg"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-brand via-brand/20 to-transparent" />
         <div className="absolute inset-0 flex items-end p-10">
