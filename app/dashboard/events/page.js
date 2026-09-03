@@ -2,11 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import EventForm from "@/components/events/EventForm";
 import { getCurrentUser } from "@/lib/firebase/session";
 import { listUserEvents } from "@/lib/events/events";
 import { getCurrentUserProfile } from "@/lib/users/users";
-import { createEvent, deleteEvent } from "./actions";
+import { deleteEvent } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -23,22 +22,25 @@ export default async function EventsPage() {
   if (profile?.user_type !== "admin") redirect("/dashboard");
 
   const events = await listUserEvents(user.uid);
-  const useFirebaseStorage = process.env.FIREBASE_STORAGE === "true";
 
   return (
     <main className="min-h-screen bg-surface text-ink">
       <Navbar user={user} profile={profile} />
-      <header className="mx-auto w-full max-w-6xl border-b border-accent px-4 py-7 sm:px-6 lg:px-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">Firestore</p>
-        <h1 className="mt-3 text-3xl font-semibold text-ink sm:text-5xl">Eventos</h1>
-        <p className="mt-4 max-w-2xl text-sm leading-6 text-brand">Creá y administrá tus eventos publicados.</p>
+      <header className="mx-auto flex w-full max-w-6xl flex-col gap-5 border-b border-accent px-4 py-7 sm:flex-row sm:items-end sm:justify-between sm:px-6 lg:px-8">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">Firestore</p>
+          <h1 className="mt-3 text-3xl font-semibold text-ink sm:text-5xl">Eventos</h1>
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-brand">Creá y administrá tus eventos publicados.</p>
+        </div>
+        <Link
+          className="inline-flex h-12 w-full items-center justify-center rounded-md border border-secondary bg-secondary px-5 text-sm font-semibold text-surface transition hover:bg-secondary/90 sm:w-auto"
+          href="/dashboard/events/nuevo"
+        >
+          Crear evento
+        </Link>
       </header>
 
-      <section className="mx-auto mt-7 grid w-full max-w-6xl gap-6 px-4 sm:px-6 lg:px-8 xl:grid-cols-[minmax(280px,360px)_1fr]">
-        <div>
-          <h2 className="mb-3 text-lg font-semibold">Crear evento</h2>
-          <EventForm action={createEvent} useFirebaseStorage={useFirebaseStorage} />
-        </div>
+      <section className="mx-auto mt-7 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
         <div>
           <div className="mb-3 flex items-center justify-between gap-3">
             <h2 className="text-lg font-semibold">Mis eventos</h2>
