@@ -153,7 +153,7 @@ export default function LoginForm() {
         </label>
         <button
           type="submit"
-          className="mt-2 h-11 rounded-md border border-brand bg-brand px-4 text-sm font-semibold text-surface transition hover:border-ink hover:bg-ink disabled:hover:border-brand disabled:hover:bg-brand"
+          className="mt-2 h-11 rounded-md border border-secondary bg-secondary px-4 text-sm font-semibold text-surface transition hover:bg-secondary/90 disabled:hover:bg-secondary"
           disabled={loading}
         >
           {loading ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Ingresar"}
