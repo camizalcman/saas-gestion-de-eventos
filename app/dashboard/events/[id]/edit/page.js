@@ -21,13 +21,13 @@ export default async function EditEventPage({ params }) {
   if (!event) notFound();
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100">
+    <main className="min-h-screen bg-surface text-ink">
       <Navbar user={user} profile={profile} />
       <section className="mx-auto w-full max-w-2xl px-4 py-7 sm:px-6 lg:px-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-cyan-300">Firestore</p>
-        <h1 className="mt-3 text-3xl font-semibold text-zinc-50 sm:text-4xl">Editar evento</h1>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">Firestore</p>
+        <h1 className="mt-3 text-3xl font-semibold text-ink sm:text-4xl">Editar evento</h1>
         <div className="mt-7"><EventForm action={updateEvent.bind(null, event.id)} event={event} submitLabel="Guardar cambios" useFirebaseStorage={process.env.FIREBASE_STORAGE === "true"} /></div>
-        <Link className="mt-4 inline-flex h-10 items-center justify-center border border-zinc-700 px-4 text-sm font-semibold hover:bg-zinc-900" href="/dashboard/events">Volver a eventos</Link>
+        <Link className="mt-4 inline-flex h-10 items-center justify-center rounded-md border border-accent px-4 text-sm font-semibold text-ink transition hover:border-secondary hover:bg-secondary/10" href="/dashboard/events">Volver a eventos</Link>
       </section>
       <Footer />
     </main>
