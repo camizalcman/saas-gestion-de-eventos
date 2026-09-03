@@ -12,8 +12,8 @@ export default function Hero({ user }) {
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
           Gestion de eventos
         </p>
-        <h1 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight tracking-normal text-surface sm:text-5xl lg:text-6xl lg:leading-none">
-          Organizá tus próximos eventos
+        <h1 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight tracking-normal text-surface font-serif sm:text-5xl lg:text-6xl lg:leading-none">
+          Organizá tu próximo evento
         </h1>
         <h2 className="mt-4 max-w-2xl text-base leading-7 text-surface/80">
           Creá, publicá y administrá eventos desde un solo lugar.

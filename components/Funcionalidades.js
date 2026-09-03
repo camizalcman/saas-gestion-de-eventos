@@ -1,3 +1,7 @@
+"use client";
+
+import useInView from "@/lib/useInView";
+
 const funcionalidades = [
   {
     numero: "01",
@@ -29,6 +33,51 @@ const funcionalidades = [
   },
 ];
 
+function FuncionalidadCard({ f, index }) {
+  const { ref, isInView } = useInView();
+
+  return (
+    <div
+      ref={ref}
+      className={`grid items-stretch gap-6 lg:grid-cols-2 transition-all duration-700 ease-out ${
+        isInView
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-8"
+      }`}
+      style={{ transitionDelay: `${index * 150}ms` }}
+    >
+      <div
+        className={`flex flex-col justify-center gap-2 rounded-3xl bg-secondary p-6 sm:gap-3 sm:p-8 lg:h-52 ${
+          index % 2 === 1 ? "lg:order-2" : ""
+        }`}
+      >
+        <span className="text-3xl font-semibold text-surface/60">
+          {f.numero}
+        </span>
+        <h3 className="text-xl font-semibold text-surface sm:text-2xl">
+          {f.titulo}
+        </h3>
+        <p className="text-sm leading-6 text-surface/80">
+          {f.subtitulo}
+        </p>
+      </div>
+
+      <div
+        className={`overflow-hidden rounded-3xl lg:h-52 ${
+          index % 2 === 1 ? "lg:order-1" : ""
+        }`}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          alt={f.titulo}
+          className="h-full w-full object-cover transition duration-500 ease-out hover:scale-105 hover:grayscale"
+          src={f.imagen}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function Funcionalidades() {
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
@@ -42,44 +91,9 @@ export default function Funcionalidades() {
       </div>
 
       <div className="flex flex-col gap-6">
-        {funcionalidades.map((f, i) => {
-          const invertido = i % 2 === 1;
-          return (
-            <div
-              className="grid items-stretch gap-6 lg:grid-cols-2"
-              key={f.titulo}
-            >
-              <div
-                className={`flex flex-col justify-center gap-2 rounded-3xl bg-secondary p-6 sm:gap-3 sm:p-8 lg:h-52 ${
-                  invertido ? "lg:order-2" : ""
-                }`}
-              >
-                <span className="text-3xl font-semibold text-surface/60">
-                  {f.numero}
-                </span>
-                <h3 className="text-xl font-semibold text-surface sm:text-2xl">
-                  {f.titulo}
-                </h3>
-                <p className="text-sm leading-6 text-surface/80">
-                  {f.subtitulo}
-                </p>
-              </div>
-
-              <div
-                className={`overflow-hidden rounded-3xl lg:h-52 ${
-                  invertido ? "lg:order-1" : ""
-                }`}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  alt={f.titulo}
-                  className="h-full w-full object-cover transition duration-500 ease-out hover:scale-105 hover:grayscale"
-                  src={f.imagen}
-                />
-              </div>
-            </div>
-          );
-        })}
+        {funcionalidades.map((f, i) => (
+          <FuncionalidadCard key={f.titulo} f={f} index={i} />
+        ))}
       </div>
     </section>
   );
