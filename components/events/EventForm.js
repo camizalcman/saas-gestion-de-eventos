@@ -92,18 +92,18 @@ export default function EventForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid min-w-0 gap-4 border border-zinc-800 p-4 sm:p-5">
-      <label className="grid gap-2 text-sm font-medium text-zinc-300">
+    <form onSubmit={handleSubmit} className="grid min-w-0 gap-4 border border-accent p-4 sm:p-5">
+      <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Titulo</span>
-        <input className="h-11 border border-zinc-800 bg-zinc-950 px-3 text-zinc-100 outline-none focus:border-cyan-400" name="title" defaultValue={event?.title || ""} disabled={loading} required />
+        <input className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="title" defaultValue={event?.title || ""} disabled={loading} required />
       </label>
-      <label className="grid gap-2 text-sm font-medium text-zinc-300">
+      <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Descripcion</span>
-        <textarea className="min-h-28 resize-y border border-zinc-800 bg-zinc-950 px-3 py-3 text-zinc-100 outline-none focus:border-cyan-400" name="description" defaultValue={event?.description || ""} disabled={loading} />
+        <textarea className="min-h-28 resize-y rounded-md border border-accent bg-surface px-3 py-3 text-ink outline-none focus:border-secondary" name="description" defaultValue={event?.description || ""} disabled={loading} />
       </label>
-      <label className="grid gap-2 text-sm font-medium text-zinc-300">
+      <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Tipo de evento</span>
-        <select className="h-11 border border-zinc-800 bg-zinc-950 px-3 text-zinc-100 outline-none focus:border-cyan-400" name="eventType" value={eventType} onChange={(e) => setEventType(e.target.value)} disabled={loading}>
+        <select className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="eventType" value={eventType} onChange={(e) => setEventType(e.target.value)} disabled={loading}>
           <option value="">Seleccionar tipo...</option>
           {EVENT_TYPES.map((t) => (
             <option key={t.value} value={t.value}>{t.label}</option>
@@ -111,27 +111,27 @@ export default function EventForm({
         </select>
       </label>
       {eventType === "otro" && (
-        <label className="grid gap-2 text-sm font-medium text-zinc-300">
+        <label className="grid gap-2 text-sm font-medium text-ink">
           <span>Especificar tipo de evento</span>
-          <input className="h-11 border border-zinc-800 bg-zinc-950 px-3 text-zinc-100 outline-none focus:border-cyan-400" name="customEventType" defaultValue={event?.customEventType || ""} disabled={loading} />
+          <input className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="customEventType" defaultValue={event?.customEventType || ""} disabled={loading} />
         </label>
       )}
-      <label className="grid gap-2 text-sm font-medium text-zinc-300">
+      <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Protagonistas</span>
-        <input className="h-11 border border-zinc-800 bg-zinc-950 px-3 text-zinc-100 outline-none focus:border-cyan-400" name="protagonists" defaultValue={event?.protagonists?.join(", ") || ""} disabled={loading} placeholder="Separados por coma" />
+        <input className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="protagonists" defaultValue={event?.protagonists?.join(", ") || ""} disabled={loading} placeholder="Separados por coma" />
       </label>
-      <label className="grid gap-2 text-sm font-medium text-zinc-300">
+      <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Fecha y hora</span>
-        <input className="h-11 border border-zinc-800 bg-zinc-950 px-3 text-zinc-100 outline-none focus:border-cyan-400" name="date" type="datetime-local" defaultValue={event?.date || ""} disabled={loading} />
+        <input className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="date" type="datetime-local" defaultValue={event?.date || ""} disabled={loading} />
       </label>
-      <label className="grid gap-2 text-sm font-medium text-zinc-300">
+      <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Ubicacion</span>
-        <input className="h-11 border border-zinc-800 bg-zinc-950 px-3 text-zinc-100 outline-none focus:border-cyan-400" name="location" defaultValue={event?.location || ""} disabled={loading} />
+        <input className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="location" defaultValue={event?.location || ""} disabled={loading} />
       </label>
-      <label className="grid gap-2 text-sm font-medium text-zinc-300">
+      <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Imagen</span>
         {useFirebaseStorage ? (
-          <input accept="image/jpeg,image/png,image/webp,image/gif" className="min-w-0 border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100" name="imageFile" type="file" disabled={loading} onChange={(changeEvent) => {
+          <input accept="image/jpeg,image/png,image/webp,image/gif" className="min-w-0 rounded-md border border-accent bg-surface px-3 py-2 text-sm text-ink" name="imageFile" type="file" disabled={loading} onChange={(changeEvent) => {
             const file = changeEvent.target.files?.[0];
             if (!file) { setObjectPreviewUrl(""); setPreviewUrl(event?.imageUrl || ""); return; }
             const nextPreviewUrl = URL.createObjectURL(file);
@@ -139,23 +139,23 @@ export default function EventForm({
             setPreviewUrl(nextPreviewUrl);
           }} />
         ) : (
-          <input className="h-11 border border-zinc-800 bg-zinc-950 px-3 text-zinc-100 outline-none focus:border-cyan-400" name="imageUrl" type="text" defaultValue={getLocalImageInputValue(event?.imageUrl, cleanImageBasePath)} disabled={loading} placeholder="imagen.jpg" onChange={(changeEvent) => setPreviewUrl(normalizeLocalImagePath(changeEvent.target.value, cleanImageBasePath))} />
+          <input className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="imageUrl" type="text" defaultValue={getLocalImageInputValue(event?.imageUrl, cleanImageBasePath)} disabled={loading} placeholder="imagen.jpg" onChange={(changeEvent) => setPreviewUrl(normalizeLocalImagePath(changeEvent.target.value, cleanImageBasePath))} />
         )}
-        <span className="text-sm font-normal leading-6 text-zinc-500">Imagen opcional. Para imagen local, usar `public/events`.</span>
+        <span className="text-sm font-normal leading-6 text-brand/60">Imagen opcional. Para imagen local, usar `public/events`.</span>
       </label>
       {useFirebaseStorage ? <><input name="imageUrl" type="hidden" defaultValue={event?.imageUrl || ""} /><input name="imagePath" type="hidden" defaultValue={event?.imagePath || ""} /></> : null}
       {previewUrl ? (
-        <div className="border border-zinc-800 bg-zinc-900">
+        <div className="rounded-md border border-accent bg-accent">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img alt="Preview del evento" className="h-44 w-full object-cover" src={previewUrl} />
         </div>
       ) : null}
-      <label className="flex items-start gap-3 border border-zinc-800 p-3 text-sm font-medium text-zinc-300">
-        <input className="mt-1 size-4 accent-cyan-400" name="published" type="checkbox" defaultChecked={Boolean(event?.published)} disabled={loading} />
-        <span>Publicado<span className="mt-1 block text-sm font-normal leading-6 text-zinc-500">El evento aparecera en la pagina publica.</span></span>
+      <label className="flex items-start gap-3 rounded-md border border-accent p-3 text-sm font-medium text-ink">
+        <input className="mt-1 size-4 accent-secondary" name="published" type="checkbox" defaultChecked={Boolean(event?.published)} disabled={loading} />
+        <span>Publicado<span className="mt-1 block text-sm font-normal leading-6 text-brand/60">El evento aparecera en la pagina publica.</span></span>
       </label>
-      <button className="h-11 w-full border border-cyan-400 bg-cyan-400 px-4 text-sm font-semibold text-zinc-950" disabled={loading} type="submit">{loading ? "Guardando..." : submitLabel}</button>
-      {error ? <p className="border border-red-900/70 bg-red-950/40 p-3 text-sm text-red-300">{error}</p> : null}
+      <button className="h-11 w-full rounded-md border border-secondary bg-secondary px-4 text-sm font-semibold text-surface transition hover:bg-secondary/90" disabled={loading} type="submit">{loading ? "Guardando..." : submitLabel}</button>
+      {error ? <p className="rounded-md border border-brand/40 bg-brand/10 p-3 text-sm text-brand">{error}</p> : null}
     </form>
   );
 }
