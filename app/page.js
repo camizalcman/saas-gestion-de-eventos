@@ -1,9 +1,11 @@
 import Link from "next/link";
 import Faq from "@/components/Faq";
 import Footer from "@/components/Footer";
+import Frase from "@/components/Frase";
 import Funcionalidades from "@/components/Funcionalidades";
 import Hero from "@/components/Hero";
 import Navbar from "@/components/Navbar";
+import Pasos from "@/components/Pasos";
 import { getCurrentUser } from "@/lib/firebase/session";
 import { listPublishedEvents } from "@/lib/events/events";
 import { getCurrentUserProfile } from "@/lib/users/users";
@@ -20,6 +22,8 @@ export default async function Home() {
       <Navbar user={user} profile={profile} />
       <Hero user={user} />
       <Funcionalidades />
+      <Pasos />
+      <Frase />
       <Faq />
 
       <section className="mx-auto w-full max-w-6xl border-t border-accent px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
