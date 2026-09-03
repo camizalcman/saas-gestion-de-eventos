@@ -13,11 +13,15 @@ function parseEventForm(formData) {
   const location = String(formData.get("location") || "").trim();
   const imageUrl = String(formData.get("imageUrl") || "").trim();
   const imagePath = String(formData.get("imagePath") || "").trim();
+  const eventType = String(formData.get("eventType") || "").trim();
+  const customEventType = String(formData.get("customEventType") || "").trim();
+  const protagonistsRaw = String(formData.get("protagonists") || "").trim();
+  const protagonists = protagonistsRaw ? protagonistsRaw.split(",").map((p) => p.trim()).filter(Boolean) : [];
 
-  if (!title || !date || !location) throw new Error("Titulo, fecha y ubicacion son obligatorios.");
-  if (Number.isNaN(new Date(date).getTime())) throw new Error("La fecha no es valida.");
+  if (!title) throw new Error("El titulo es obligatorio.");
+  if (date && Number.isNaN(new Date(date).getTime())) throw new Error("La fecha no es valida.");
 
-  return { title, description, date, location, published: formData.get("published") === "on", imageUrl, imagePath };
+  return { title, description, date, location, published: formData.get("published") === "on", imageUrl, imagePath, eventType, customEventType, protagonists };
 }
 
 async function requireAdmin() {

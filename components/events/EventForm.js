@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getClientAuth } from "@/lib/firebase/client";
 import { uploadEntityImage } from "@/lib/firebase/storage";
+import { EVENT_TYPES } from "@/lib/events/constants";
 
 function normalizeLocalImagePath(imageName, imageBasePath) {
   const value = String(imageName || "").trim();
@@ -30,6 +31,7 @@ export default function EventForm({
   const imageBasePath = "events";
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [eventType, setEventType] = useState(event?.eventType || "");
   const [previewUrl, setPreviewUrl] = useState(event?.imageUrl || "");
   const [objectPreviewUrl, setObjectPreviewUrl] = useState("");
   const cleanImageBasePath = useMemo(() => imageBasePath, []);
@@ -100,12 +102,31 @@ export default function EventForm({
         <textarea className="min-h-28 resize-y border border-zinc-800 bg-zinc-950 px-3 py-3 text-zinc-100 outline-none focus:border-cyan-400" name="description" defaultValue={event?.description || ""} disabled={loading} />
       </label>
       <label className="grid gap-2 text-sm font-medium text-zinc-300">
+        <span>Tipo de evento</span>
+        <select className="h-11 border border-zinc-800 bg-zinc-950 px-3 text-zinc-100 outline-none focus:border-cyan-400" name="eventType" value={eventType} onChange={(e) => setEventType(e.target.value)} disabled={loading}>
+          <option value="">Seleccionar tipo...</option>
+          {EVENT_TYPES.map((t) => (
+            <option key={t.value} value={t.value}>{t.label}</option>
+          ))}
+        </select>
+      </label>
+      {eventType === "otro" && (
+        <label className="grid gap-2 text-sm font-medium text-zinc-300">
+          <span>Especificar tipo de evento</span>
+          <input className="h-11 border border-zinc-800 bg-zinc-950 px-3 text-zinc-100 outline-none focus:border-cyan-400" name="customEventType" defaultValue={event?.customEventType || ""} disabled={loading} />
+        </label>
+      )}
+      <label className="grid gap-2 text-sm font-medium text-zinc-300">
+        <span>Protagonistas</span>
+        <input className="h-11 border border-zinc-800 bg-zinc-950 px-3 text-zinc-100 outline-none focus:border-cyan-400" name="protagonists" defaultValue={event?.protagonists?.join(", ") || ""} disabled={loading} placeholder="Separados por coma" />
+      </label>
+      <label className="grid gap-2 text-sm font-medium text-zinc-300">
         <span>Fecha y hora</span>
-        <input className="h-11 border border-zinc-800 bg-zinc-950 px-3 text-zinc-100 outline-none focus:border-cyan-400" name="date" type="datetime-local" defaultValue={event?.date || ""} disabled={loading} required />
+        <input className="h-11 border border-zinc-800 bg-zinc-950 px-3 text-zinc-100 outline-none focus:border-cyan-400" name="date" type="datetime-local" defaultValue={event?.date || ""} disabled={loading} />
       </label>
       <label className="grid gap-2 text-sm font-medium text-zinc-300">
         <span>Ubicacion</span>
-        <input className="h-11 border border-zinc-800 bg-zinc-950 px-3 text-zinc-100 outline-none focus:border-cyan-400" name="location" defaultValue={event?.location || ""} disabled={loading} required />
+        <input className="h-11 border border-zinc-800 bg-zinc-950 px-3 text-zinc-100 outline-none focus:border-cyan-400" name="location" defaultValue={event?.location || ""} disabled={loading} />
       </label>
       <label className="grid gap-2 text-sm font-medium text-zinc-300">
         <span>Imagen</span>
