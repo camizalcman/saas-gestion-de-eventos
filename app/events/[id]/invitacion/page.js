@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Calendar, Clock, Gift, MapPin, Shirt } from "lucide-react";
 import Countdown from "@/components/invitation/Countdown";
 import InvitationActions from "@/components/invitation/InvitationActions";
+import MusicPlayer from "@/components/invitation/MusicPlayer";
 import { getPublishedEvent } from "@/lib/events/events";
 import { getPalette } from "@/lib/invitation/palettes";
 import { getTypography } from "@/lib/invitation/typographies";
@@ -57,6 +58,12 @@ export default async function PublicInvitationPage({ params }) {
             className="absolute inset-x-0 bottom-0 h-32"
             style={{ background: `linear-gradient(to top, ${bg}, transparent)` }}
           />
+        </div>
+      ) : null}
+
+      {invitation.audioEnabled && invitation.audioUrl ? (
+        <div className="fixed right-4 top-4 z-40">
+          <MusicPlayer src={invitation.audioUrl} color={cta} />
         </div>
       ) : null}
 

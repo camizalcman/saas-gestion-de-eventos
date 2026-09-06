@@ -28,6 +28,22 @@ function listLocalEventImages() {
   }
 }
 
+const AUDIO_EXTENSIONS = new Set([".mp3", ".ogg", ".wav", ".m4a"]);
+
+function listLocalEventAudio() {
+  const dir = path.join(process.cwd(), "public", "audio");
+
+  try {
+    return fs
+      .readdirSync(dir)
+      .filter((file) => AUDIO_EXTENSIONS.has(path.extname(file).toLowerCase()))
+      .map((file) => `/audio/${file}`)
+      .sort();
+  } catch {
+    return [];
+  }
+}
+
 export default async function InvitationPage({ params }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -40,6 +56,7 @@ export default async function InvitationPage({ params }) {
 
   const invitation = event.invitation;
   const availableImages = listLocalEventImages();
+  const availableAudio = listLocalEventAudio();
 
   return (
     <main className="min-h-screen bg-surface text-ink">
@@ -59,6 +76,7 @@ export default async function InvitationPage({ params }) {
             submitLabel={invitation ? "Guardar cambios" : "Crear invitación"}
             useFirebaseStorage={process.env.FIREBASE_STORAGE === "true"}
             availableImages={availableImages}
+            availableAudio={availableAudio}
           />
         </div>
 

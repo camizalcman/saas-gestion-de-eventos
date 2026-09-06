@@ -2,6 +2,7 @@
 
 import { Calendar, Clock, Gift, MapPin, Shirt } from "lucide-react";
 import Countdown from "@/components/invitation/Countdown";
+import MusicPlayer from "@/components/invitation/MusicPlayer";
 import { getPalette } from "@/lib/invitation/palettes";
 import { getTypography } from "@/lib/invitation/typographies";
 
@@ -34,7 +35,13 @@ export default function InvitationPreview({ values, eventTitle }) {
   const formattedDate = formatInvitationDate(values.date, values.time);
 
   return (
-    <div className="mx-auto w-[340px] max-w-full overflow-hidden rounded-2xl border border-accent shadow-lg">
+    <div className="relative mx-auto w-[340px] max-w-full overflow-hidden rounded-2xl border border-accent shadow-lg">
+      {values.audioEnabled && values.audioUrl ? (
+        <div className="absolute right-3 top-3 z-10">
+          <MusicPlayer src={values.audioUrl} color={cta} />
+        </div>
+      ) : null}
+
       <div
         style={{ backgroundColor: bg, color: ink, fontFamily: typography.bodyFont }}
         className="min-h-[640px]"
@@ -67,7 +74,7 @@ export default function InvitationPreview({ values, eventTitle }) {
             ) : null}
           </header>
 
-          {values.personalText ? (
+          {values.personalTextEnabled && values.personalText ? (
             <p
               style={{ color: muted, borderColor: accent }}
               className="mx-auto mt-8 max-w-xs whitespace-pre-wrap border-t border-b py-5 text-center text-sm leading-6"
@@ -76,7 +83,7 @@ export default function InvitationPreview({ values, eventTitle }) {
             </p>
           ) : null}
 
-          {(formattedDate || values.time) ? (
+          {(values.dateTimeEnabled && (formattedDate || values.time)) ? (
             <div className="mt-10 flex items-start justify-center gap-8">
               {formattedDate ? (
                 <div className="flex flex-col items-center gap-1.5">
@@ -99,7 +106,7 @@ export default function InvitationPreview({ values, eventTitle }) {
             </div>
           ) : null}
 
-          {values.venue ? (
+          {values.venueEnabled && values.venue ? (
             <section
               className="mt-14 flex flex-col items-center gap-2.5 border-t pt-8 text-center"
               style={{ borderColor: accent }}
@@ -112,7 +119,7 @@ export default function InvitationPreview({ values, eventTitle }) {
             </section>
           ) : null}
 
-          {values.dressCode ? (
+          {values.dressCodeEnabled && values.dressCode ? (
             <section
               className="mt-14 flex flex-col items-center gap-2.5 border-t pt-8 text-center"
               style={{ borderColor: accent }}
@@ -138,7 +145,7 @@ export default function InvitationPreview({ values, eventTitle }) {
             </section>
           ) : null}
 
-          {values.closingText ? (
+          {values.closingTextEnabled && values.closingText ? (
             <p style={{ color: muted }} className="mt-14 whitespace-pre-wrap text-center text-sm leading-6">
               {values.closingText}
             </p>

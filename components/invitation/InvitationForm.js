@@ -112,6 +112,56 @@ function TypographyGrid({ selectedId, onSelect }) {
   );
 }
 
+function AudioPicker({ availableAudio, selectedUrl, onSelect }) {
+  if (!Array.isArray(availableAudio) || availableAudio.length === 0) {
+    return (
+      <p className="rounded-md border border-accent bg-surface p-3 text-sm text-brand">
+        No hay canciones en <code className="rounded bg-accent px-1">public/audio</code>. Copiá un MP3 ahí y recargá la página.
+      </p>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
+      {availableAudio.map((src) => {
+        const isSelected = selectedUrl === src;
+        const name = src.split("/").pop()?.replace(/\.[^.]+$/, "") || src;
+        return (
+          <button
+            key={src}
+            type="button"
+            onClick={() => onSelect(src)}
+            className={`relative flex items-center gap-2 rounded-md border-2 p-2 text-left text-xs transition ${
+              isSelected
+                ? "border-secondary bg-secondary/10 ring-2 ring-secondary/30"
+                : "border-accent bg-surface hover:scale-[1.02] hover:border-secondary"
+            }`}
+          >
+            {isSelected ? (
+              <span className="grid size-5 shrink-0 place-items-center rounded-full bg-secondary text-surface">
+                <svg className="size-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </span>
+            ) : (
+              <span className="grid size-5 shrink-0 place-items-center rounded-full border border-accent text-brand">
+                <svg className="size-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 18V6l10-2v12" />
+                  <circle cx="6" cy="18" r="3" />
+                  <circle cx="16" cy="16" r="3" />
+                </svg>
+              </span>
+            )}
+            <span className="min-w-0">
+              <span className={`block truncate font-semibold ${isSelected ? "text-ink" : "text-ink"}`}>{name}</span>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function CoverImagePicker({ availableImages, selectedUrl, onSelect }) {
   if (!Array.isArray(availableImages) || availableImages.length === 0) {
     return (
@@ -165,6 +215,7 @@ export default function InvitationForm({
   submitLabel = "Guardar invitación",
   useFirebaseStorage = false,
   availableImages = [],
+  availableAudio = [],
 }) {
   const initial = invitation || makeInvitationDefaults(event);
 
@@ -186,8 +237,11 @@ export default function InvitationForm({
     giftEnabled: invitation ? Boolean(initial.giftEnabled) : true,
     giftAlias: initial.giftAlias || "",
     closingText: initial.closingText || "",
+    closingTextEnabled: true,
     palette: initial.palette || "clasico",
     typography: initial.typography || "elegante",
+    audioEnabled: initial.audioEnabled || false,
+    audioUrl: initial.audioUrl || "",
   });
 
   const [error, setError] = useState("");
@@ -249,9 +303,11 @@ export default function InvitationForm({
       formData.set("dressCode", values.dressCodeEnabled ? values.dressCode : "");
       formData.set("giftEnabled", values.giftEnabled ? "on" : "");
       formData.set("giftAlias", values.giftAlias);
-      formData.set("closingText", values.closingText);
+      formData.set("closingText", values.closingTextEnabled ? values.closingText : "");
       formData.set("palette", values.palette);
       formData.set("typography", values.typography);
+      formData.set("audioEnabled", values.audioEnabled ? "on" : "");
+      formData.set("audioUrl", values.audioEnabled ? values.audioUrl : "");
 
       await action(formData);
     } catch (submitError) {
@@ -341,6 +397,27 @@ export default function InvitationForm({
             onSelect={(src) => update("heroImageUrl", src)}
           />
         )}
+      </div>
+
+      <div className="grid gap-2">
+        <label className="flex items-center gap-3 text-sm font-semibold text-ink">
+          <input
+            className="size-4 accent-secondary"
+            type="checkbox"
+            checked={values.audioEnabled}
+            onChange={(e) => update("audioEnabled", e.target.checked)}
+            disabled={loading}
+          />
+          <span>Música de fondo</span>
+        </label>
+
+        {values.audioEnabled ? (
+          <AudioPicker
+            availableAudio={availableAudio}
+            selectedUrl={values.audioUrl}
+            onSelect={(src) => update("audioUrl", src)}
+          />
+        ) : null}
       </div>
 
       <label className={labelClasses}>
@@ -509,16 +586,28 @@ export default function InvitationForm({
         </label>
       ) : null}
 
-      <label className={labelClasses}>
-        <span>Texto de cierre (opcional)</span>
-        <textarea
-          className="min-h-20 resize-y rounded-md border border-accent bg-surface px-3 py-3 text-ink outline-none focus:border-secondary"
-          value={values.closingText}
-          onChange={(e) => update("closingText", e.target.value)}
-          placeholder="Mensaje final de agradecimiento..."
+      <label className="flex items-center gap-3 text-sm font-semibold text-ink">
+        <input
+          className="size-4 accent-secondary"
+          type="checkbox"
+          checked={values.closingTextEnabled}
+          onChange={(e) => update("closingTextEnabled", e.target.checked)}
           disabled={loading}
         />
+        <span>Texto de cierre</span>
       </label>
+
+      {values.closingTextEnabled ? (
+        <label className={labelClasses}>
+          <textarea
+            className="min-h-20 resize-y rounded-md border border-accent bg-surface px-3 py-3 text-ink outline-none focus:border-secondary"
+            value={values.closingText}
+            onChange={(e) => update("closingText", e.target.value)}
+            placeholder="Mensaje final de agradecimiento..."
+            disabled={loading}
+          />
+        </label>
+      ) : null}
 
       <input type="hidden" name="heroImagePath" value={values.heroImagePath} />
 

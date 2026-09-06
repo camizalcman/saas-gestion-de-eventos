@@ -93,6 +93,8 @@ function parseInvitationForm(formData) {
     closingText: value("closingText"),
     palette: value("palette") || "clasico",
     typography: value("typography") || "elegante",
+    audioEnabled: formData.get("audioEnabled") === "on",
+    audioUrl: value("audioUrl"),
   };
 }
 
