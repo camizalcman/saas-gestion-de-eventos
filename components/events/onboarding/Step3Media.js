@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { getClientAuth } from "@/lib/firebase/client";
 import { uploadEntityImage } from "@/lib/firebase/storage";
 
 function normalizeLocalImagePath(imageName) {
@@ -49,13 +48,10 @@ export default function Step3Media({ form, onBack, onCreate, useFirebaseStorage,
 
       if (useFirebaseStorage) {
         if (file && file.size > 0) {
-          const currentUser = getClientAuth().currentUser;
-          if (!currentUser) throw new Error("Tenes que iniciar sesion para subir imagenes.");
           const uploaded = await uploadEntityImage({
             entity: "events",
             file,
             itemId: "uploads",
-            userId: currentUser.uid,
           });
           result.imageUrl = uploaded.imageUrl;
           result.imagePath = uploaded.imagePath;

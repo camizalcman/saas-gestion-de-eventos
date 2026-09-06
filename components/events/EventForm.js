@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { getClientAuth } from "@/lib/firebase/client";
 import { uploadEntityImage } from "@/lib/firebase/storage";
 import { EVENT_TYPES } from "@/lib/events/constants";
 
@@ -55,14 +54,10 @@ export default function EventForm({
         formData.delete("imageFile");
 
         if (hasNewImage) {
-          const currentUser = getClientAuth().currentUser;
-          if (!currentUser) throw new Error("Tenes que iniciar sesion para subir imagenes.");
-
           const uploadedImage = await uploadEntityImage({
             entity: cleanImageBasePath,
             file: imageFile,
             itemId: event?.id || "uploads",
-            userId: currentUser.uid,
           });
           formData.set("imageUrl", uploadedImage.imageUrl);
           formData.set("imagePath", uploadedImage.imagePath);

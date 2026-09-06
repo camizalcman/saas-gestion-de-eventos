@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/firebase/session";
-import { createUserEvent, deleteUserEvent, updateUserEvent } from "@/lib/events/events";
+import { createUserEvent, deleteUserEvent, updateUserEvent, setUserEventInvitation } from "@/lib/events/events";
 import { getCurrentUserProfile } from "@/lib/users/users";
 
 function parseEventForm(formData) {
@@ -59,4 +59,48 @@ export async function deleteEvent(eventId) {
   revalidatePath(`/events/${eventId}`);
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/events");
+}
+
+function parseInvitationForm(formData) {
+  const value = (name) => String(formData.get(name) || "").trim();
+
+  const heroImageUrl = value("heroImageUrl");
+  const names = value("names");
+  const message = value("message");
+  const date = value("date");
+  const time = value("time");
+  const venue = value("venue");
+  const dressCode = value("dressCode");
+
+  if (!heroImageUrl) throw new Error("La foto de portada es obligatoria.");
+  if (!names) throw new Error("Los nombres son obligatorios.");
+  if (!message) throw new Error("El mensaje es obligatorio.");
+
+  return {
+    heroImageUrl,
+    heroImagePath: value("heroImagePath"),
+    names,
+    message,
+    personalText: value("personalText"),
+    date,
+    time,
+    venue,
+    mapUrl: value("mapUrl"),
+    dressCode,
+    gallery: [],
+    giftEnabled: formData.get("giftEnabled") === "on",
+    giftAlias: value("giftAlias"),
+    closingText: value("closingText"),
+    palette: value("palette") || "clasico",
+    typography: value("typography") || "elegante",
+  };
+}
+
+export async function saveInvitation(eventId, formData) {
+  const user = await requireAdmin();
+  await setUserEventInvitation(user.uid, eventId, parseInvitationForm(formData));
+  revalidatePath(`/events/${eventId}/invitacion`);
+  revalidatePath(`/dashboard/events/${eventId}`);
+  revalidatePath("/dashboard/events");
+  redirect(`/dashboard/events/${eventId}`);
 }

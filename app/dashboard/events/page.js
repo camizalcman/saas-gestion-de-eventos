@@ -62,7 +62,7 @@ export default async function EventsPage() {
                     {event.description ? <p className="mt-3 overflow-wrap-anywhere text-sm leading-6 text-brand">{event.description}</p> : null}
                   </div>
                   <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-start lg:justify-end">
-                    {event.published ? <Link className="inline-flex h-9 items-center justify-center border border-accent px-3 text-sm font-semibold hover:bg-accent/40" href={`/events/${event.id}`}>Ver</Link> : null}
+                    <Link className="inline-flex h-9 items-center justify-center border border-accent px-3 text-sm font-semibold hover:bg-accent/40" href={`/dashboard/events/${event.id}`}>Ver</Link>
                     <Link className="inline-flex h-9 items-center justify-center border border-accent px-3 text-sm font-semibold hover:bg-accent/40" href={`/dashboard/events/${event.id}/edit`}>Editar</Link>
                     <form action={deleteEvent.bind(null, event.id)}><button className="h-9 border border-brand/40 px-3 text-sm font-semibold text-brand hover:bg-brand/10" type="submit">Eliminar</button></form>
                   </div>
