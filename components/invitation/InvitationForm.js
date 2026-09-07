@@ -18,6 +18,12 @@ function normalizeLocalImagePath(imageName) {
   return `/events/${value}`;
 }
 
+function buildGoogleMapsUrl(venue) {
+  const query = String(venue || "").trim();
+  if (!query) return "";
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+
 function ObjectUrlPreview({ src, alt = "Preview", className = "h-44 w-full rounded-md object-cover" }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
@@ -263,6 +269,11 @@ export default function InvitationForm({
     setValues((prev) => ({ ...prev, [field]: value }));
   }
 
+  function handleVenueChange(value) {
+    update("venue", value);
+    update("mapUrl", buildGoogleMapsUrl(value));
+  }
+
   function handleHeroSelect(file) {
     if (!file) return;
     setHeroFile(file);
@@ -429,7 +440,6 @@ export default function InvitationForm({
           placeholder="Te invitamos a nuestro..."
           disabled={loading}
         />
-        <span className={hintClasses}>Se genera según el tipo de evento; editá si lo necesitás.</span>
       </label>
 
       <label className={labelClasses}>
@@ -441,7 +451,6 @@ export default function InvitationForm({
           placeholder="Nombre del o los protagonistas"
           disabled={loading}
         />
-        <span className={hintClasses}>Se completa automáticamente con el onboarding, pero podés cambiarlo.</span>
       </label>
 
       <label className="flex items-center gap-3 text-sm font-semibold text-ink">
@@ -515,29 +524,16 @@ export default function InvitationForm({
       </label>
 
       {values.venueEnabled ? (
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className={labelClasses}>
-            <span>Ubicación / salón</span>
-            <input
-              className={fieldClasses}
-              value={values.venue}
-              onChange={(e) => update("venue", e.target.value)}
-              placeholder="Salón o dirección"
-              disabled={loading}
-            />
-          </label>
-          <label className={labelClasses}>
-            <span>Link a Google Maps (opcional)</span>
-            <input
-              className={fieldClasses}
-              type="url"
-              value={values.mapUrl}
-              onChange={(e) => update("mapUrl", e.target.value)}
-              placeholder="https://maps.google.com/..."
-              disabled={loading}
-            />
-          </label>
-        </div>
+        <label className={labelClasses}>
+          <span>Ubicación / salón</span>
+          <input
+            className={fieldClasses}
+            value={values.venue}
+            onChange={(e) => handleVenueChange(e.target.value)}
+            placeholder="Salón o dirección"
+            disabled={loading}
+          />
+        </label>
       ) : null}
 
       <label className="flex items-center gap-3 text-sm font-semibold text-ink">
