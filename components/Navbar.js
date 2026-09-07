@@ -60,7 +60,7 @@ export default function Navbar({ actions, profile, user }) {
             href="/"
             onClick={closeMenu}
           >
-            SaaS Starter
+            Gestión de eventos
           </Link>
 
           <div className="hidden min-w-0 flex-1 items-center justify-between gap-4 md:flex">
