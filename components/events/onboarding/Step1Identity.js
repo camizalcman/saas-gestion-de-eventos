@@ -58,6 +58,7 @@ export default function Step1Identity({ form, updateField, onNext }) {
           name="title"
           value={form.title}
           onChange={(e) => updateField("title", e.target.value)}
+          minLength={3}
         />
       </label>
 

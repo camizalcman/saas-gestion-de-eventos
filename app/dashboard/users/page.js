@@ -1,7 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
 import UserForm from "@/components/users/UserForm";
 import { getCurrentUser } from "@/lib/firebase/session";
 import { getCurrentUserProfile, listUserProfiles } from "@/lib/users/users";
@@ -30,33 +28,28 @@ export default async function UsersPage() {
   const profile = await getCurrentUserProfile(user);
 
   if (profile?.user_type !== "admin") {
-    redirect("/dashboard");
+    redirect("/dashboard/panel");
   }
 
   const users = await listUserProfiles();
 
   return (
-    <main className="min-h-screen bg-surface text-ink">
-      <Navbar user={user} profile={profile} />
-      <header className="mx-auto flex w-full max-w-6xl flex-col gap-5 border-b border-accent px-4 py-7 sm:flex-row sm:items-end sm:justify-between sm:px-6 lg:px-8">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
-            Administracion
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-5xl lg:text-6xl">
-            Usuarios
-          </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-brand">
-            Gestion de perfiles almacenados en Firestore.
-          </p>
-        </div>
+    <>
+      <header className="border-b border-accent pb-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
+          Administracion
+        </p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-4xl">
+          Usuarios
+        </h1>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-brand">
+          Gestion de perfiles almacenados en Firestore.
+        </p>
       </header>
 
-      <section className="mx-auto mt-7 grid w-full max-w-6xl gap-6 px-4 sm:px-6 lg:px-8 xl:grid-cols-[minmax(280px,360px)_1fr]">
+      <section className="mt-7 grid gap-6 xl:grid-cols-[minmax(280px,360px)_1fr]">
         <div>
-          <h2 className="mb-3 text-lg font-semibold text-ink">
-            Crear usuario
-          </h2>
+          <h2 className="mb-3 text-lg font-semibold text-ink">Crear usuario</h2>
           <UserForm
             action={createUser}
             showCredentials
@@ -129,7 +122,6 @@ export default async function UsersPage() {
           )}
         </div>
       </section>
-      <Footer />
-    </main>
+    </>
   );
 }

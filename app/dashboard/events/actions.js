@@ -3,25 +3,66 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/firebase/session";
-import { createUserEvent, deleteUserEvent, updateUserEvent, setUserEventInvitation } from "@/lib/events/events";
+import {
+  addEventGuest,
+  createUserEvent,
+  deleteUserEvent,
+  deriveGuestStatus,
+  getUserEvent,
+  removeEventGuest,
+  setUserEventInvitation,
+  updateEventGuestField,
+  updateUserEvent,
+} from "@/lib/events/events";
 import { getCurrentUserProfile } from "@/lib/users/users";
+import { EVENT_TYPES } from "@/lib/events/constants";
+import { INVITATION_PALETTES } from "@/lib/invitation/palettes";
+import { INVITATION_TYPOGRAPHIES } from "@/lib/invitation/typographies";
+import {
+  booleanInput,
+  dateInput,
+  datetimeInput,
+  enumInput,
+  integerInput,
+  nameListInput,
+  optionalText,
+  pathOrUrl,
+  requiredText,
+  storagePath,
+  timeInput,
+} from "@/lib/validation";
+
+const EVENT_TYPE_VALUES = EVENT_TYPES.map((type) => type.value);
+const PALETTE_IDS = INVITATION_PALETTES.map((palette) => palette.id);
+const TYPOGRAPHY_IDS = INVITATION_TYPOGRAPHIES.map((typography) => typography.id);
 
 function parseEventForm(formData) {
-  const title = String(formData.get("title") || "").trim();
-  const description = String(formData.get("description") || "").trim();
-  const date = String(formData.get("date") || "").trim();
-  const location = String(formData.get("location") || "").trim();
-  const imageUrl = String(formData.get("imageUrl") || "").trim();
-  const imagePath = String(formData.get("imagePath") || "").trim();
-  const eventType = String(formData.get("eventType") || "").trim();
-  const customEventType = String(formData.get("customEventType") || "").trim();
-  const protagonistsRaw = String(formData.get("protagonists") || "").trim();
-  const protagonists = protagonistsRaw ? protagonistsRaw.split(",").map((p) => p.trim()).filter(Boolean) : [];
+  const title = requiredText(formData.get("title"), { label: "El titulo", min: 3, max: 120 });
+  const description = optionalText(formData.get("description"), { label: "La descripcion", max: 5000 });
+  const date = datetimeInput(formData.get("date"), { label: "La fecha" });
+  const location = optionalText(formData.get("location"), { label: "La ubicacion", max: 250 });
+  const imageUrl = pathOrUrl(formData.get("imageUrl"), { label: "La imagen del evento", max: 1000 });
+  const imagePath = storagePath(formData.get("imagePath"), { label: "La imagen del evento" });
+  const eventType = enumInput(formData.get("eventType"), { label: "El tipo de evento", allowed: EVENT_TYPE_VALUES, required: true });
+  const customEventType = optionalText(formData.get("customEventType"), { label: "El tipo personalizado", max: 120 });
+  const protagonists = nameListInput(formData.get("protagonists"), { label: "los protagonistas" });
 
-  if (!title) throw new Error("El titulo es obligatorio.");
-  if (date && Number.isNaN(new Date(date).getTime())) throw new Error("La fecha no es valida.");
+  if (eventType === "otro" && !customEventType) {
+    throw new Error("El tipo personalizado es obligatorio cuando el tipo de evento es otro.");
+  }
 
-  return { title, description, date, location, published: formData.get("published") === "on", imageUrl, imagePath, eventType, customEventType, protagonists };
+  return {
+    title,
+    description,
+    date,
+    location,
+    published: booleanInput(formData.get("published")),
+    imageUrl,
+    imagePath,
+    eventType,
+    customEventType,
+    protagonists,
+  };
 }
 
 async function requireAdmin() {
@@ -62,39 +103,54 @@ export async function deleteEvent(eventId) {
 }
 
 function parseInvitationForm(formData) {
-  const value = (name) => String(formData.get(name) || "").trim();
+  const get = (name) => formData.get(name);
 
-  const heroImageUrl = value("heroImageUrl");
-  const names = value("names");
-  const message = value("message");
-  const date = value("date");
-  const time = value("time");
-  const venue = value("venue");
-  const dressCode = value("dressCode");
-
-  if (!heroImageUrl) throw new Error("La foto de portada es obligatoria.");
-  if (!names) throw new Error("Los nombres son obligatorios.");
-  if (!message) throw new Error("El mensaje es obligatorio.");
+  const heroImageUrl = pathOrUrl(get("heroImageUrl"), {
+    label: "La foto de portada",
+    required: true,
+    requiredMessage: "La foto de portada es obligatoria.",
+    max: 1000,
+  });
+  const heroImagePath = storagePath(get("heroImagePath"), { label: "La foto de portada" });
+  const names = requiredText(get("names"), {
+    label: "Los nombres",
+    requiredMessage: "Los nombres son obligatorios.",
+    max: 120,
+  });
+  const message = requiredText(get("message"), { label: "El mensaje", max: 500 });
+  const personalText = optionalText(get("personalText"), { label: "El texto personal", max: 1000 });
+  const date = dateInput(get("date"), { label: "La fecha" });
+  const time = timeInput(get("time"), { label: "El horario" });
+  const venue = optionalText(get("venue"), { label: "La ubicacion", max: 250 });
+  const mapUrl = pathOrUrl(get("mapUrl"), { label: "El enlace del mapa", max: 2000 });
+  const dressCode = optionalText(get("dressCode"), { label: "El dress code", max: 120 });
+  const palette = enumInput(get("palette") || "clasico", { label: "La paleta de colores", allowed: PALETTE_IDS });
+  const typography = enumInput(get("typography") || "elegante", { label: "La tipografia", allowed: TYPOGRAPHY_IDS });
+  const giftEnabled = booleanInput(get("giftEnabled"));
+  const giftAlias = optionalText(get("giftAlias"), { label: "El texto de regalo", max: 500 });
+  const closingText = optionalText(get("closingText"), { label: "El texto de cierre", max: 1000 });
+  const audioEnabled = booleanInput(get("audioEnabled"));
+  const audioUrl = pathOrUrl(get("audioUrl"), { label: "El audio", max: 1000 });
 
   return {
     heroImageUrl,
-    heroImagePath: value("heroImagePath"),
+    heroImagePath,
     names,
     message,
-    personalText: value("personalText"),
+    personalText,
     date,
     time,
     venue,
-    mapUrl: value("mapUrl"),
+    mapUrl,
     dressCode,
     gallery: [],
-    giftEnabled: formData.get("giftEnabled") === "on",
-    giftAlias: value("giftAlias"),
-    closingText: value("closingText"),
-    palette: value("palette") || "clasico",
-    typography: value("typography") || "elegante",
-    audioEnabled: formData.get("audioEnabled") === "on",
-    audioUrl: value("audioUrl"),
+    giftEnabled,
+    giftAlias,
+    closingText,
+    palette,
+    typography,
+    audioEnabled,
+    audioUrl,
   };
 }
 
@@ -105,4 +161,64 @@ export async function saveInvitation(eventId, formData) {
   revalidatePath(`/dashboard/events/${eventId}`);
   revalidatePath("/dashboard/events");
   redirect(`/dashboard/events/${eventId}`);
+}
+
+function parseGuestForm(formData) {
+  const name = requiredText(formData.get("name"), {
+    label: "El nombre",
+    min: 2,
+    max: 120,
+  });
+  const quantity = integerInput(formData.get("quantity"), {
+    label: "La cantidad",
+    min: 1,
+    max: 50,
+  });
+
+  return { name, quantity };
+}
+
+export async function addGuest(eventId, formData) {
+  const user = await requireAdmin();
+  const { name, quantity } = parseGuestForm(formData);
+  await addEventGuest(user.uid, eventId, { name, quantity });
+  revalidatePath(`/dashboard/events/${eventId}`);
+}
+
+export async function removeGuest(eventId, guestId) {
+  const user = await requireAdmin();
+  await removeEventGuest(user.uid, eventId, guestId);
+  revalidatePath(`/dashboard/events/${eventId}/invitados`);
+  revalidatePath(`/dashboard/events/${eventId}`, "layout");
+}
+
+export async function updateGuestConfirmedCount(eventId, guestId, formData) {
+  const user = await requireAdmin();
+  const event = await getUserEvent(user.uid, eventId);
+
+  if (!event) {
+    throw new Error("Event not found.");
+  }
+
+  const guest = (event.guests || []).find((entry) => entry.id === guestId);
+
+  if (!guest) {
+    throw new Error("Guest not found.");
+  }
+
+  const quantity = guest.quantity;
+  const parsed = integerInput(formData.get("confirmedCount"), {
+    label: "Los confirmados",
+    min: 0,
+    max: 50,
+  });
+  const confirmedCount = Math.min(Math.max(parsed, 0), quantity);
+  const status = deriveGuestStatus(confirmedCount, quantity);
+
+  await updateEventGuestField(user.uid, eventId, guestId, {
+    confirmedCount,
+    status,
+  });
+  revalidatePath(`/dashboard/events/${eventId}/invitados`);
+  revalidatePath(`/dashboard/events/${eventId}`, "layout");
 }

@@ -90,7 +90,7 @@ export default function EventForm({
     <form onSubmit={handleSubmit} className="grid min-w-0 gap-4 border border-accent p-4 sm:p-5">
       <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Titulo</span>
-        <input className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="title" defaultValue={event?.title || ""} disabled={loading} required />
+        <input className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="title" defaultValue={event?.title || ""} disabled={loading} required minLength={3} />
       </label>
       <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Descripcion</span>

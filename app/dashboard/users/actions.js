@@ -10,6 +10,12 @@ import {
   updateManagedUser,
   USER_TYPES,
 } from "@/lib/users/users";
+import {
+  emailInput,
+  enumInput,
+  optionalText,
+  passwordInput,
+} from "@/lib/validation";
 
 async function requireAdmin() {
   const user = await getCurrentUser();
@@ -28,22 +34,10 @@ async function requireAdmin() {
 }
 
 function parseUserForm(formData, { requirePassword = false } = {}) {
-  const email = String(formData.get("email") || "").trim();
-  const password = String(formData.get("password") || "");
-  const displayName = String(formData.get("displayName") || "").trim();
-  const userType = String(formData.get("user_type") || "user");
-
-  if (!email && requirePassword) {
-    throw new Error("El email es obligatorio.");
-  }
-
-  if (requirePassword && password.length < 6) {
-    throw new Error("La contrasena debe tener al menos 6 caracteres.");
-  }
-
-  if (!USER_TYPES.includes(userType)) {
-    throw new Error("Tipo de usuario invalido.");
-  }
+  const email = emailInput(formData.get("email"), { label: "El email", required: requirePassword });
+  const password = passwordInput(formData.get("password"), { label: "La contrasena", required: requirePassword });
+  const displayName = optionalText(formData.get("displayName"), { label: "El nombre visible", max: 120 });
+  const userType = enumInput(formData.get("user_type"), { label: "El tipo de usuario", allowed: USER_TYPES, required: true });
 
   return {
     email,

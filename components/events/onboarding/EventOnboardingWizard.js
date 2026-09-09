@@ -34,21 +34,25 @@ export default function EventOnboardingWizard({ useFirebaseStorage }) {
   async function handleCreate(image) {
     setLoading(true);
 
-    const formData = new FormData();
-    formData.set("title", form.title);
-    formData.set("description", form.description);
-    formData.set("eventType", form.eventType);
-    formData.set("customEventType", form.customEventType);
-    formData.set("protagonists", form.protagonists);
-    formData.set("date", form.date);
-    formData.set("location", form.location);
-    formData.set("imageUrl", image.imageUrl);
-    formData.set("imagePath", image.imagePath);
+    try {
+      const formData = new FormData();
+      formData.set("title", form.title);
+      formData.set("description", form.description);
+      formData.set("eventType", form.eventType);
+      formData.set("customEventType", form.customEventType);
+      formData.set("protagonists", form.protagonists);
+      formData.set("date", form.date);
+      formData.set("location", form.location);
+      formData.set("imageUrl", image.imageUrl);
+      formData.set("imagePath", image.imagePath);
 
-    await createEvent(formData);
+      await createEvent(formData);
 
-    router.push("/dashboard/events");
-    router.refresh();
+      router.push("/dashboard/events");
+      router.refresh();
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

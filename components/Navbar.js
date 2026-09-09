@@ -35,16 +35,9 @@ export default function Navbar({ actions, profile, user }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const userType = profile?.user_type || "user";
-  const isAdmin = userType === "admin";
   const links = [
     { href: "/", label: "Home" },
-    ...(user
-      ? [
-          { href: "/dashboard", label: "Dashboard" },
-           ...(isAdmin ? [{ href: "/dashboard/events", label: "Eventos" }] : []),
-        ]
-      : []),
-    ...(isAdmin ? [{ href: "/dashboard/users", label: "Usuarios" }] : []),
+    ...(user ? [{ href: "/dashboard", label: "Mi perfil" }] : []),
   ];
 
   function closeMenu() {

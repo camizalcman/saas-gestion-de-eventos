@@ -10,7 +10,7 @@ export default async function NewEventPage() {
   if (!user) redirect("/login");
 
   const profile = await getCurrentUserProfile(user);
-  if (profile?.user_type !== "admin") redirect("/dashboard");
+  if (profile?.user_type !== "admin") redirect("/dashboard/panel");
 
   return <EventOnboardingWizard useFirebaseStorage={process.env.FIREBASE_STORAGE === "true"} />;
 }

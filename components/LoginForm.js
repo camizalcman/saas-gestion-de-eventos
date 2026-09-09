@@ -22,10 +22,28 @@ async function persistSession(user) {
   }
 }
 
+function getSafeNextPath(value) {
+  if (!value) {
+    return "/dashboard";
+  }
+
+  try {
+    const url = new URL(value, "https://app.local");
+
+    if (url.origin !== "https://app.local") {
+      return "/dashboard";
+    }
+
+    return `${url.pathname}${url.search}${url.hash}` || "/dashboard";
+  } catch {
+    return "/dashboard";
+  }
+}
+
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextUrl = searchParams.get("next") || "/dashboard";
+  const nextUrl = getSafeNextPath(searchParams.get("next"));
   const [mode, setMode] = useState("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

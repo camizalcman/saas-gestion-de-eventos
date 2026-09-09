@@ -1,7 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
 import { getCurrentUser } from "@/lib/firebase/session";
 import { listUserEvents } from "@/lib/events/events";
 import { getCurrentUserProfile } from "@/lib/users/users";
@@ -19,18 +17,23 @@ export default async function EventsPage() {
   if (!user) redirect("/login");
 
   const profile = await getCurrentUserProfile(user);
-  if (profile?.user_type !== "admin") redirect("/dashboard");
+  if (profile?.user_type !== "admin") redirect("/dashboard/panel");
 
   const events = await listUserEvents(user.uid);
 
   return (
-    <main className="min-h-screen bg-surface text-ink">
-      <Navbar user={user} profile={profile} />
-      <header className="mx-auto flex w-full max-w-6xl flex-col gap-5 border-b border-accent px-4 py-7 sm:flex-row sm:items-end sm:justify-between sm:px-6 lg:px-8">
+    <>
+      <header className="flex flex-col gap-5 border-b border-accent pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">Firestore</p>
-          <h1 className="mt-3 text-3xl font-semibold text-ink sm:text-5xl">Eventos</h1>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-brand">Creá y administrá tus eventos publicados.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
+            Firestore
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-4xl">
+            Eventos
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-brand">
+            Creá y administrá tus eventos publicados.
+          </p>
         </div>
         <Link
           className="inline-flex h-12 w-full items-center justify-center rounded-md border border-secondary bg-secondary px-5 text-sm font-semibold text-surface transition hover:bg-secondary/90 sm:w-auto"
@@ -40,39 +43,38 @@ export default async function EventsPage() {
         </Link>
       </header>
 
-      <section className="mx-auto mt-7 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div>
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold">Mis eventos</h2>
-            <span className="text-sm text-brand">{events.length} total</span>
-          </div>
-          {events.length === 0 ? (
-            <div className="border border-accent p-6 text-sm text-brand">Todavia no hay eventos cargados.</div>
-          ) : (
-            <div className="grid gap-px overflow-hidden border border-accent bg-accent">
-              {events.map((event) => (
-                <article className="grid min-w-0 gap-4 bg-surface p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_auto]" key={event.id}>
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <h3 className="overflow-wrap-anywhere text-base font-semibold">{event.title}</h3>
-                      <span className="border border-accent px-2 py-1 text-xs uppercase text-brand">{event.published ? "published" : "draft"}</span>
-                    </div>
-                    <p className="mt-3 text-sm text-secondary">{formatDate(event.date)}</p>
-                    <p className="mt-2 text-sm text-brand">{event.location}</p>
-                    {event.description ? <p className="mt-3 overflow-wrap-anywhere text-sm leading-6 text-brand">{event.description}</p> : null}
-                  </div>
-                  <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-start lg:justify-end">
-                    <Link className="inline-flex h-9 items-center justify-center border border-accent px-3 text-sm font-semibold hover:bg-accent/40" href={`/dashboard/events/${event.id}`}>Ver</Link>
-                    <Link className="inline-flex h-9 items-center justify-center border border-accent px-3 text-sm font-semibold hover:bg-accent/40" href={`/dashboard/events/${event.id}/edit`}>Editar</Link>
-                    <form action={deleteEvent.bind(null, event.id)}><button className="h-9 border border-brand/40 px-3 text-sm font-semibold text-brand hover:bg-brand/10" type="submit">Eliminar</button></form>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
+      <section className="mt-7">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">Mis eventos</h2>
+          <span className="text-sm text-brand">{events.length} total</span>
         </div>
+        {events.length === 0 ? (
+          <div className="border border-accent p-6 text-sm text-brand">
+            Todavia no hay eventos cargados.
+          </div>
+        ) : (
+          <div className="grid gap-px overflow-hidden border border-accent bg-accent">
+            {events.map((event) => (
+              <article className="grid min-w-0 gap-4 bg-surface p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_auto]" key={event.id}>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h3 className="overflow-wrap-anywhere text-base font-semibold">{event.title}</h3>
+                    <span className="border border-accent px-2 py-1 text-xs uppercase text-brand">{event.published ? "published" : "draft"}</span>
+                  </div>
+                  <p className="mt-3 text-sm text-secondary">{formatDate(event.date)}</p>
+                  <p className="mt-2 text-sm text-brand">{event.location}</p>
+                  {event.description ? <p className="mt-3 overflow-wrap-anywhere text-sm leading-6 text-brand">{event.description}</p> : null}
+                </div>
+                <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-start lg:justify-end">
+                  <Link className="inline-flex h-9 items-center justify-center border border-accent px-3 text-sm font-semibold hover:bg-accent/40" href={`/dashboard/events/${event.id}`}>Ver</Link>
+                  <Link className="inline-flex h-9 items-center justify-center border border-accent px-3 text-sm font-semibold hover:bg-accent/40" href={`/dashboard/events/${event.id}/edit`}>Editar</Link>
+                  <form action={deleteEvent.bind(null, event.id)}><button className="h-9 border border-brand/40 px-3 text-sm font-semibold text-brand hover:bg-brand/10" type="submit">Eliminar</button></form>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
-      <Footer />
-    </main>
+    </>
   );
 }
