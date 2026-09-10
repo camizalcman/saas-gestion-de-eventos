@@ -2,9 +2,15 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ToastProvider";
 
-export default function GuestRemoveButton({ action, guestName }) {
+export default function GuestRemoveButton({
+  action,
+  guestName,
+  successMessage = "Invitado eliminado",
+}) {
   const router = useRouter();
+  const showToast = useToast();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -48,6 +54,7 @@ export default function GuestRemoveButton({ action, guestName }) {
       try {
         await action(formData);
         setOpen(false);
+        showToast(successMessage);
         router.refresh();
       } catch (submitError) {
         setError(

@@ -10,6 +10,7 @@ import {
   deriveGuestStatus,
   getUserEvent,
   removeEventGuest,
+  removeEventGuestMember,
   setUserEventInvitation,
   updateEventGuestField,
   updateUserEvent,
@@ -175,19 +176,45 @@ function parseGuestForm(formData) {
     max: 50,
   });
 
-  return { name, quantity };
+  if (quantity <= 1) {
+    return { type: "individual", name, quantity: 1, members: [] };
+  }
+
+  const memberNames = formData
+    .getAll("memberName")
+    .map((value) =>
+      optionalText(value, { label: "El nombre del integrante", max: 120 }),
+    );
+
+  if (
+    memberNames.length !== quantity ||
+    memberNames.some((member) => member.length < 2)
+  ) {
+    throw new Error("Completá el nombre de cada integrante del grupo.");
+  }
+
+  return { type: "group", name, quantity, members: memberNames };
 }
 
 export async function addGuest(eventId, formData) {
   const user = await requireAdmin();
-  const { name, quantity } = parseGuestForm(formData);
-  await addEventGuest(user.uid, eventId, { name, quantity });
+  const guest = parseGuestForm(formData);
+  await addEventGuest(user.uid, eventId, guest);
   revalidatePath(`/dashboard/events/${eventId}`);
+  revalidatePath(`/dashboard/events/${eventId}/invitados`);
+  revalidatePath(`/dashboard/events/${eventId}`, "layout");
 }
 
 export async function removeGuest(eventId, guestId) {
   const user = await requireAdmin();
   await removeEventGuest(user.uid, eventId, guestId);
+  revalidatePath(`/dashboard/events/${eventId}/invitados`);
+  revalidatePath(`/dashboard/events/${eventId}`, "layout");
+}
+
+export async function removeGuestMember(eventId, guestId, memberId) {
+  const user = await requireAdmin();
+  await removeEventGuestMember(user.uid, eventId, guestId, memberId);
   revalidatePath(`/dashboard/events/${eventId}/invitados`);
   revalidatePath(`/dashboard/events/${eventId}`, "layout");
 }

@@ -1,6 +1,8 @@
-import Link from "next/link";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import InvitationResponse from "@/components/invitation/InvitationResponse";
+import { findEventByGuestToken } from "@/lib/events/events";
+import { respondToInvitation } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +14,8 @@ export const metadata = {
 
 export default async function GuestInvitationPage({ params }) {
   const { token } = await params;
+  const found = await findEventByGuestToken(token);
+  const guest = found?.guest || null;
 
   return (
     <main className="min-h-screen bg-surface text-ink">
@@ -31,14 +35,17 @@ export default async function GuestInvitationPage({ params }) {
           Token: {token}
         </p>
 
-        <div className="mt-10">
-          <Link
-            className="inline-flex h-11 items-center justify-center rounded-md border border-secondary bg-secondary px-5 text-sm font-semibold text-surface transition hover:bg-secondary/90"
-            href="/"
-          >
-            Volver al inicio
-          </Link>
-        </div>
+        {guest ? (
+          <InvitationResponse
+            guest={guest}
+            respondAction={respondToInvitation}
+            token={token}
+          />
+        ) : (
+          <p className="mt-8 border border-accent bg-surface p-4 text-sm text-brand">
+            No encontramos ninguna invitación asociada a este link.
+          </p>
+        )}
       </section>
       <Footer />
     </main>

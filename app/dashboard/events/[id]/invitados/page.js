@@ -1,16 +1,14 @@
 import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import ToastProvider from "@/components/ToastProvider";
+import ConfirmedGuestsList from "@/components/events/ConfirmedGuestsList";
 import GuestForm from "@/components/events/GuestForm";
 import GuestList from "@/components/events/GuestList";
 import { getCurrentUser } from "@/lib/firebase/session";
 import { getUserEvent } from "@/lib/events/events";
 import { getCurrentUserProfile } from "@/lib/users/users";
-import {
-  addGuest,
-  removeGuest,
-  updateGuestConfirmedCount,
-} from "../../actions";
+import { addGuest, removeGuest, removeGuestMember } from "../../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +37,7 @@ export default async function GuestsPage({ params }) {
   const buildGuestLink = (token) => `${origin}/i/${token}`;
 
   return (
-    <>
+    <ToastProvider>
       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
         Lista de invitados
       </p>
@@ -60,11 +58,12 @@ export default async function GuestsPage({ params }) {
           buildGuestLink={buildGuestLink}
           guests={guests}
           removeAction={removeGuest.bind(null, event.id)}
-          updateConfirmedCountAction={updateGuestConfirmedCount.bind(
-            null,
-            event.id,
-          )}
+          removeMemberAction={removeGuestMember.bind(null, event.id)}
         />
+      </div>
+
+      <div className="mt-7">
+        <ConfirmedGuestsList confirmedGuests={event.confirmedGuests || []} />
       </div>
 
       <Link
@@ -73,6 +72,6 @@ export default async function GuestsPage({ params }) {
       >
         Volver al evento
       </Link>
-    </>
+    </ToastProvider>
   );
 }
