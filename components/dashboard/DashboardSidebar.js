@@ -31,10 +31,7 @@ export default function DashboardSidebar({ isAdmin = false }) {
         aria-label="Secciones del panel"
         className="lg:sticky lg:top-7"
       >
-        <p className="hidden text-xs font-semibold uppercase tracking-[0.14em] text-secondary lg:block">
-          Panel
-        </p>
-        <ul className="mt-3 flex flex-row gap-1 overflow-x-auto border border-accent bg-surface p-1 lg:mt-4 lg:flex-col lg:gap-0 lg:overflow-visible lg:border-0 lg:bg-transparent lg:p-0">
+        <ul className="flex flex-row gap-1 overflow-x-auto border border-accent bg-surface p-1 lg:mt-4 lg:flex-col lg:gap-0 lg:overflow-visible lg:border-0 lg:bg-transparent lg:p-0">
           {items.map((item) => {
             const active = isActive(pathname, item.href);
 

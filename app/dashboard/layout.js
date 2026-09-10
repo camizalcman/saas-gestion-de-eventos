@@ -29,9 +29,9 @@ export default async function DashboardLayout({ children }) {
   return (
     <div className="min-h-screen bg-surface text-ink">
       <Navbar user={user} profile={profile} />
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-7 sm:px-6 lg:flex-row lg:gap-10 lg:px-8">
+      <div className="flex w-full flex-col gap-6 px-4 py-7 sm:px-6 lg:flex-row lg:gap-10 lg:pl-8 lg:pr-0">
         <DashboardSidebar isAdmin={isAdmin} />
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="mx-auto w-full max-w-6xl min-w-0 flex-1 lg:px-8">{children}</div>
       </div>
       <Footer />
     </div>
