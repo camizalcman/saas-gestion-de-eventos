@@ -101,15 +101,15 @@ export default function LoginForm() {
       aria-labelledby="login-title"
     >
       <div
-        className="mb-7 grid grid-cols-2 rounded-lg border border-accent bg-accent/40 p-1"
+        className="mb-6 grid grid-cols-2 rounded-full border border-accent bg-accent/40 p-1"
         aria-label="Modo de autenticacion"
       >
         <button
           type="button"
-          className={`h-10 rounded-md text-sm font-semibold transition ${
+          className={`h-8 rounded-full text-sm font-semibold transition ${
             mode === "signin"
-              ? "border border-brand bg-brand text-surface"
-              : "border border-transparent text-ink/60 hover:text-ink"
+              ? "bg-brand text-surface"
+              : "text-ink/60 hover:text-ink"
           }`}
           onClick={() => setMode("signin")}
           disabled={loading}
@@ -118,10 +118,10 @@ export default function LoginForm() {
         </button>
         <button
           type="button"
-          className={`h-10 rounded-md text-sm font-semibold transition ${
+          className={`h-8 rounded-full text-sm font-semibold transition ${
             mode === "signup"
-              ? "border border-brand bg-brand text-surface"
-              : "border border-transparent text-ink/60 hover:text-ink"
+              ? "bg-brand text-surface"
+              : "text-ink/60 hover:text-ink"
           }`}
           onClick={() => setMode("signup")}
           disabled={loading}
@@ -130,9 +130,6 @@ export default function LoginForm() {
         </button>
       </div>
 
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
-        Nombre de saas
-      </p>
       <h1
         id="login-title"
         className="mt-3 text-2xl font-semibold tracking-normal text-brand sm:text-3xl"
@@ -147,7 +144,7 @@ export default function LoginForm() {
         <label className="grid gap-2 text-sm font-medium text-ink">
           <span>Email</span>
           <input
-            className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none transition placeholder:text-ink/50 focus:border-brand"
+            className="h-10 rounded-md border border-accent bg-surface px-3 text-ink outline-none transition placeholder:text-ink/50 focus:border-brand"
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -159,7 +156,7 @@ export default function LoginForm() {
         <label className="grid gap-2 text-sm font-medium text-ink">
           <span>Password</span>
           <input
-            className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none transition placeholder:text-ink/50 focus:border-brand"
+            className="h-10 rounded-md border border-accent bg-surface px-3 text-ink outline-none transition placeholder:text-ink/50 focus:border-brand"
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
@@ -171,7 +168,7 @@ export default function LoginForm() {
         </label>
         <button
           type="submit"
-          className="mt-2 h-11 rounded-md border border-secondary bg-secondary px-4 text-sm font-semibold text-surface transition hover:bg-secondary/90 disabled:hover:bg-secondary"
+          className="mt-2 h-10 rounded-md border border-secondary bg-secondary px-4 text-sm font-semibold text-surface transition hover:bg-secondary/90 disabled:hover:bg-secondary"
           disabled={loading}
         >
           {loading ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Ingresar"}
@@ -184,12 +181,30 @@ export default function LoginForm() {
         <span className="h-px flex-1 bg-accent" />
       </div>
 
-      <button
+<button
         type="button"
-        className="h-11 w-full rounded-md border border-accent bg-transparent px-4 text-sm font-semibold text-brand transition hover:border-brand hover:bg-accent/40"
+        className="flex h-10 w-full items-center justify-center gap-2.5 rounded-md border border-accent bg-transparent px-3 text-sm font-semibold text-ink transition hover:border-brand hover:bg-accent/40"
         onClick={handleGoogleLogin}
         disabled={loading}
       >
+        <svg aria-hidden="true" className="size-4.5" viewBox="0 0 24 24">
+          <path
+            d="M21.6 12.23c0-.68-.06-1.36-.18-2.03H12v3.85h5.39a4.63 4.63 0 0 1-2 3.04v2.5h3.24c1.9-1.75 2.97-4.33 2.97-7.36Z"
+            fill="#4285F4"
+          />
+          <path
+            d="M12 22c2.7 0 4.97-.9 6.62-2.41l-3.23-2.5c-.9.6-2.05.96-3.39.96-2.6 0-4.8-1.76-5.6-4.13H3.07v2.58A10 10 0 0 0 12 22Z"
+            fill="#34A853"
+          />
+          <path
+            d="M6.4 13.92a6 6 0 0 1 0-3.83V7.5H3.07a10 10 0 0 0 0 9l3.33-2.58Z"
+            fill="#FBBC05"
+          />
+          <path
+            d="M12 6.04c1.48 0 2.8.5 3.84 1.5l2.88-2.88A9.5 9.5 0 0 0 12 2 10 10 0 0 0 3.07 7.5L6.4 10.1c.8-2.37 3-4.06 5.6-4.06Z"
+            fill="#EA4335"
+          />
+        </svg>
         {loading ? "Procesando..." : "Continuar con Google"}
       </button>
 

@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 const navItems = [
-  { href: "/", label: "Home" },
-  { href: "/dashboard", label: "Mi perfil" },
-  { href: "/login", label: "Login" },
+  { href: "/", label: "Inicio" },
+  { href: "#funcionalidades", label: "Funciones" },
+  { href: "#preguntas", label: "Preguntas" },
 ];
 
 export default function Footer() {
@@ -15,30 +15,35 @@ export default function Footer() {
         <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
           <div className="max-w-sm">
             <Link
-              className="text-sm font-semibold uppercase tracking-[0.14em] text-surface"
+              className="text-sm font-serif font-semibold uppercase tracking-[0.14em] text-surface"
               href="/"
             >
-              Gestión de eventos
+              Special Day
             </Link>
             <p className="mt-3 text-sm leading-6 text-surface/70">
-              Plataforma para crear, administrar y compartir invitaciones
-              digitales con tus invitados.
+              Plataforma que te permite armar invitaciones digitales y coordinar todos los detalles de tu fiesta.
             </p>
           </div>
 
           <nav aria-label="Links secundarios">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-surface/60">
-              Navegacion
-            </p>
             <ul className="mt-3 flex flex-col gap-2 text-sm">
               {navItems.map((item) => (
                 <li key={item.href}>
-                  <Link
-                    className="text-surface/80 transition hover:text-surface"
-                    href={item.href}
-                  >
-                    {item.label}
-                  </Link>
+                  {item.href.startsWith("#") ? (
+                    <a
+                      className="text-surface/80 transition hover:text-surface"
+                      href={item.href}
+                    >
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link
+                      className="text-surface/80 transition hover:text-surface"
+                      href={item.href}
+                    >
+                      {item.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -46,7 +51,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 flex flex-col gap-2 border-t border-surface/15 pt-6 text-xs text-surface/60 sm:flex-row sm:items-center sm:justify-between">
-          <p>&copy; {year} Gestion de eventos. Todos los derechos reservados.</p>
+          <p>&copy; {year} Special Day. Todos los derechos reservados.</p>
           <p>Hecho con Next.js y Firebase.</p>
         </div>
       </div>

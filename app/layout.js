@@ -1,4 +1,5 @@
 import {
+  Aboreto,
   Dancing_Script,
   Literata,
   Lora,
@@ -8,6 +9,12 @@ import {
   Geist_Mono,
 } from "next/font/google";
 import "./globals.css";
+
+const aboreto = Aboreto({
+  variable: "--font-aboreto",
+  subsets: ["latin"],
+  weight: ["400"],
+});
 
 const nunitoSans = Nunito_Sans({
   variable: "--font-nunito-sans",
@@ -59,7 +66,7 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="es"
-      className={`${nunitoSans.variable} ${literata.variable} ${geistMono.variable} ${playfair.variable} ${lora.variable} ${montserrat.variable} ${dancingScript.variable}`}
+      className={`${aboreto.variable} ${nunitoSans.variable} ${literata.variable} ${geistMono.variable} ${playfair.variable} ${lora.variable} ${montserrat.variable} ${dancingScript.variable}`}
     >
       <body className="min-h-screen bg-surface text-ink antialiased">
         {children}

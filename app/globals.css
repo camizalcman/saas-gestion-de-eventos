@@ -2,7 +2,7 @@
 
 @theme {
   --font-sans: var(--font-nunito-sans), Arial, Helvetica, sans-serif;
-  --font-serif: var(--font-literata), Georgia, "Times New Roman", serif;
+  --font-serif: var(--font-aboreto), Georgia, "Times New Roman", serif;
   --font-mono: var(--font-geist-mono), "SFMono-Regular", Consolas, monospace;
 
    /*Paleta del proyecto*/
@@ -17,6 +17,7 @@
   html {
     height: 100%;
     color-scheme: light;
+    scroll-behavior: smooth;
   }
 
   body {

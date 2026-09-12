@@ -36,14 +36,12 @@ export default function Faq() {
   const [abierta, setAbierta] = useState(0);
 
   return (
-    <section className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
-      <div className="mb-10 flex flex-col items-start gap-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
+    <section id="preguntas" className="mx-auto w-full max-w-3xl scroll-mt-20 px-4 pb-16 pt-30 sm:px-6 lg:px-8">
+      <div className="mb-10 flex flex-col items-center gap-4">
+        <h2 className="text-center font-serif text-2xl font-semibold tracking-wide text-ink sm:text-3xl">
           Preguntas frecuentes
-        </p>
-        <h2 className="text-2xl font-semibold tracking-normal text-ink sm:text-3xl">
-          ¿Tenés dudas? Te las respondemos
         </h2>
+        <span className="h-px w-80 bg-gradient-to-r from-transparent via-brand to-transparent" />
       </div>
 
       <div className="flex flex-col gap-3">
