@@ -1,5 +1,7 @@
 import { cache } from "react";
 import { redirect } from "next/navigation";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { getCurrentUser } from "@/lib/firebase/session";
 import { getCurrentUserProfile } from "@/lib/users/users";
