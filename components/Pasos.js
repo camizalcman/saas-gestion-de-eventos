@@ -7,46 +7,44 @@ import {
 
 const pasos = [
   {
-    numero: "01",
+    numero: "1",
     titulo: "Creá tu evento",
     icono: CalendarHeart,
     descripcion:
-      "Elegí el tipo de fiesta e incluí los detalles.",
+      "Elegí el tipo de fiesta e incluí todos los detalles.",
   },
   {
-    numero: "02",
-    titulo: "Personalizá y compartí",
+    numero: "2",
+    titulo: "Armá las invitaciones",
     icono: Send,
     descripcion:
-      "Activá los bloques de tu invitación digital y enviá el enlace.",
+      "Personalizá tu invitación digital y enviá el enlace a tus invitados.",
   },
   {
-    numero: "03",
+    numero: "3",
     titulo: "Organizá tu evento",
     icono: Wallet,
     descripcion:
-      "Gestioná los proveedores, tu presupuesto, confirmación de invitados y la ubicación en las mesas.",
+      "Gestioná los proveedores, confirmación de invitados y su ubicación en las mesas.",
   },
   {
-    numero: "04",
+    numero: "4",
     titulo: "Disfrutá la fiesta",
     icono: PartyPopper,
     descripcion:
-      "El sistema envía notificaciones a los invitados y a los proveedores sin que te tengas que ocupar.",
+      "El sistema envía notificaciones sin que te tengas que ocupar.",
   },
 ];
 
 export default function Pasos() {
   return (
-    <section className="bg-surface py-20 md:py-28">
+    <section className="bg-surface py-20 md:py-16">
       <div className="relative mx-auto w-full max-w-6xl px-6">
         <div className="mx-auto mb-14 max-w-2xl text-center md:mb-16">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
-            Simplicidad en cada etapa
-          </p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-            Organizá tu fiesta en simples pasos
+          <h2 className="font-serif mt-3 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+           ¿Cómo utilizarla?
           </h2>
+          <span className="mx-auto mt-4 block h-px w-80 bg-gradient-to-r from-transparent via-brand to-transparent" />
         </div>
 
         <ol className="relative grid grid-cols-1 gap-8 md:grid-cols-4">

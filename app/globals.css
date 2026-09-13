@@ -2,13 +2,13 @@
 
 @theme {
   --font-sans: var(--font-nunito-sans), Arial, Helvetica, sans-serif;
-  --font-serif: var(--font-literata), Georgia, "Times New Roman", serif;
+  --font-serif: var(--font-aboreto), Georgia, "Times New Roman", serif;
   --font-mono: var(--font-geist-mono), "SFMono-Regular", Consolas, monospace;
 
    /*Paleta del proyecto*/
-  --color-brand: #3b3735;      
-  --color-surface: #f7f4e6;    
-  --color-secondary: #96a88f;  
+  --color-brand: #3D2B22;      
+  --color-surface: #FFF3E6;    
+  --color-secondary: #96A88F;  
   --color-accent: #cfcfcf;     
   --color-ink: #242424;        
 }
@@ -17,6 +17,7 @@
   html {
     height: 100%;
     color-scheme: light;
+    scroll-behavior: smooth;
   }
 
   body {
