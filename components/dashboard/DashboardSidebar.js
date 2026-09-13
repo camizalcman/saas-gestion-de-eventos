@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const baseItems = [
   { href: "/dashboard", label: "Mi perfil" },
   { href: "/dashboard/panel", label: "Dashboard" },
+  { href: "/dashboard/suppliers", label: "Proveedores" },
 ];
 
 const adminItems = [
