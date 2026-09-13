@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { logout } from "@/app/dashboard/actions";
+import { logout } from "@/app/(app)/dashboard/actions";
 import { User } from "lucide-react";
 
 function isActivePath(pathname, href) {

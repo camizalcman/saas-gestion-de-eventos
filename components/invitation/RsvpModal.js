@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { confirmAttendance } from "@/app/events/actions";
+import { confirmAttendance } from "@/app/(public)/events/actions";
 
 export default function RsvpModal({ eventId, palette, open, onClose }) {
   const router = useRouter();

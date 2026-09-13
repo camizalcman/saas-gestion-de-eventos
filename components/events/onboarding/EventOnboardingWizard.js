@@ -6,7 +6,7 @@ import StepIndicator from "./StepIndicator";
 import Step1Identity from "./Step1Identity";
 import Step2Details from "./Step2Details";
 import Step3Media from "./Step3Media";
-import { createEvent } from "@/app/dashboard/events/actions";
+import { createEvent } from "@/app/(app)/dashboard/actions";
 
 export default function EventOnboardingWizard({ useFirebaseStorage }) {
   const router = useRouter();
@@ -48,7 +48,7 @@ export default function EventOnboardingWizard({ useFirebaseStorage }) {
 
       await createEvent(formData);
 
-      router.push("/dashboard/events");
+      router.push("/dashboard");
       router.refresh();
     } finally {
       setLoading(false);
