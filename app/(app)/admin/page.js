@@ -5,19 +5,81 @@ import { getAdminStats } from "@/lib/admin/stats";
 
 export const dynamic = "force-dynamic";
 
-const MONTH_LABELS = [
-  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+const MONTH_SHORT = [
+  "Ene", "Feb", "Mar", "Abr", "May", "Jun",
+  "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
 ];
 
-function formatMonth(key) {
-  const [year, monthIndex] = key.split("-").map(Number);
-  return `${MONTH_LABELS[monthIndex - 1] || monthIndex} ${year}`;
+const PLOT_HEIGHT = 176;
+
+function shortMonthLabel(key) {
+  const [year, month] = key.split("-").map(Number);
+  const name = MONTH_SHORT[month - 1] || String(month);
+  return month === 1 ? `${name} ${String(year).slice(-2)}` : name;
 }
 
 function formatDate(value) {
   if (!value) return "—";
   return new Intl.DateTimeFormat("es-AR", { dateStyle: "medium" }).format(new Date(value));
+}
+
+function MonthBarChart({ title, months = [], counts = [], max = 1, labelFormat }) {
+  if (months.length === 0) {
+    return (
+      <section className="rounded-lg border border-accent bg-surface p-5">
+        <h2 className="text-base font-semibold text-ink">{title}</h2>
+        <p className="mt-4 text-sm text-brand">Todavía no hay registros.</p>
+      </section>
+    );
+  }
+
+  const ariaLabel = `${title}: ${months
+    .map((month, index) => `${labelFormat(month)} ${counts[index] || 0}`)
+    .join(", ")}`;
+
+  return (
+    <section className="rounded-lg border border-accent bg-surface p-5">
+      <h2 className="text-base font-semibold text-ink">{title}</h2>
+      <div aria-label={ariaLabel} role="img">
+        <div className="mt-5 flex h-44 items-end justify-between gap-2 sm:gap-3">
+          {months.map((month, index) => {
+            const count = counts[index] || 0;
+            const barHeight =
+              count > 0
+                ? Math.max(Math.round((count / max) * PLOT_HEIGHT), 4)
+                : 2;
+
+            return (
+              <div
+                className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1"
+                key={month}
+              >
+                <span className="text-xs font-semibold tabular-nums text-ink">
+                  {count}
+                </span>
+                <div
+                  aria-hidden="true"
+                  className="w-full max-w-9 rounded-t-md bg-secondary"
+                  style={{ height: `${barHeight}px` }}
+                  title={`${labelFormat(month)}: ${count}`}
+                />
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-2 flex items-center justify-between gap-2 border-t border-accent pt-2 sm:gap-3">
+          {months.map((month) => (
+            <span
+              className="min-w-0 flex-1 text-center text-[11px] font-medium text-brand"
+              key={month}
+            >
+              {labelFormat(month)}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
 
 export default async function AdminPage() {
@@ -28,94 +90,66 @@ export default async function AdminPage() {
   if (profile?.user_type !== "admin") redirect("/dashboard");
 
   const [stats, users] = await Promise.all([getAdminStats(), listUserProfiles()]);
-  const maxMonthlyUsers = stats.usersPerMonth.reduce(
-    (max, entry) => Math.max(max, entry.count),
-    0,
-  );
+
+  const axisMonths = [
+    ...new Set([
+      ...stats.usersPerMonth.map((entry) => entry.month),
+      ...stats.eventsPerMonth.map((entry) => entry.month),
+    ]),
+  ].sort();
+
+  function getCount(series, month) {
+    return series.find((entry) => entry.month === month)?.count || 0;
+  }
+
+  const usersCounts = axisMonths.map((month) => getCount(stats.usersPerMonth, month));
+  const eventsCounts = axisMonths.map((month) => getCount(stats.eventsPerMonth, month));
+  const maxCount = Math.max(...usersCounts, ...eventsCounts, 1);
 
   return (
     <>
       <header className="border-b border-accent pb-5">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
-          Administracion
+          Administración
         </p>
         <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-4xl">
-          Panel de administracion
+          Panel de administración
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-brand">
-          Estadisticas generales de la plataforma. No se muestran datos
-          privados de los eventos de cada usuario.
+          Estadísticas generales de la plataforma.
         </p>
       </header>
 
-      <section id="resumen" className="mt-7 grid gap-px overflow-hidden border border-accent bg-accent md:grid-cols-3">
-        <article className="bg-surface p-5">
-          <span className="block text-sm text-brand">Usuarios totales</span>
-          <strong className="mt-3 block text-3xl font-semibold text-ink">
+      <section className="mt-7 grid gap-4 sm:grid-cols-2" id="resumen">
+        <article className="rounded-lg bg-secondary p-6 text-surface">
+          <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-surface/80">
+            Usuarios creados
+          </span>
+          <strong className="mt-3 block text-4xl font-semibold tabular-nums">
             {stats.totalUsers}
           </strong>
         </article>
-        <article className="bg-surface p-5">
-          <span className="block text-sm text-brand">Usuarios este mes</span>
-          <strong className="mt-3 block text-3xl font-semibold text-ink">
-            {stats.usersThisMonth}
-          </strong>
-        </article>
-        <article className="bg-surface p-5">
-          <span className="block text-sm text-brand">Eventos creados</span>
-          <strong className="mt-3 block text-3xl font-semibold text-ink">
+        <article className="rounded-lg bg-secondary p-6 text-surface">
+          <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-surface/80">
+            Eventos creados
+          </span>
+          <strong className="mt-3 block text-4xl font-semibold tabular-nums">
             {stats.totalEvents}
           </strong>
         </article>
       </section>
 
-      <section id="estadisticas" className="mt-7">
-        <div className="mb-3 grid gap-1">
-          <h2 className="text-lg font-semibold text-ink">Usuarios por mes</h2>
-          <p className="text-sm leading-6 text-brand">
-            Altas de usuarios agrupadas por mes, segun su fecha de registro.
-          </p>
-        </div>
-        {stats.usersPerMonth.length === 0 ? (
-          <div className="border border-accent bg-surface p-6 text-sm text-brand">
-            Todavia no hay registros.
-          </div>
-        ) : (
-          <div className="grid gap-3 border border-accent bg-surface p-5">
-            {stats.usersPerMonth.map((entry) => {
-              const width = maxMonthlyUsers > 0 ? (entry.count / maxMonthlyUsers) * 100 : 0;
-              return (
-                <div className="grid gap-1" key={entry.month}>
-                  <div className="flex items-baseline justify-between gap-3 text-sm">
-                    <span className="font-medium text-ink">{formatMonth(entry.month)}</span>
-                    <span className="text-brand">
-                      {entry.count} {entry.count === 1 ? "usuario" : "usuarios"}
-                    </span>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-accent">
-                    <div
-                      className="h-full rounded-full bg-secondary"
-                      style={{ width: `${Math.max(width, 2)}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      <section id="usuarios" className="mt-7">
+      <section className="mt-7" id="usuarios">
         <div className="mb-3 grid gap-1">
           <h2 className="text-lg font-semibold text-ink">Usuarios registrados</h2>
           <p className="text-sm leading-6 text-brand">
-            Listado de perfiles sin datos privados de sus eventos.
+            Listado de perfiles de los usuarios de la plataforma.
           </p>
         </div>
 
         {users.length === 0 ? (
           <div className="border border-accent bg-surface p-6 text-sm text-brand">
-            Todavia no hay usuarios registrados.
+            Todavía no hay usuarios registrados.
           </div>
         ) : (
           <div className="overflow-x-auto border border-accent">
@@ -135,11 +169,6 @@ export default async function AdminPage() {
                       <span className="block overflow-wrap-anywhere">
                         {managedUser.displayName || "Sin nombre"}
                       </span>
-                      {managedUser.user_type === "admin" ? (
-                        <span className="mt-1 inline-block border border-accent px-2 py-0.5 text-xs uppercase text-brand">
-                          admin
-                        </span>
-                      ) : null}
                     </td>
                     <td className="min-w-0 px-4 py-3 text-brand">
                       <span className="block overflow-wrap-anywhere">
@@ -158,6 +187,31 @@ export default async function AdminPage() {
             </table>
           </div>
         )}
+      </section>
+
+      <section className="mt-7" id="estadisticas">
+        <div className="mb-3 grid gap-1">
+          <h2 className="text-lg font-semibold text-ink">Estadísticas por mes</h2>
+          <p className="text-sm leading-6 text-brand">
+            Registros agrupados por mes según su fecha de creación.
+          </p>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <MonthBarChart
+            counts={usersCounts}
+            labelFormat={shortMonthLabel}
+            max={maxCount}
+            months={axisMonths}
+            title="Usuarios por mes"
+          />
+          <MonthBarChart
+            counts={eventsCounts}
+            labelFormat={shortMonthLabel}
+            max={maxCount}
+            months={axisMonths}
+            title="Eventos creados por mes"
+          />
+        </div>
       </section>
     </>
   );
