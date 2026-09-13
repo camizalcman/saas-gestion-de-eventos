@@ -54,6 +54,7 @@ export default function Navbar({ actions, profile, user }) {
   const userType = profile?.user_type || "user";
   const links = [
     { href: "/", label: "Inicio" },
+    { href: "/dashboard/suppliers", label: "Proveedores" },
     { href: "#funcionalidades", label: "Funciones" },
     { href: "#preguntas", label: "Preguntas" },
   ];

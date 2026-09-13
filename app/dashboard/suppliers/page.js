@@ -31,8 +31,8 @@ export default async function SuppliersPage({ searchParams }) {
   const suppliers = await getSuppliers(filters);
 
   return (
-    <>
-      <header className="border-b border-accent pb-5">
+    <div className="mx-auto w-full max-w-6xl px-4 py-7 sm:px-6 lg:px-10">
+      <header className="border-b border-accent pb-6">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
           Recursos para tus eventos
         </p>
@@ -45,7 +45,7 @@ export default async function SuppliersPage({ searchParams }) {
       </header>
 
       {isAdmin ? (
-        <section className="mt-7 flex flex-col gap-4 border-b border-accent pb-7 sm:flex-row sm:items-center sm:justify-between">
+        <section className="mt-8 flex flex-col gap-4 border-b border-accent pb-7 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-ink">Agregar proveedor</h2>
             <p className="mt-1 text-sm leading-6 text-brand">
@@ -59,36 +59,38 @@ export default async function SuppliersPage({ searchParams }) {
         </section>
       ) : null}
 
-      <section className="mt-7 border-b border-accent pb-7">
-        <h2 className="text-lg font-semibold text-ink">Buscar proveedores</h2>
-        <p className="mt-1 text-sm leading-6 text-brand">
-          Filtra la galeria por categoria y ubicacion.
-        </p>
-        <div className="mt-4">
+      <section className="mt-8 border-b border-accent pb-7">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-ink">Buscar proveedores</h2>
+            <p className="mt-1 text-sm leading-6 text-brand">
+              Filtra la galeria por categoria y ubicacion.
+            </p>
+          </div>
           <SupplierFiltersToggle filters={filters} />
         </div>
       </section>
 
-      <section className="mt-7">
-        <div className="mb-3 flex items-center justify-between gap-3">
+      <section className="mt-8">
+        <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-ink">Proveedores disponibles</h2>
           <span className="text-sm text-brand">{suppliers.length} total</span>
         </div>
 
         {suppliers.length === 0 ? (
-          <div className="border border-accent p-6 text-sm leading-6 text-brand">
+          <div className="border border-accent bg-surface p-6 text-sm leading-6 text-brand">
             {Object.values(filters).some(Boolean)
               ? "No encontramos proveedores con esos filtros."
               : "Todavia no hay proveedores cargados."}
           </div>
         ) : (
-          <div className="grid gap-4 overflow-hidden border border-accent bg-accent sm:grid-cols-2 sm:gap-px xl:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {suppliers.map((supplier) => (
               <SupplierCard key={supplier.id} supplier={supplier} />
             ))}
           </div>
         )}
       </section>
-    </>
+    </div>
   );
 }
