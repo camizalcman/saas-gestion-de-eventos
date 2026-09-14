@@ -85,19 +85,12 @@ export default function SeatingSection({
             <ul className="mt-4 grid gap-2">
               {people.map((person) => (
                 <li
-                  className="flex flex-wrap items-center justify-between gap-2 border border-accent/60 bg-accent/10 px-4 py-3 text-sm"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-accent/30 px-4 py-3 text-sm"
                   key={person.id}
                 >
-                  <div className="min-w-0">
-                    <p className="overflow-wrap-anywhere font-semibold text-ink">
-                      {person.name}
-                    </p>
-                    {person.groupName ? (
-                      <p className="text-[11px] text-brand/70">
-                        {person.groupName}
-                      </p>
-                    ) : null}
-                  </div>
+                  <p className="min-w-0 overflow-wrap-anywhere font-semibold text-ink">
+                    {person.name}
+                  </p>
                   <GuestTableSelect
                     action={assignAction.bind(null, person.guestId, person.memberId)}
                     person={person}
