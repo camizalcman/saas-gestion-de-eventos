@@ -66,7 +66,7 @@ export default function EventSwitcher({ events, activeEventId }) {
       <button
         aria-expanded={open}
         aria-haspopup="listbox"
-        className="flex h-12 w-full items-center gap-2.5 rounded-xl border border-surface/20 bg-surface/15 pl-3.5 pr-3 text-sm font-semibold text-surface shadow-sm outline-none transition hover:bg-surface/25 focus:border-secondary/70 focus:ring-2 focus:ring-secondary/40"
+        className="flex h-12 w-full items-center gap-2.5 rounded-xl border border-surface/70 bg-surface/20 pl-3.5 pr-3 text-sm font-semibold text-surface shadow-sm outline-none transition hover:bg-surface/25 focus:border-secondary/70 focus:ring-2 focus:ring-secondary/40"
         onClick={() => setOpen((value) => !value)}
         type="button"
       >
