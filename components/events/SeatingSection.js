@@ -62,7 +62,7 @@ export default function SeatingSection({
         </p>
       </div>
 
-      <div className="mt-5 grid items-start gap-6 lg:grid-cols-2">
+      <div className="mt-5 grid items-start gap-6 lg:grid-cols-[3fr_7fr]">
         <div>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="text-lg font-semibold text-ink">
