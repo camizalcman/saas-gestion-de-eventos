@@ -6,10 +6,10 @@
   --font-mono: var(--font-geist-mono), "SFMono-Regular", Consolas, monospace;
 
    /*Paleta del proyecto*/
-  --color-brand: #3D2B22;      
-  --color-surface: #FFF3E6;    
-  --color-secondary: #96A88F;  
-  --color-accent: #cfcfcf;     
+  --color-brand: #40230B;      
+  --color-surface: #FBF3E6;    
+  --color-secondary:#9EB07D;  
+  --color-accent: #9D8A7B;     
   --color-ink: #242424;        
 }
 
