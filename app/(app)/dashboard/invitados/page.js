@@ -2,12 +2,18 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import ToastProvider from "@/components/ToastProvider";
-import ConfirmedGuestsList from "@/components/events/ConfirmedGuestsList";
 import GuestForm from "@/components/events/GuestForm";
 import GuestList from "@/components/events/GuestList";
+import SeatingSection from "@/components/events/SeatingSection";
 import { getCurrentUser } from "@/lib/firebase/session";
 import { getActiveEvent } from "@/lib/events/active";
-import { addGuest, removeGuest, removeGuestMember } from "../actions";
+import {
+  addGuest,
+  assignGuestTable,
+  removeGuest,
+  removeGuestMember,
+  saveEventTables,
+} from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -57,9 +63,12 @@ export default async function InvitadosPage() {
         />
       </div>
 
-      <div className="mt-7">
-        <ConfirmedGuestsList confirmedGuests={event.confirmedGuests || []} />
-      </div>
+      <SeatingSection
+        assignAction={assignGuestTable}
+        confirmedGuests={event.confirmedGuests || []}
+        tableCount={event.tableCount || 0}
+        tableCountAction={saveEventTables}
+      />
 
       <Link
         className="mt-7 inline-flex h-10 items-center justify-center rounded-md border border-accent px-4 text-sm font-semibold text-ink transition hover:border-secondary hover:bg-secondary/10"

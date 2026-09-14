@@ -16,6 +16,8 @@ import {
   removeEventGuest,
   removeEventGuestMember,
   removeEventProvider,
+  setEventGuestTable,
+  setEventTableCount,
   setUserEventInvitation,
   updateEventGuestField,
   updateUserEvent,
@@ -35,6 +37,8 @@ import {
   pathOrUrl,
   requiredText,
   storagePath,
+  tableCountInput,
+  tableNumberInput,
   timeInput,
 } from "@/lib/validation";
 
@@ -293,6 +297,61 @@ export async function updateGuestConfirmedCount(guestId, formData) {
   await updateEventGuestField(user.uid, event.id, guestId, {
     confirmedCount,
     status,
+  });
+  revalidatePath("/dashboard/invitados", "layout");
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function saveEventTables(formData) {
+  const { user, event } = await requireActiveEvent();
+  const count = tableCountInput(formData.get("tableCount"), {
+    label: "La cantidad de mesas",
+  });
+
+  await setEventTableCount(user.uid, event.id, count);
+  revalidatePath("/dashboard/invitados", "layout");
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function assignGuestTable(guestId, memberId, formData) {
+  const { user, event } = await requireActiveEvent();
+  const guest = (event.guests || []).find((entry) => entry.id === guestId);
+
+  if (!guest) {
+    throw new Error("Invitado no encontrado.");
+  }
+
+  const isMember = Boolean(memberId);
+
+  if (guest.type === "group") {
+    if (!isMember) {
+      throw new Error("Para un grupo elegí el integrante.");
+    }
+
+    const member = guest.members.find((entry) => entry.id === memberId);
+
+    if (!member) {
+      throw new Error("Integrante no encontrado.");
+    }
+
+    if (member.status !== "confirmado") {
+      throw new Error("El integrante aún no confirmó su asistencia.");
+    }
+  } else if (isMember) {
+    throw new Error("El invitado no es un grupo.");
+  } else if (guest.status !== "confirmado") {
+    throw new Error("El invitado aún no confirmó su asistencia.");
+  }
+
+  const tableNumber = tableNumberInput(formData.get("tableNumber"), {
+    label: "La mesa",
+    max: event.tableCount,
+  });
+
+  await setEventGuestTable(user.uid, event.id, {
+    guestId,
+    memberId: isMember ? memberId : null,
+    tableNumber,
   });
   revalidatePath("/dashboard/invitados", "layout");
   revalidatePath("/dashboard", "layout");
