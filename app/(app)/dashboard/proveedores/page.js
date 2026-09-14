@@ -33,10 +33,7 @@ export default async function ProveedoresPage() {
 
   return (
     <ToastProvider>
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
-        Proveedores
-      </p>
-      <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-4xl">
+      <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-3xl font-serif">
         Proveedores
       </h1>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-brand">
@@ -106,12 +103,7 @@ export default async function ProveedoresPage() {
         )}
       </div>
 
-      <Link
-        className="mt-7 inline-flex h-10 items-center justify-center rounded-md border border-accent px-4 text-sm font-semibold text-ink transition hover:border-secondary hover:bg-secondary/10"
-        href="/dashboard"
-      >
-        Volver al dashboard
-      </Link>
+
     </ToastProvider>
   );
 }

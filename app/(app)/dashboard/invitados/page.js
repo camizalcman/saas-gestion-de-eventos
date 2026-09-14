@@ -39,10 +39,7 @@ export default async function InvitadosPage() {
 
   return (
     <ToastProvider>
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
-        Lista de invitados
-      </p>
-      <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-4xl">
+      <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-3xl font-serif">
         Invitados
       </h1>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-brand">
