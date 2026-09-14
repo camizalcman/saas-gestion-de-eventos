@@ -12,6 +12,7 @@ import {
   assignGuestTable,
   removeGuest,
   removeGuestMember,
+  saveEventTablePositions,
   saveEventTables,
 } from "../actions";
 
@@ -63,7 +64,9 @@ export default async function InvitadosPage() {
       <SeatingSection
         assignAction={assignGuestTable}
         confirmedGuests={event.confirmedGuests || []}
+        savePositionsAction={saveEventTablePositions}
         tableCount={event.tableCount || 0}
+        tables={event.tables || []}
         tableCountAction={saveEventTables}
       />
 
