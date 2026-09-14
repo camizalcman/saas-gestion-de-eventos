@@ -18,6 +18,7 @@ import {
   removeEventProvider,
   setEventGuestTable,
   setEventTableCount,
+  setEventTablePositions,
   setUserEventInvitation,
   updateEventGuestField,
   updateUserEvent,
@@ -309,6 +310,39 @@ export async function saveEventTables(formData) {
   });
 
   await setEventTableCount(user.uid, event.id, count);
+  revalidatePath("/dashboard/invitados", "layout");
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function saveEventTablePositions(formData) {
+  const { user, event } = await requireActiveEvent();
+
+  let parsed;
+  try {
+    parsed = JSON.parse(String(formData.get("positions") || "[]"));
+  } catch {
+    throw new Error("No se pudieron leer las posiciones de las mesas.");
+  }
+
+  if (!Array.isArray(parsed)) {
+    throw new Error("Las posiciones de las mesas no tienen el formato esperado.");
+  }
+
+  const positions = parsed
+    .map((entry) => ({
+      number: Number(entry?.number),
+      x: Number(entry?.x),
+      y: Number(entry?.y),
+    }))
+    .filter(
+      (entry) =>
+        Number.isInteger(entry.number) &&
+        entry.number > 0 &&
+        Number.isFinite(entry.x) &&
+        Number.isFinite(entry.y),
+    );
+
+  await setEventTablePositions(user.uid, event.id, positions);
   revalidatePath("/dashboard/invitados", "layout");
   revalidatePath("/dashboard", "layout");
 }
