@@ -31,12 +31,6 @@ export default async function PresupuestoPage() {
         </p>
       </div>
 
-      <Link
-        className="mt-7 inline-flex h-10 items-center justify-center rounded-md border border-accent px-4 text-sm font-semibold text-ink transition hover:border-secondary hover:bg-secondary/10"
-        href="/dashboard"
-      >
-        Volver al dashboard
-      </Link>
     </>
   );
 }
