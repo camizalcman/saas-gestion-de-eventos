@@ -5,7 +5,6 @@ export default function Step2Details({ form, updateField, onBack, onNext }) {
     <section className="flex h-full flex-col gap-4">
       <div>
         <h2 className="text-2xl font-semibold text-ink">Detalles</h2>
-        <p className="mt-1 text-sm text-brand">Completá la info del evento. Podés omitirla si todavía no la tenés.</p>
       </div>
 
       <label className="grid gap-2 text-sm font-medium text-ink">

@@ -48,7 +48,6 @@ export default function Step1Identity({ form, updateField, onNext }) {
     <section className="flex h-full flex-col gap-4">
       <div>
         <h2 className="text-xl font-semibold text-ink sm:text-2xl">Identidad del evento</h2>
-        <p className="mt-1 text-sm text-brand">Contanos qué tipo de celebración vas a organizar.</p>
       </div>
 
       <label className="grid gap-2 text-sm font-medium text-ink">
@@ -59,17 +58,6 @@ export default function Step1Identity({ form, updateField, onNext }) {
           value={form.title}
           onChange={(e) => updateField("title", e.target.value)}
           minLength={3}
-        />
-      </label>
-
-      <label className="grid gap-2 text-sm font-medium text-ink">
-        <span>Descripción</span>
-        <textarea
-          className="min-h-20 resize-y rounded-md border border-accent bg-surface px-3 py-3 text-ink outline-none focus:border-secondary"
-          name="description"
-          value={form.description}
-          onChange={(e) => updateField("description", e.target.value)}
-          placeholder="Contanos un poco más sobre el evento..."
         />
       </label>
 

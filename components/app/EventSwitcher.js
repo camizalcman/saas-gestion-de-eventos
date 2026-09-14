@@ -109,6 +109,17 @@ export default function EventSwitcher({ events, activeEventId }) {
               </li>
             );
           })}
+          <li>
+            <hr className="my-1.5 border-accent" />
+            <Link
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-bold text-ink transition hover:bg-secondary/15"
+              href="/dashboard/evento/nuevo"
+              onClick={() => setOpen(false)}
+            >
+              <Plus aria-hidden="true" className="size-4 shrink-0 text-secondary" />
+              <span className="min-w-0 flex-1 truncate">Crear mi evento</span>
+            </Link>
+          </li>
         </ul>
       ) : null}
     </div>

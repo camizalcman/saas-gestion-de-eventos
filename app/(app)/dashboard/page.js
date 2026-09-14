@@ -74,10 +74,7 @@ export default async function DashboardPage() {
     <>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
-            Evento activo
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold text-ink sm:text-4xl">
+          <h1 className="mt-3 text-3xl font-semibold text-ink sm:text-3xl font-serif">
             {event.title}
           </h1>
           {event.published ? (
