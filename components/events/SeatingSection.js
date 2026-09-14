@@ -56,10 +56,7 @@ export default function SeatingSection({
         <h2 className="text-2xl font-semibold tracking-normal text-ink">
           Armado de mesas
         </h2>
-        <p className="text-sm leading-6 text-brand">
-          Asigná un número de mesa a cada invitado confirmado. Se refleja al
-          instante en el salón de la derecha.
-        </p>
+
       </div>
 
       <div className="mt-5 grid items-start gap-6 lg:grid-cols-[3fr_7fr]">
@@ -73,7 +70,7 @@ export default function SeatingSection({
             </span>
           </div>
           <p className="mt-2 text-sm text-brand">
-            Elegí la mesa desde el listado.
+            Asigná un número de mesa a cada invitado
           </p>
 
           {people.length === 0 ? (
@@ -112,9 +109,7 @@ export default function SeatingSection({
             </span>
           </div>
           <p className="mt-2 text-sm text-brand">
-            Definí la cantidad de mesas del evento. Al cambiarla se
-            reconfiguran las mesas y se limpian las asignaciones fuera de
-            rango.
+            Definí la cantidad de mesas del evento. 
           </p>
 
           <form

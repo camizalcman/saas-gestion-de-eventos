@@ -109,10 +109,7 @@ export default async function AdminPage() {
   return (
     <>
       <header className="border-b border-accent pb-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
-          Administración
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-4xl">
+        <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-3xl font-serif">
           Panel de administración
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-brand">
@@ -152,9 +149,9 @@ export default async function AdminPage() {
             Todavía no hay usuarios registrados.
           </div>
         ) : (
-          <div className="overflow-x-auto border border-accent">
+          <div className="overflow-x-auto border border-accent rounded-lg">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="bg-accent/60 text-xs uppercase tracking-[0.12em] text-brand">
+              <thead className="bg-accent/60 text-xs uppercase tracking-[0.12em] text-brand ">
                 <tr>
                   <th className="px-4 py-3 font-semibold" scope="col">Nombre</th>
                   <th className="px-4 py-3 font-semibold" scope="col">Email</th>
