@@ -14,7 +14,7 @@ import {
   Wallet,
 } from "lucide-react";
 import EventSwitcher from "./EventSwitcher";
-import { logout } from "@/app/(app)/dashboard/actions";
+import LogoutButton from "./LogoutButton";
 
 const baseItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -86,15 +86,12 @@ export default function AppSidebar({ events, activeEventId, isAdmin }) {
             <UserRound aria-hidden="true" className="size-4 shrink-0" />
             Mi perfil
           </Link>
-          <form action={logout}>
-            <button
-              className="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-surface/60 transition hover:bg-surface/10 hover:text-surface/90"
-              type="submit"
-            >
-              <LogOut aria-hidden="true" className="size-4 shrink-0" />
-              Cerrar sesión
-            </button>
-          </form>
+          <LogoutButton
+            className="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-surface/60 transition hover:bg-surface/10 hover:text-surface/90"
+          >
+            <LogOut aria-hidden="true" className="size-4 shrink-0" />
+            Cerrar sesión
+          </LogoutButton>
         </div>
       </div>
     </aside>

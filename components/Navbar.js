@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { logout } from "@/app/(app)/dashboard/actions";
 import { User } from "lucide-react";
+import LogoutButton from "./app/LogoutButton";
 
 function isActivePath(pathname, href) {
   if (href === "/") {
@@ -96,14 +96,9 @@ export default function Navbar({ actions, profile, user }) {
                   <span className="min-w-0 max-w-64 overflow-wrap-anywhere text-right text-sm text-surface/80">
                     {user.email || "Sin email"} ({userType})
                   </span>
-                  <form action={logout}>
-                    <button
-                      className="h-10 rounded-md border border-accent bg-transparent px-4 text-sm font-semibold text-surface transition hover:border-surface hover:bg-accent/20"
-                      type="submit"
-                    >
-                      Cerrar sesion
-                    </button>
-                  </form>
+                  <LogoutButton className="h-10 rounded-md border border-accent bg-transparent px-4 text-sm font-semibold text-surface transition hover:border-surface hover:bg-accent/20">
+                    Cerrar sesión
+                  </LogoutButton>
                 </>
               ) : (
                 <Link
@@ -162,14 +157,9 @@ export default function Navbar({ actions, profile, user }) {
             </div>
 
           {user ? (
-            <form action={logout} className="mt-3">
-              <button
-                className="h-10 w-full rounded-md border border-accent bg-transparent px-4 text-sm font-semibold text-surface transition hover:border-surface hover:bg-accent/20"
-                type="submit"
-              >
-                Cerrar sesion
-              </button>
-            </form>
+            <LogoutButton className="mt-3 h-10 w-full rounded-md border border-accent bg-transparent px-4 text-sm font-semibold text-surface transition hover:border-surface hover:bg-accent/20">
+              Cerrar sesión
+            </LogoutButton>
           ) : (
             <Link
               className="mt-3 flex items-center gap-2 text-sm font-semibold text-surface transition hover:text-accent"
