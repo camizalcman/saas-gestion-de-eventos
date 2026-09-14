@@ -54,11 +54,8 @@ export default async function InvitacionPage() {
 
   return (
     <>
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
+      <h1 className="mt-3 text-3xl font-semibold text-ink sm:text-3xl font-serif">
         Invitación digital
-      </p>
-      <h1 className="mt-3 text-3xl font-semibold text-ink sm:text-4xl">
-        {invitation ? "Editar invitación" : "Crear invitación"}
       </h1>
       <p className="mt-2 text-sm text-brand">
         Personalizá la invitación de “{event.title}” con textos, fotos y colores.
@@ -76,12 +73,6 @@ export default async function InvitacionPage() {
         />
       </div>
 
-      <Link
-        className="mt-4 inline-flex h-10 items-center justify-center rounded-md border border-accent px-4 text-sm font-semibold text-ink transition hover:border-secondary hover:bg-secondary/10"
-        href="/dashboard"
-      >
-        Volver al dashboard
-      </Link>
     </>
   );
 }

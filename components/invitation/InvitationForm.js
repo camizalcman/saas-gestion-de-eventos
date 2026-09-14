@@ -335,8 +335,8 @@ export default function InvitationForm({
 
   return (
     <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_350px] xl:grid-cols-[minmax(0,1fr)_380px]">
-      <form onSubmit={handleSubmit} className="grid min-w-0 gap-4 border border-accent p-4 sm:p-5">
-      <div className="rounded-md border border-accent p-4">
+      <form onSubmit={handleSubmit} className="grid min-w-0 gap-4  bg-accent/20 p-4 sm:p-5 rounded-lg">
+      <div className="rounded-md border border-accent p-4 bg-surface">
         <div className="mb-3 grid gap-2 text-sm">
           <span className="text-sm font-medium text-ink">Paleta de colores</span>
           <span className={hintClasses}>
@@ -346,7 +346,7 @@ export default function InvitationForm({
         <PaletteGrid selectedPalette={values.palette} onSelect={(p) => update("palette", p)} />
       </div>
 
-      <div className="rounded-md border border-accent p-4">
+      <div className="rounded-md border border-accent p-4 bg-surface">
         <div className="mb-3 grid gap-2 text-sm">
           <span className="text-sm font-medium text-ink">Tipografía</span>
           <span className={hintClasses}>
