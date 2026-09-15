@@ -470,7 +470,6 @@ export default function InvitationForm({
             className="min-h-20 resize-y rounded-md border border-accent bg-surface px-3 py-3 text-ink outline-none focus:border-secondary"
             value={values.personalText}
             onChange={(e) => update("personalText", e.target.value)}
-            placeholder='Ej: "Con la bendición de Hashem y de nuestros padres..."'
             disabled={loading}
           />
         </label>
@@ -530,7 +529,6 @@ export default function InvitationForm({
             className={fieldClasses}
             value={values.venue}
             onChange={(e) => handleVenueChange(e.target.value)}
-            placeholder="Salón o dirección"
             disabled={loading}
           />
         </label>
@@ -553,7 +551,6 @@ export default function InvitationForm({
             className={fieldClasses}
             value={values.dressCode}
             onChange={(e) => update("dressCode", e.target.value)}
-            placeholder='Ej: "Etiqueta"'
             disabled={loading}
           />
         </label>
@@ -576,7 +573,6 @@ export default function InvitationForm({
             className="min-h-20 resize-y rounded-md border border-accent bg-surface px-3 py-3 text-ink outline-none focus:border-secondary"
             value={values.giftAlias}
             onChange={(e) => update("giftAlias", e.target.value)}
-            placeholder='Ej: "Si querés hacernos un regalo, nuestro alias es..."'
             disabled={loading}
           />
         </label>
@@ -599,7 +595,6 @@ export default function InvitationForm({
             className="min-h-20 resize-y rounded-md border border-accent bg-surface px-3 py-3 text-ink outline-none focus:border-secondary"
             value={values.closingText}
             onChange={(e) => update("closingText", e.target.value)}
-            placeholder="Mensaje final de agradecimiento..."
             disabled={loading}
           />
         </label>
