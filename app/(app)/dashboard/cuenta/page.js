@@ -13,15 +13,10 @@ export default async function CuentaPage() {
   return (
     <>
       <header className="border-b border-accent pb-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
-          Mi cuenta
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-4xl">
+
+        <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-3xl font-serif">
           Mi perfil
         </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-brand">
-          Información básica de tu cuenta y datos de sesión.
-        </p>
       </header>
 
       <section className="mt-7 grid gap-px overflow-hidden border border-accent bg-accent md:grid-cols-3">

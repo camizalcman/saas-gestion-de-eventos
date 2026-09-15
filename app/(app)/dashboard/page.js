@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Plus } from "lucide-react";
 import { getCurrentUser } from "@/lib/firebase/session";
 import { getActiveEvent } from "@/lib/events/active";
 import { listUserEvents } from "@/lib/events/events";
@@ -107,6 +108,13 @@ export default async function DashboardPage() {
               Eliminar
             </button>
           </form>
+          <Link
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-secondary bg-secondary px-4 text-sm font-semibold text-surface transition hover:bg-secondary/90"
+            href="/dashboard/evento/nuevo"
+          >
+            <Plus aria-hidden="true" className="size-4" />
+            Nuevo evento
+          </Link>
         </div>
       </div>
 
