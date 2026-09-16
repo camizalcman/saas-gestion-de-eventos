@@ -3,9 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getActiveEvent } from "@/lib/events/active";
-import { addEventProvider, getUserEvent } from "@/lib/events/events";
+import { addEventProvider, getUserEvent, syncSupplierInEvents } from "@/lib/events/events";
 import { getCurrentUser } from "@/lib/firebase/session";
-import { createSupplier, getSupplierById } from "@/lib/suppliers/suppliers";
+import {
+  createSupplier,
+  deleteSupplier,
+  getSupplierById,
+  updateSupplier,
+} from "@/lib/suppliers/suppliers";
 import { validateSupplier } from "@/lib/suppliers/validation";
 import { getCurrentUserProfile } from "@/lib/users/users";
 
@@ -46,6 +51,41 @@ export async function createSupplierAction(formData) {
 
   revalidatePath("/dashboard/suppliers");
   revalidatePath("/dashboard");
+}
+
+export async function updateSupplierAction(id, formData) {
+  await requireAdmin();
+  const data = parseSupplierForm(formData);
+  await updateSupplier(id, data);
+
+  await syncSupplierInEvents(id, {
+    name: data.name,
+    category: data.category,
+    description: data.description || "",
+    locality: data.locality || "",
+    province: data.province || "",
+    whatsapp: data.whatsapp || "",
+    instagram: data.instagram || "",
+    website: data.website || "",
+    imageUrl: data.imageUrl || "",
+  }, data);
+
+  revalidatePath("/dashboard/suppliers");
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/proveedores", "layout");
+}
+
+export async function deleteSupplierAction(id) {
+  await requireAdmin();
+
+  const supplier = await getSupplierById(id);
+  await deleteSupplier(id);
+
+  await syncSupplierInEvents(id, { deleted: true }, supplier);
+
+  revalidatePath("/dashboard/suppliers");
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/proveedores", "layout");
 }
 
 export async function addSupplierToEvent(supplierId, eventId) {

@@ -34,7 +34,7 @@ function ContactLink({ href, label }) {
   );
 }
 
-export default function SupplierCard({ supplier, addButton }) {
+export default function SupplierCard({ supplier, addButton, editButton, deleteButton }) {
   const location = [supplier.locality, getProvinceLabel(supplier.province)]
     .filter(Boolean)
     .join(", ");
@@ -81,6 +81,13 @@ export default function SupplierCard({ supplier, addButton }) {
           <ContactLink href={supplier.website} label="Sitio web" />
           {addButton}
         </div>
+
+        {editButton || deleteButton ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {editButton}
+            {deleteButton}
+          </div>
+        ) : null}
       </div>
     </article>
   );

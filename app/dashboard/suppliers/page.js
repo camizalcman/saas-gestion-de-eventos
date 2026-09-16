@@ -4,13 +4,20 @@ import { ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import SupplierCard from "@/components/suppliers/SupplierCard";
 import SupplierAddButton from "@/components/suppliers/SupplierAddButton";
+import SupplierDeleteButton from "@/components/suppliers/SupplierDeleteButton";
+import SupplierEditModal from "@/components/suppliers/SupplierEditModal";
 import SupplierFiltersToggle from "@/components/suppliers/SupplierFiltersToggle";
 import SupplierModal from "@/components/suppliers/SupplierModal";
 import { listUserEvents } from "@/lib/events/events";
 import { getCurrentUser } from "@/lib/firebase/session";
 import { getSuppliers } from "@/lib/suppliers/suppliers";
 import { getCurrentUserProfile } from "@/lib/users/users";
-import { createSupplierAction, addSupplierToEvent } from "./actions";
+import {
+  createSupplierAction,
+  addSupplierToEvent,
+  updateSupplierAction,
+  deleteSupplierAction,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -126,11 +133,28 @@ export default async function SuppliersPage({ searchParams }) {
                     key={supplier.id}
                     supplier={supplier}
                     addButton={
-                  <SupplierAddButton
-                    action={addSupplierToEvent.bind(null, supplier.id)}
-                    supplierName={supplier.name}
-                    events={events}
-                  />
+                      <SupplierAddButton
+                        action={addSupplierToEvent.bind(null, supplier.id)}
+                        supplierName={supplier.name}
+                        events={events}
+                      />
+                    }
+                    editButton={
+                      isAdmin ? (
+                        <SupplierEditModal
+                          action={updateSupplierAction}
+                          supplier={supplier}
+                          useFirebaseStorage={process.env.FIREBASE_STORAGE === "true"}
+                        />
+                      ) : null
+                    }
+                    deleteButton={
+                      isAdmin ? (
+                        <SupplierDeleteButton
+                          action={deleteSupplierAction.bind(null, supplier.id)}
+                          supplierName={supplier.name}
+                        />
+                      ) : null
                     }
                   />
                 ))}

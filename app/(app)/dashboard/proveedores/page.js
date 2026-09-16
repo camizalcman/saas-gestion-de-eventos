@@ -53,44 +53,56 @@ export default async function ProveedoresPage() {
         ) : (
           providers.map((provider) => (
             <article
-              className="grid min-w-0 gap-3 border border-accent bg-surface p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+              className={`grid min-w-0 gap-3 border bg-surface p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center ${
+                provider.deleted
+                  ? "border-brand/40 opacity-60"
+                  : "border-accent"
+              }`}
               key={provider.id}
             >
               <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-3">
-                  <h2 className="overflow-wrap-anywhere text-base font-semibold text-ink">
-                    {provider.name}
-                  </h2>
-                  <span className="border border-accent px-2 py-1 text-xs uppercase text-brand">
-                    {categoryLabel(provider.category)}
-                  </span>
-                </div>
-                <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-brand">
-                  {provider.whatsapp ? (
-                    <span>WhatsApp: {provider.whatsapp}</span>
-                  ) : null}
-                  {provider.instagram ? (
-                    <span>Instagram: {provider.instagram}</span>
-                  ) : null}
-                  {provider.website ? (
-                    <span className="overflow-wrap-anywhere">
-                      Web: {provider.website}
-                    </span>
-                  ) : null}
-                  {!provider.whatsapp && !provider.instagram && !provider.website ? (
-                    <span>Sin datos de contacto</span>
-                  ) : null}
-                </div>
-                {buildProviderLink(provider) ? (
-                  <a
-                    className="mt-3 inline-block text-sm font-semibold text-secondary underline-offset-4 hover:underline"
-                    href={buildProviderLink(provider)}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    Contactar
-                  </a>
-                ) : null}
+                {provider.deleted ? (
+                  <p className="text-sm font-semibold text-brand">
+                    Este proveedor fue eliminado de la galería.
+                  </p>
+                ) : (
+                  <>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <h2 className="overflow-wrap-anywhere text-base font-semibold text-ink">
+                        {provider.name}
+                      </h2>
+                      <span className="border border-accent px-2 py-1 text-xs uppercase text-brand">
+                        {categoryLabel(provider.category)}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-brand">
+                      {provider.whatsapp ? (
+                        <span>WhatsApp: {provider.whatsapp}</span>
+                      ) : null}
+                      {provider.instagram ? (
+                        <span>Instagram: {provider.instagram}</span>
+                      ) : null}
+                      {provider.website ? (
+                        <span className="overflow-wrap-anywhere">
+                          Web: {provider.website}
+                        </span>
+                      ) : null}
+                      {!provider.whatsapp && !provider.instagram && !provider.website ? (
+                        <span>Sin datos de contacto</span>
+                      ) : null}
+                    </div>
+                    {buildProviderLink(provider) ? (
+                      <a
+                        className="mt-3 inline-block text-sm font-semibold text-secondary underline-offset-4 hover:underline"
+                        href={buildProviderLink(provider)}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        Contactar
+                      </a>
+                    ) : null}
+                  </>
+                )}
               </div>
               <div className="sm:justify-self-end">
                 <ProviderRemoveButton
