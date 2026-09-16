@@ -2,8 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getActiveEvent } from "@/lib/events/active";
+import { addEventProvider, getUserEvent } from "@/lib/events/events";
 import { getCurrentUser } from "@/lib/firebase/session";
-import { createSupplier } from "@/lib/suppliers/suppliers";
+import { createSupplier, getSupplierById } from "@/lib/suppliers/suppliers";
 import { validateSupplier } from "@/lib/suppliers/validation";
 import { getCurrentUserProfile } from "@/lib/users/users";
 
@@ -44,4 +46,50 @@ export async function createSupplierAction(formData) {
 
   revalidatePath("/dashboard/suppliers");
   revalidatePath("/dashboard");
+}
+
+export async function addSupplierToEvent(supplierId, eventId) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const event = eventId
+    ? await getUserEvent(user.uid, eventId)
+    : await getActiveEvent(user);
+
+  if (!event) {
+    throw new Error("No tenés ningún evento creado.");
+  }
+
+  const supplier = await getSupplierById(supplierId);
+
+  if (!supplier) {
+    throw new Error("Proveedor no encontrado.");
+  }
+
+  const providers = event.providers || [];
+  const alreadyExists = providers.some((p) => p.supplierId === supplierId);
+
+  if (alreadyExists) {
+    throw new Error("Este proveedor ya está en tu evento.");
+  }
+
+  await addEventProvider(user.uid, event.id, {
+    name: supplier.name,
+    category: supplier.category,
+    description: supplier.description || "",
+    locality: supplier.locality || "",
+    province: supplier.province || "",
+    whatsapp: supplier.whatsapp || "",
+    instagram: supplier.instagram || "",
+    website: supplier.website || "",
+    imageUrl: supplier.imageUrl || "",
+    supplierId: supplier.id,
+  });
+
+  revalidatePath("/dashboard/proveedores", "layout");
+
+  return event.title;
 }

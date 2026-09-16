@@ -34,7 +34,7 @@ function ContactLink({ href, label }) {
   );
 }
 
-export default function SupplierCard({ supplier }) {
+export default function SupplierCard({ supplier, addButton }) {
   const location = [supplier.locality, getProvinceLabel(supplier.province)]
     .filter(Boolean)
     .join(", ");
@@ -79,6 +79,7 @@ export default function SupplierCard({ supplier }) {
           <ContactLink href={whatsappUrl} label="WhatsApp" />
           <ContactLink href={supplier.instagram} label="Instagram" />
           <ContactLink href={supplier.website} label="Sitio web" />
+          {addButton}
         </div>
       </div>
     </article>
