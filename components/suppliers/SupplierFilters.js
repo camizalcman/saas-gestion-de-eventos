@@ -15,6 +15,7 @@ export default function SupplierFilters({ filters }) {
       className="grid gap-4 border border-accent p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end"
       method="get"
     >
+      {filters.search ? <input name="search" type="hidden" value={filters.search} /> : null}
       <label className="grid gap-2 text-sm font-semibold text-ink">
         <span>Categoria</span>
         <select

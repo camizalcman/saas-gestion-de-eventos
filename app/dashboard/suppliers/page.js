@@ -7,6 +7,7 @@ import SupplierAddButton from "@/components/suppliers/SupplierAddButton";
 import SupplierDeleteButton from "@/components/suppliers/SupplierDeleteButton";
 import SupplierEditModal from "@/components/suppliers/SupplierEditModal";
 import SupplierFiltersToggle from "@/components/suppliers/SupplierFiltersToggle";
+import SupplierSearchBar from "@/components/suppliers/SupplierSearchBar";
 import SupplierModal from "@/components/suppliers/SupplierModal";
 import { listUserEvents } from "@/lib/events/events";
 import { getCurrentUser } from "@/lib/firebase/session";
@@ -39,6 +40,7 @@ export default async function SuppliersPage({ searchParams }) {
     category: getQueryValue(query?.category),
     province: getQueryValue(query?.province),
     locality: getQueryValue(query?.locality),
+    search: getQueryValue(query?.search),
   };
   const suppliers = await getSuppliers(filters);
   const events = await listUserEvents(user.uid);
@@ -103,6 +105,13 @@ export default async function SuppliersPage({ searchParams }) {
               <SupplierFiltersToggle filters={filters} />
             </div>
           </section>
+
+          <SupplierSearchBar
+            defaultValue={filters.search}
+            category={filters.category}
+            province={filters.province}
+            locality={filters.locality}
+          />
 
           {events.length === 0 ? (
             <div className="mt-8 border border-accent bg-surface p-6 text-sm leading-6 text-brand">
