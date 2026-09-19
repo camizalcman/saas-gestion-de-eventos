@@ -5,6 +5,8 @@ import { getCurrentUser } from "@/lib/firebase/session";
 import { getActiveEvent } from "@/lib/events/active";
 import { listUserEvents } from "@/lib/events/events";
 import { deleteEvent } from "./actions";
+import ToastProvider from "@/components/ToastProvider";
+import EventDeleteButton from "@/components/events/EventDeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -72,7 +74,7 @@ export default async function DashboardPage() {
   const providersCount = (event.providers || []).length;
 
   return (
-    <>
+    <ToastProvider>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="mt-3 text-3xl font-semibold text-ink sm:text-3xl font-serif">
@@ -100,14 +102,7 @@ export default async function DashboardPage() {
           >
             Editar datos del evento
           </Link>
-          <form action={deleteEvent}>
-            <button
-              className="inline-flex h-10 items-center justify-center rounded-md border border-brand/40 px-4 text-sm font-semibold text-brand transition hover:bg-brand/10"
-              type="submit"
-            >
-              Eliminar
-            </button>
-          </form>
+          <EventDeleteButton action={deleteEvent} eventTitle={event.title} />
           <Link
             className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-secondary bg-secondary px-4 text-sm font-semibold text-surface transition hover:bg-secondary/90"
             href="/dashboard/evento/nuevo"
@@ -167,6 +162,6 @@ export default async function DashboardPage() {
           />
         </div>
       </div>
-    </>
+    </ToastProvider>
   );
 }

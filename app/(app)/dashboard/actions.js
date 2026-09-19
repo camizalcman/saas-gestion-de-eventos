@@ -139,7 +139,10 @@ function parseEventForm(formData) {
 
 export async function createEvent(formData) {
   const user = await requireUser();
-  const eventId = await createUserEvent(user.uid, parseEventForm(formData));
+  const eventId = await createUserEvent(user.uid, {
+    ...parseEventForm(formData),
+    published: true,
+  });
 
   const cookieStore = await cookies();
   cookieStore.set(ACTIVE_EVENT_COOKIE, eventId, cookieOptions());
@@ -162,7 +165,6 @@ export async function deleteEvent() {
   cookieStore.set(ACTIVE_EVENT_COOKIE, "", { ...cookieOptions(), maxAge: 0 });
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
 }
 
 function parseInvitationForm(formData) {

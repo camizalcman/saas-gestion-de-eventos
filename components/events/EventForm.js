@@ -21,6 +21,11 @@ function getLocalImageInputValue(imageUrl, imageBasePath) {
   return value.startsWith(prefix) ? value.slice(prefix.length) : value;
 }
 
+function normalizeDateTimeInputValue(value) {
+  const text = String(value || "");
+  return /^\d{4}-\d{2}-\d{2}$/.test(text) ? `${text}T00:00` : text;
+}
+
 export default function EventForm({
   action,
   event,
@@ -117,7 +122,7 @@ export default function EventForm({
       </label>
       <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Fecha y hora</span>
-        <input className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="date" type="datetime-local" defaultValue={event?.date || ""} disabled={loading} />
+        <input className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="date" type="datetime-local" defaultValue={normalizeDateTimeInputValue(event?.date)} disabled={loading} />
       </label>
       <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Ubicacion</span>
@@ -145,9 +150,16 @@ export default function EventForm({
           <img alt="Preview del evento" className="h-44 w-full object-cover" src={previewUrl} />
         </div>
       ) : null}
-      <label className="flex items-start gap-3 rounded-md border border-accent p-3 text-sm font-medium text-ink">
-        <input className="mt-1 size-4 accent-secondary" name="published" type="checkbox" defaultChecked={Boolean(event?.published)} disabled={loading} />
-        <span>Publicado<span className="mt-1 block text-sm font-normal leading-6 text-brand/60">El evento aparecera en la pagina publica.</span></span>
+      <label className="flex cursor-pointer items-center justify-between gap-4 rounded-md border border-accent p-3 text-sm font-medium text-ink has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
+        <span>
+          Evento público
+          <span className="mt-1 block text-sm font-normal leading-6 text-brand/60">El evento aparecera en la pagina publica.</span>
+        </span>
+        <span className="relative shrink-0">
+          <input className="peer sr-only" name="published" type="checkbox" defaultChecked={Boolean(event?.published)} disabled={loading} />
+          <span className="block h-7 w-12 rounded-full bg-accent transition peer-checked:bg-secondary peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-secondary" aria-hidden="true" />
+          <span className="pointer-events-none absolute left-1 top-1 block size-5 rounded-full bg-surface shadow transition peer-checked:translate-x-5" aria-hidden="true" />
+        </span>
       </label>
       <button className="h-11 w-full rounded-md border border-secondary bg-secondary px-4 text-sm font-semibold text-surface transition hover:bg-secondary/90" disabled={loading} type="submit">{loading ? "Guardando..." : submitLabel}</button>
       {error ? <p className="rounded-md border border-brand/40 bg-brand/10 p-3 text-sm text-brand">{error}</p> : null}

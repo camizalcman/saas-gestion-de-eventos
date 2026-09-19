@@ -8,6 +8,17 @@ export default function Step2Details({ form, updateField, onBack, onNext }) {
       </div>
 
       <label className="grid gap-2 text-sm font-medium text-ink">
+        <span>Descripcion</span>
+        <textarea
+          className="min-h-28 resize-y rounded-md border border-accent bg-surface px-3 py-3 text-ink outline-none focus:border-secondary"
+          name="description"
+          value={form.description}
+          onChange={(e) => updateField("description", e.target.value)}
+          placeholder="Contá brevemente sobre tu evento"
+        />
+      </label>
+
+      <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Protagonistas</span>
         <input
           className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary"
@@ -23,7 +34,7 @@ export default function Step2Details({ form, updateField, onBack, onNext }) {
         <input
           className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary"
           name="date"
-          type="date"
+          type="datetime-local"
           value={form.date}
           onChange={(e) => updateField("date", e.target.value)}
         />

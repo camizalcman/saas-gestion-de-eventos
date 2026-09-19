@@ -13,6 +13,7 @@ export default function EventOnboardingWizard({ useFirebaseStorage }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [form, setForm] = useState({
     title: "",
+    description: "",
     eventType: "",
     customEventType: "",
     protagonists: "",
@@ -36,6 +37,7 @@ export default function EventOnboardingWizard({ useFirebaseStorage }) {
     try {
       const formData = new FormData();
       formData.set("title", form.title);
+      formData.set("description", form.description);
       formData.set("eventType", form.eventType);
       formData.set("customEventType", form.customEventType);
       formData.set("protagonists", form.protagonists);
@@ -70,7 +72,7 @@ export default function EventOnboardingWizard({ useFirebaseStorage }) {
         </div>
       </div>
 
-      <div className="flex h-full max-h-screen flex-col justify-center overflow-hidden px-8 py-4 md:px-12 lg:px-16">
+      <div className="flex h-full max-h-screen flex-col justify-center overflow-y-auto px-8 py-4 md:px-12 lg:px-16">
         <div className="mx-auto w-full max-w-xl">
           <StepIndicator currentStep={currentStep} />
 
