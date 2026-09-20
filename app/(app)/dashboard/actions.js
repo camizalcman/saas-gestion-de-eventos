@@ -9,6 +9,7 @@ import { getCurrentUser } from "@/lib/firebase/session";
 import {
   addEventGuest,
   addEventProvider,
+  addEventScheduleItem,
   createUserEvent,
   deleteUserEvent,
   deriveGuestStatus,
@@ -16,11 +17,13 @@ import {
   removeEventGuest,
   removeEventGuestMember,
   removeEventProvider,
+  removeEventScheduleItem,
   setEventGuestTable,
   setEventTableCount,
   setEventTablePositions,
   setUserEventInvitation,
   updateEventGuestField,
+  updateEventScheduleItem,
   updateUserEvent,
 } from "@/lib/events/events";
 import { EVENT_TYPES } from "@/lib/events/constants";
@@ -425,6 +428,85 @@ export async function addProvider(formData) {
   const provider = parseProviderForm(formData);
   await addEventProvider(user.uid, event.id, provider);
   revalidatePath("/dashboard/proveedores", "layout");
+}
+
+function parseScheduleActivityForm(formData, event) {
+  const title = requiredText(formData.get("title"), {
+    label: "El titulo de la actividad",
+    min: 2,
+    max: 120,
+  });
+  const startTime = timeInput(formData.get("startTime"), {
+    label: "La hora de inicio",
+    required: true,
+  });
+  const endTime = timeInput(formData.get("endTime"), {
+    label: "La hora de finalizacion",
+    required: true,
+  });
+
+  if (endTime === startTime) {
+    throw new Error("La hora de finalizacion debe ser distinta al inicio.");
+  }
+
+  const description = optionalText(formData.get("description"), {
+    label: "La descripcion",
+    max: 2000,
+  });
+  const color = String(formData.get("color") || "#B58B63").trim();
+
+  if (!/^#[0-9a-f]{6}$/i.test(color)) {
+    throw new Error("El color de la actividad no es valido.");
+  }
+
+  const eventProviders = new Map(
+    (event.providers || [])
+      .filter((provider) => !provider.deleted)
+      .map((provider) => [provider.id, provider]),
+  );
+  const providerIds = [...new Set(formData.getAll("providerIds"))]
+    .map((providerId) => String(providerId))
+    .filter(Boolean);
+
+  if (providerIds.some((providerId) => !eventProviders.has(providerId))) {
+    throw new Error("Uno de los proveedores seleccionados no pertenece al evento.");
+  }
+
+  return { title, startTime, endTime, description, color, providerIds };
+}
+
+export async function addScheduleActivity(formData) {
+  const { user, event } = await requireActiveEvent();
+  const activity = parseScheduleActivityForm(formData, event);
+
+  await addEventScheduleItem(user.uid, event.id, activity);
+  revalidatePath("/dashboard/cronograma", "layout");
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function updateScheduleActivity(formData) {
+  const { user, event } = await requireActiveEvent();
+  const activityId = requiredText(formData.get("activityId"), {
+    label: "La actividad",
+    max: 200,
+  });
+  const activity = parseScheduleActivityForm(formData, event);
+
+  await updateEventScheduleItem(user.uid, event.id, activityId, activity);
+  revalidatePath("/dashboard/cronograma", "layout");
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function removeScheduleActivity(formData) {
+  const { user, event } = await requireActiveEvent();
+  const activityId = requiredText(formData.get("activityId"), {
+    label: "La actividad",
+    max: 200,
+  });
+
+  await removeEventScheduleItem(user.uid, event.id, activityId);
+  revalidatePath("/dashboard/cronograma", "layout");
+  revalidatePath("/dashboard", "layout");
 }
 
 export async function removeProvider(providerId) {
