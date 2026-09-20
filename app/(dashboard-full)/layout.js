@@ -29,7 +29,7 @@ export default async function DashboardFullLayout({ children }) {
         }))}
         isAdmin={profile?.user_type === "admin"}
       />
-      <main className="min-w-0 flex-1">
+      <main className="min-w-0 flex-1 pl-16 lg:pl-0">
         {children}
       </main>
     </div>

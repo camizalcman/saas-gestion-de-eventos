@@ -18,12 +18,10 @@ export default function Hero({ user }) {
       <div className="absolute inset-0 bg-gradient-to-t from-brand via-brand/80 to-transparent" />
 
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-6 sm:px-6 lg:px-8">
-        <h1 className="mt-3 max-w-3xl text-3xl font-bold leading-snug tracking-normal text-surface font-serif sm:text-5xl lg:text-6xl">
-          Organizá tu
-          <br />
-          próximo evento
+        <h1 className="mt-3 max-w-3xl text-5xl font-normal tracking-normal text-surface font-caladea sm:text-7xl lg:text-8xl">
+          Organizá tu próximo evento
         </h1>
-        <p className="mt-2 max-w-2xl text-md leading-8 text-surface/80 sm:text-xl">
+        <p className="mt-2 max-w-2xl text-md leading-6 text-surface/80 sm:text-xl">
           Armá las invitaciones y coordiná todos los detalles de tu fiesta
         </p>
 

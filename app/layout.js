@@ -1,5 +1,6 @@
 import {
   Aboreto,
+  Caladea,
   Dancing_Script,
   Literata,
   Lora,
@@ -9,6 +10,12 @@ import {
   Geist_Mono,
 } from "next/font/google";
 import "./globals.css";
+
+const caladea = Caladea({
+  variable: "--font-caladea",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
 
 const aboreto = Aboreto({
   variable: "--font-aboreto",
@@ -66,7 +73,7 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="es"
-      className={`${aboreto.variable} ${nunitoSans.variable} ${literata.variable} ${geistMono.variable} ${playfair.variable} ${lora.variable} ${montserrat.variable} ${dancingScript.variable}`}
+      className={`${caladea.variable} ${aboreto.variable} ${nunitoSans.variable} ${literata.variable} ${geistMono.variable} ${playfair.variable} ${lora.variable} ${montserrat.variable} ${dancingScript.variable}`}
     >
       <body className="min-h-screen bg-surface text-ink antialiased">
         {children}
