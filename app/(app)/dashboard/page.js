@@ -72,6 +72,7 @@ export default async function DashboardPage() {
   const guestsCount = guests.length;
   const guestsTotal = guests.reduce((sum, guest) => sum + guest.quantity, 0);
   const providersCount = (event.providers || []).length;
+  const expensesCount = (event.expenses || []).length;
 
   return (
     <ToastProvider>
@@ -158,7 +159,11 @@ export default async function DashboardPage() {
           <SectionLink
             href="/dashboard/presupuesto"
             label="Presupuesto"
-            description="Controlá gastos y división de gastos."
+            description={
+              expensesCount === 0
+                ? "Todavía no hay gastos cargados. Definí tu presupuesto y controlá los costos."
+                : `${expensesCount} ${expensesCount === 1 ? "gasto cargado" : "gastos cargados"} · controlá el presupuesto del evento`
+            }
           />
         </div>
       </div>
