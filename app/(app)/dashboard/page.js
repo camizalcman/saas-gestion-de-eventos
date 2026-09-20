@@ -14,6 +14,21 @@ import BudgetPanel from "@/components/dashboard/BudgetPanel";
 
 export const dynamic = "force-dynamic";
 
+function SectionLink({ href, label, description }) {
+  return (
+    <Link
+      className="flex items-center justify-between gap-3 rounded-md border border-accent bg-surface px-4 py-3 text-sm transition hover:border-secondary/50"
+      href={href}
+    >
+      <span className="min-w-0">
+        <span className="block font-semibold text-ink">{label}</span>
+        <span className="block text-brand">{description}</span>
+      </span>
+      <span aria-hidden="true" className="text-ink">&rarr;</span>
+    </Link>
+  );
+}
+
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -52,6 +67,10 @@ export default async function DashboardPage() {
   const guests = event.guests || [];
   const providers = event.providers || [];
   const schedule = event.schedule || [];
+  const guestsCount = guests.length;
+  const guestsTotal = guests.reduce((sum, guest) => sum + guest.quantity, 0);
+  const providersCount = (event.providers || []).length;
+  const expensesCount = (event.expenses || []).length;
 
   return (
     <ToastProvider>
@@ -69,7 +88,51 @@ export default async function DashboardPage() {
       </div>
 
       <div className="mt-8">
-        <div className="grid grid-cols-2 gap-4">
+        <h2 className="text-lg font-semibold text-ink">Secciones</h2>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <SectionLink
+            href="/dashboard/invitacion"
+            label={hasInvitation ? "Editar invitación" : "Crear invitación digital"}
+            description={
+              hasInvitation
+                ? "Cambiar textos, imágenes y colores de tu invitación"
+                : "Personalizá tu invitación digital con textos, imágenes y colores"
+            }
+          />
+          <SectionLink
+            href="/dashboard/invitados"
+            label="Invitados y mesas"
+            description={
+              guestsCount === 0
+                ? "Todavía no hay invitados cargados. Armá la lista con cantidades."
+                : `${guestsCount} ${guestsCount === 1 ? "invitado cargado" : "invitados cargados"} · ${guestsTotal} ${guestsTotal === 1 ? "persona" : "personas"} en total`
+            }
+          />
+          <SectionLink
+            href="/dashboard/proveedores"
+            label="Proveedores"
+            description={
+              providersCount === 0
+                ? "Todavía no hay proveedores cargados para tu evento."
+                : `${providersCount} ${providersCount === 1 ? "proveedor cargado" : "proveedores cargados"}`
+            }
+          />
+          <SectionLink
+            href="/dashboard/cronograma"
+            label="Cronograma"
+            description="Coordiná el minuto a minuto de la fiesta."
+          />
+          <SectionLink
+            href="/dashboard/presupuesto"
+            label="Presupuesto"
+            description={
+              expensesCount === 0
+                ? "Todavía no hay gastos cargados. Definí tu presupuesto y controlá los costos."
+                : `${expensesCount} ${expensesCount === 1 ? "gasto cargado" : "gastos cargados"} · controlá el presupuesto del evento`
+            }
+          />
+        </div>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <ProvidersPanel providers={providers} />
           <SchedulePanel schedule={schedule} />
         </div>

@@ -7,23 +7,30 @@ import { SESSION_COOKIE_NAME, SESSION_MAX_AGE } from "@/lib/firebase/constants";
 import { ACTIVE_EVENT_COOKIE, getActiveEvent } from "@/lib/events/active";
 import { getCurrentUser } from "@/lib/firebase/session";
 import {
+  addEventExpense,
   addEventGuest,
+  addEventPaymentResponsible,
   addEventProvider,
   addEventScheduleItem,
   createUserEvent,
   deleteUserEvent,
   deriveGuestStatus,
   listUserEvents,
+  removeEventExpense,
   removeEventGuest,
   removeEventGuestMember,
+  removeEventPaymentResponsible,
   removeEventProvider,
   removeEventScheduleItem,
+  setEventBudget,
   setEventGuestTable,
   setEventTableCount,
   setEventTablePositions,
   setUserEventInvitation,
+  updateEventExpense,
   updateEventGuestField,
   updateEventScheduleItem,
+  updateEventPaymentResponsible,
   updateUserEvent,
 } from "@/lib/events/events";
 import { EVENT_TYPES } from "@/lib/events/constants";
@@ -36,10 +43,12 @@ import {
   datetimeInput,
   enumInput,
   integerInput,
+  moneyInput,
   nameListInput,
   optionalText,
   pathOrUrl,
   requiredText,
+  shortNameInput,
   storagePath,
   tableCountInput,
   tableNumberInput,
@@ -511,6 +520,166 @@ export async function removeScheduleActivity(formData) {
 
 export async function removeProvider(providerId) {
   const { user, event } = await requireActiveEvent();
+  const expenses = Array.isArray(event.expenses) ? event.expenses : [];
+  const usedCount = expenses.filter(
+    (expense) => expense.providerId === providerId,
+  ).length;
+
+  if (usedCount > 0) {
+    const provider = (event.providers || []).find(
+      (entry) => entry.id === providerId,
+    );
+    const name = provider?.name || "el proveedor";
+    throw new Error(
+      `No se puede quitar "${name}": hay ${usedCount} gasto(s) asociados. Reasigná o eliminá esos gastos primero.`,
+    );
+  }
+
   await removeEventProvider(user.uid, event.id, providerId);
   revalidatePath("/dashboard/proveedores", "layout");
+}
+
+function parseExpenseForm(formData) {
+  return {
+    title: requiredText(formData.get("title"), {
+      label: "El concepto",
+      min: 2,
+      max: 120,
+    }),
+    cost: moneyInput(formData.get("cost"), {
+      label: "El costo total",
+      required: true,
+    }),
+    paidAmount: moneyInput(formData.get("paidAmount"), {
+      label: "El monto pagado",
+    }),
+    providerId: requiredText(formData.get("providerId"), {
+      label: "El proveedor",
+      min: 1,
+      max: 200,
+    }),
+    responsibleId: requiredText(formData.get("responsibleId"), {
+      label: "El responsable",
+      min: 1,
+      max: 200,
+    }),
+    notes: optionalText(formData.get("notes"), {
+      label: "Las observaciones",
+      max: 500,
+    }),
+  };
+}
+
+function validateExpenseRefs(event, expense) {
+  const providers = Array.isArray(event.providers) ? event.providers : [];
+  const provider = providers.find(
+    (entry) => entry.id === expense.providerId && !entry.deleted,
+  );
+
+  if (!provider) {
+    throw new Error("El proveedor seleccionado no pertenece a este evento.");
+  }
+
+  const responsibles = Array.isArray(event.paymentResponsibles)
+    ? event.paymentResponsibles
+    : [];
+  const hasResponsible = responsibles.some(
+    (entry) => entry.id === expense.responsibleId,
+  );
+
+  if (!hasResponsible) {
+    throw new Error(
+      "El responsable seleccionado no pertenece a este evento.",
+    );
+  }
+}
+
+export async function saveBudget(formData) {
+  const { user, event } = await requireActiveEvent();
+  const budget = moneyInput(formData.get("budget"), {
+    label: "El presupuesto",
+  });
+
+  await setEventBudget(user.uid, event.id, budget);
+  revalidatePath("/dashboard/presupuesto", "layout");
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function addExpense(formData) {
+  const { user, event } = await requireActiveEvent();
+  const expense = parseExpenseForm(formData);
+  validateExpenseRefs(event, expense);
+
+  await addEventExpense(user.uid, event.id, expense);
+  revalidatePath("/dashboard/presupuesto", "layout");
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function updateExpense(expenseId, formData) {
+  const { user, event } = await requireActiveEvent();
+  const expense = parseExpenseForm(formData);
+  validateExpenseRefs(event, expense);
+
+  await updateEventExpense(user.uid, event.id, expenseId, expense);
+  revalidatePath("/dashboard/presupuesto", "layout");
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function removeExpense(expenseId) {
+  const { user, event } = await requireActiveEvent();
+  await removeEventExpense(user.uid, event.id, expenseId);
+  revalidatePath("/dashboard/presupuesto", "layout");
+  revalidatePath("/dashboard", "layout");
+}
+
+function parseResponsibleForm(formData) {
+  return shortNameInput(formData.get("name"), {
+    label: "El responsable",
+    min: 2,
+    max: 60,
+  });
+}
+
+function validateResponsibleRemoval(event, responsibleId, name) {
+  const expenses = Array.isArray(event.expenses) ? event.expenses : [];
+  const usedCount = expenses.filter(
+    (expense) => expense.responsibleId === responsibleId,
+  ).length;
+
+  if (usedCount > 0) {
+    throw new Error(
+      `No se puede eliminar "${name}": hay ${usedCount} gasto(s) asociados. Reasigná o eliminá esos gastos primero.`,
+    );
+  }
+}
+
+export async function addPaymentResponsible(formData) {
+  const { user, event } = await requireActiveEvent();
+  const name = parseResponsibleForm(formData);
+  const id = await addEventPaymentResponsible(user.uid, event.id, name);
+
+  revalidatePath("/dashboard/presupuesto", "layout");
+  return id;
+}
+
+export async function updatePaymentResponsible(responsibleId, formData) {
+  const { user, event } = await requireActiveEvent();
+  const name = parseResponsibleForm(formData);
+
+  await updateEventPaymentResponsible(user.uid, event.id, responsibleId, name);
+  revalidatePath("/dashboard/presupuesto", "layout");
+}
+
+export async function removePaymentResponsible(responsibleId) {
+  const { user, event } = await requireActiveEvent();
+  const responsible = (event.paymentResponsibles || []).find(
+    (entry) => entry.id === responsibleId,
+  );
+
+  if (responsible) {
+    validateResponsibleRemoval(event, responsibleId, responsible.name);
+  }
+
+  await removeEventPaymentResponsible(user.uid, event.id, responsibleId);
+  revalidatePath("/dashboard/presupuesto", "layout");
 }

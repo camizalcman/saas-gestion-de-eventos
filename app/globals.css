@@ -12,6 +12,9 @@
   --color-secondary:#90C2E0;  
   --color-accent: #98AA9D;     
   --color-ink: #2D3536;        
+  --color-danger: #C0392B;     
+  --color-warning: #E67E22;    
+  --color-success: #27AE60;    
 }
 
 @layer base {
