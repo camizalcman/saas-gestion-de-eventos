@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
+import { Trash2 } from "lucide-react";
 
 export default function ExpenseRemoveButton({
   action,
@@ -67,11 +68,12 @@ export default function ExpenseRemoveButton({
   return (
     <>
       <button
-        className="h-9 border border-brand/40 px-3 text-sm font-semibold text-brand transition hover:bg-brand/10"
+        className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold text-danger transition hover:text-danger/80"
         onClick={() => setOpen(true)}
         type="button"
       >
-        Quitar
+        <Trash2 aria-hidden="true" className="size-4" />
+        Eliminar
       </button>
 
       {open ? (
@@ -83,7 +85,7 @@ export default function ExpenseRemoveButton({
           role="dialog"
         >
           <form
-            className="w-full max-w-md rounded-lg border border-accent bg-surface p-6 shadow-xl"
+            className="w-full max-w-md rounded-lg border border-accent bg-surface p-6 text-left shadow-xl"
             onSubmit={handleSubmit}
           >
             <h2

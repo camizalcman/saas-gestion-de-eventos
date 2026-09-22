@@ -26,12 +26,12 @@ export default function ToastProvider({ children }) {
       {children}
       <div className="pointer-events-none fixed inset-x-0 bottom-6 z-[70] flex flex-col items-center gap-2 px-4">
         {toasts.map((toast) => (
-          <div
-            className={`pointer-events-auto w-full max-w-sm border bg-surface px-4 py-3 text-center text-sm font-semibold shadow-lg ${
-              toast.tone === "error"
-                ? "border-brand/40 text-brand"
-                : "border-secondary text-ink"
-            }`}
+<div
+          className={`pointer-events-auto w-full max-w-sm rounded-full border bg-surface px-4 py-3 text-center text-sm font-semibold shadow-lg ${
+            toast.tone === "error"
+              ? "border-brand/40 text-brand"
+              : "border-brand bg-brand/10 text-brand"
+          }`}
             key={toast.id}
             role="status"
           >

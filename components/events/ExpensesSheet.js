@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
+import { Search, ChevronDown, Trash2, X, Check } from "lucide-react";
 import ExpenseRemoveButton from "./ExpenseRemoveButton";
 import ExpenseStatusBadge from "./ExpenseStatusBadge";
 
@@ -36,10 +37,25 @@ const thClass =
   "whitespace-nowrap px-2 py-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-brand";
 
 const cellInputClass =
-  "w-full min-w-0 bg-transparent px-1.5 py-1 text-sm text-ink outline-none transition placeholder:text-brand/60 focus:bg-surface focus:ring-2 focus:ring-secondary/50";
+  "w-full min-w-0 bg-transparent px-1.5 py-1 text-sm text-ink outline-none transition placeholder:text-brand/60 focus:bg-surface";
 
 const cellSelectClass =
-  "w-full min-w-0 cursor-pointer bg-transparent px-1.5 py-1 text-sm text-ink outline-none transition focus:bg-surface focus:ring-2 focus:ring-secondary/50";
+  "w-full min-w-0 cursor-pointer bg-transparent px-1.5 py-1 text-sm text-ink outline-none transition focus:bg-surface";
+
+const filterLabelClass =
+  "text-[10px] font-semibold uppercase tracking-[0.12em] text-brand";
+
+const filterInputClass =
+  "h-9 w-full min-w-0 rounded-md border border-accent bg-surface px-3 py-2 text-sm text-ink outline-none transition placeholder:text-brand/60 focus:ring-2 focus:ring-secondary/50";
+
+const filterChevronClass =
+  "pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-brand";
+
+const filterMultiControlClass =
+  "flex min-h-9 w-full min-w-0 cursor-pointer flex-wrap items-center gap-1 rounded-md border border-accent bg-surface py-1.5 pl-2 pr-10 text-left text-sm text-ink transition hover:bg-accent/20 focus:ring-2 focus:ring-secondary/50";
+
+const filterPillClass =
+  "inline-flex items-center gap-1 rounded-full border border-secondary bg-secondary/15 px-2 py-0.5 text-xs font-semibold text-ink";
 
 const DEFAULT_COLUMN_WIDTHS = {
   title: 190,
@@ -47,6 +63,7 @@ const DEFAULT_COLUMN_WIDTHS = {
   cost: 115,
   status: 115,
   paid: 115,
+  pending: 115,
   responsible: 180,
   notes: 180,
   actions: 130,
@@ -58,6 +75,7 @@ const COLUMN_DEFS = [
   { key: "cost", label: "Costo" },
   { key: "status", label: "Estado" },
   { key: "paid", label: "Pagado" },
+  { key: "pending", label: "Pendiente" },
   { key: "responsible", label: "Responsable" },
   { key: "notes", label: "Observaciones" },
   { key: "actions", label: null },
@@ -120,10 +138,10 @@ export default function ExpensesSheet({
   const [drafts, setDrafts] = useState({});
   const [newDraft, setNewDraft] = useState(() => ({
     title: "",
-    providerId: providers.filter((provider) => !provider.deleted)[0]?.id || "",
+    providerId: "",
     cost: "",
     paidAmount: "0",
-    responsibleId: responsibles[0]?.id || "",
+    responsibleId: "",
     notes: "",
   }));
   const [newResponsibles, setNewResponsibles] = useState([]);
@@ -135,6 +153,25 @@ export default function ExpensesSheet({
   const [columnWidths, setColumnWidths] = useState(DEFAULT_COLUMN_WIDTHS);
   const [draggingColumn, setDraggingColumn] = useState(null);
   const dragRef = useRef(null);
+
+  const draftsRef = useRef(drafts);
+  const saveTimersRef = useRef({});
+
+  useEffect(() => {
+    draftsRef.current = drafts;
+  }, [drafts]);
+
+  useEffect(() => {
+    const timers = saveTimersRef.current;
+    return () => {
+      Object.values(timers).forEach((timer) => window.clearTimeout(timer));
+    };
+  }, []);
+
+  const [search, setSearch] = useState("");
+  const [responsibleFilter, setResponsibleFilter] = useState([]);
+  const [statusFilter, setStatusFilter] = useState([]);
+  const [providerFilter, setProviderFilter] = useState([]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -201,6 +238,55 @@ export default function ExpensesSheet({
     ),
   );
 
+  const filteredExpenses = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return expenses.filter((expense) => {
+      const draft = drafts[expense.id] || {};
+      const title = (draft.title ?? expense.title).toLowerCase();
+      if (query && !title.includes(query)) return false;
+      if (
+        responsibleFilter.length > 0 &&
+        !responsibleFilter.includes(
+          draft.responsibleId ?? expense.responsibleId,
+        )
+      ) {
+        return false;
+      }
+      if (
+        providerFilter.length > 0 &&
+        !providerFilter.includes(draft.providerId ?? expense.providerId)
+      ) {
+        return false;
+      }
+      if (statusFilter.length > 0) {
+        const cost = draft.cost ?? String(expense.cost);
+        const paid = draft.paidAmount ?? String(expense.paidAmount);
+        if (!statusFilter.includes(deriveStatus(cost, paid))) return false;
+      }
+      return true;
+    });
+  }, [
+    expenses,
+    drafts,
+    search,
+    responsibleFilter,
+    statusFilter,
+    providerFilter,
+  ]);
+
+  const hasActiveFilters =
+    Boolean(search.trim()) ||
+    responsibleFilter.length > 0 ||
+    statusFilter.length > 0 ||
+    providerFilter.length > 0;
+
+  function clearFilters() {
+    setSearch("");
+    setResponsibleFilter([]);
+    setStatusFilter([]);
+    setProviderFilter([]);
+  }
+
   function setDraftField(id, field, value, original) {
     setDrafts((prev) => {
       const next = { ...prev };
@@ -223,25 +309,25 @@ export default function ExpensesSheet({
   }
 
   function resetNewDraft() {
-    const stillExists = responsibleOptions.some(
-      (entry) => entry.id === newDraft.responsibleId,
-    );
     setNewDraft({
       title: "",
-      providerId: activeProviders[0]?.id || "",
+      providerId: "",
       cost: "",
       paidAmount: "0",
-      responsibleId: stillExists
-        ? newDraft.responsibleId
-        : responsibleOptions[0]?.id || "",
+      responsibleId: "",
       notes: "",
     });
   }
 
   function saveRow(expense) {
-    if (savingRow) return;
+    if (savingRow === expense.id) return;
     setError("");
-    const draft = drafts[expense.id] || {};
+    const pendingTimer = saveTimersRef.current[expense.id];
+    if (pendingTimer) {
+      window.clearTimeout(pendingTimer);
+      delete saveTimersRef.current[expense.id];
+    }
+    const draft = draftsRef.current[expense.id] || {};
     const formData = new FormData();
     formData.set("title", draft.title ?? expense.title);
     formData.set("providerId", draft.providerId ?? expense.providerId);
@@ -304,6 +390,34 @@ export default function ExpensesSheet({
     });
   }
 
+  function scheduleRowSave(expense) {
+    if (savingRow === expense.id) return;
+    const key = expense.id;
+    if (saveTimersRef.current[key]) {
+      window.clearTimeout(saveTimersRef.current[key]);
+    }
+    saveTimersRef.current[key] = window.setTimeout(() => {
+      delete saveTimersRef.current[key];
+      saveRow(expense);
+    }, 700);
+  }
+
+  function handleFieldChange(event, expense, field, original) {
+    setDraftField(expense.id, field, event.target.value, original);
+    scheduleRowSave(expense);
+  }
+
+  function handleCellBlur(event, expense) {
+    if (savingRow === expense.id) return;
+    if (!draftsRef.current[expense.id]) return;
+
+    const related = event.relatedTarget;
+    if (related instanceof HTMLElement) {
+      if (related.closest("[data-row-inline-form]")) return;
+    }
+    saveRow(expense);
+  }
+
   function newRowKeyDown(event) {
     if (event.key === "Enter") {
       event.preventDefault();
@@ -337,10 +451,13 @@ export default function ExpensesSheet({
           if (target === "new") {
             setNewDraft((prev) => ({ ...prev, responsibleId: id }));
           } else {
+            const targetId = target;
             setDrafts((prev) => ({
               ...prev,
-              [target]: { ...(prev[target] || {}), responsibleId: id },
+              [targetId]: { ...(prev[targetId] || {}), responsibleId: id },
             }));
+            const expense = expenses.find((entry) => entry.id === targetId);
+            if (expense) scheduleRowSave(expense);
           }
           setCreatingFor(null);
           showToast("Responsable creado y seleccionado");
@@ -353,14 +470,17 @@ export default function ExpensesSheet({
     });
   }
 
-  const totals = expenses.reduce(
+  const totals = filteredExpenses.reduce(
     (acc, expense) => {
       const draft = drafts[expense.id] || {};
       acc.cost += toAmount(draft.cost ?? String(expense.cost));
       acc.paid += toAmount(draft.paidAmount ?? String(expense.paidAmount));
+      acc.pending +=
+        toAmount(draft.cost ?? String(expense.cost)) -
+        toAmount(draft.paidAmount ?? String(expense.paidAmount));
       return acc;
     },
-    { cost: 0, paid: 0 },
+    { cost: 0, paid: 0, pending: 0 },
   );
 
   const newRowDisabled =
@@ -390,6 +510,77 @@ export default function ExpensesSheet({
           para poder registrar gastos.
         </p>
       ) : null}
+
+      <div className="flex flex-wrap items-end gap-3">
+        <label className="grid gap-1.5">
+          <span className={filterLabelClass}>Buscar</span>
+          <div className="relative">
+            <Search
+              aria-hidden="true"
+              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-brand"
+            />
+            <input
+              className={`${filterInputClass} pl-9`}
+              name="search"
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Buscar por título…"
+              type="search"
+              value={search}
+            />
+          </div>
+        </label>
+
+        <label className="grid gap-1.5">
+          <span className={filterLabelClass}>Responsable</span>
+          <FilterMultiSelect
+            label="Responsable"
+            onChange={setResponsibleFilter}
+            options={responsibleOptions.map((responsible) => ({
+              value: responsible.id,
+              label: responsible.name,
+            }))}
+            selected={responsibleFilter}
+          />
+        </label>
+
+        <label className="grid gap-1.5">
+          <span className={filterLabelClass}>Estado</span>
+          <FilterMultiSelect
+            label="Estado"
+            onChange={setStatusFilter}
+            options={[
+              { value: "pendiente", label: "Pendiente" },
+              { value: "parcial", label: "Parcial" },
+              { value: "pagado", label: "Pagado" },
+            ]}
+            selected={statusFilter}
+          />
+        </label>
+
+        <label className="grid gap-1.5">
+          <span className={filterLabelClass}>Proveedor</span>
+          <FilterMultiSelect
+            label="Proveedor"
+            onChange={setProviderFilter}
+            options={activeProviders.map((provider) => ({
+              value: provider.id,
+              label: provider.name,
+            }))}
+            selected={providerFilter}
+          />
+        </label>
+
+        {hasActiveFilters ? (
+          <button
+            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-accent px-3 text-sm font-semibold text-brand transition hover:bg-accent/40"
+            onClick={clearFilters}
+            type="button"
+          >
+            <Trash2 aria-hidden="true" className="size-4" />
+            Limpiar filtros
+          </button>
+        ) : null}
+      </div>
 
       <div className="overflow-x-auto rounded-lg border border-accent">
         <table
@@ -422,7 +613,7 @@ export default function ExpensesSheet({
             </tr>
           </thead>
           <tbody className="divide-y divide-accent/50">
-            {expenses.map((expense, index) => {
+            {filteredExpenses.map((expense, index) => {
               const draft = drafts[expense.id] || {};
               const title = draft.title ?? expense.title;
               const providerId = draft.providerId ?? expense.providerId;
@@ -432,6 +623,7 @@ export default function ExpensesSheet({
               const notes = draft.notes ?? expense.notes ?? "";
               const dirty = Object.keys(draft).length > 0;
               const status = deriveStatus(cost, paid);
+              const pending = toAmount(cost) - toAmount(paid);
               const overpaid = toAmount(paid) > toAmount(cost);
               const rowDisabled = savingRow === expense.id;
 
@@ -454,10 +646,10 @@ export default function ExpensesSheet({
                       maxLength={120}
                       name="title"
                       onChange={(event) =>
-                        setDraftField(
-                          expense.id,
+                        handleFieldChange(
+                          event,
+                          expense,
                           "title",
-                          event.target.value,
                           expense.title,
                         )
                       }
@@ -469,6 +661,7 @@ export default function ExpensesSheet({
                           discardRow(expense.id);
                         }
                       }}
+                      onBlur={(event) => handleCellBlur(event, expense)}
                       placeholder="Concepto"
                       type="text"
                       value={title}
@@ -479,10 +672,10 @@ export default function ExpensesSheet({
                       className={cellSelectClass}
                       disabled={rowDisabled}
                       onChange={(event) =>
-                        setDraftField(
-                          expense.id,
+                        handleFieldChange(
+                          event,
+                          expense,
                           "providerId",
-                          event.target.value,
                           expense.providerId,
                         )
                       }
@@ -491,6 +684,7 @@ export default function ExpensesSheet({
                           discardRow(expense.id);
                         }
                       }}
+                      onBlur={(event) => handleCellBlur(event, expense)}
                       value={providerId}
                     >
                       {activeProviders.map((provider) => (
@@ -508,10 +702,10 @@ export default function ExpensesSheet({
                       min={0}
                       name="cost"
                       onChange={(event) =>
-                        setDraftField(
-                          expense.id,
+                        handleFieldChange(
+                          event,
+                          expense,
                           "cost",
-                          event.target.value,
                           String(expense.cost),
                         )
                       }
@@ -523,6 +717,7 @@ export default function ExpensesSheet({
                           discardRow(expense.id);
                         }
                       }}
+                      onBlur={(event) => handleCellBlur(event, expense)}
                       step={1}
                       type="number"
                       value={cost}
@@ -544,10 +739,10 @@ export default function ExpensesSheet({
                       min={0}
                       name="paidAmount"
                       onChange={(event) =>
-                        setDraftField(
-                          expense.id,
+                        handleFieldChange(
+                          event,
+                          expense,
                           "paidAmount",
-                          event.target.value,
                           String(expense.paidAmount),
                         )
                       }
@@ -559,10 +754,22 @@ export default function ExpensesSheet({
                           discardRow(expense.id);
                         }
                       }}
+                      onBlur={(event) => handleCellBlur(event, expense)}
                       step={1}
                       type="number"
                       value={paid}
                     />
+                  </td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">
+                    <span
+                      className={
+                        pending < 0
+                          ? "font-semibold text-danger"
+                          : "text-ink"
+                      }
+                    >
+                      {formatMoney(pending)}
+                    </span>
                   </td>
                   <td className="px-1 py-1">
                     {creatingFor === expense.id ? (
@@ -580,10 +787,10 @@ export default function ExpensesSheet({
                           if (event.target.value === "__create__") {
                             setCreatingFor(expense.id);
                           } else {
-                            setDraftField(
-                              expense.id,
+                            handleFieldChange(
+                              event,
+                              expense,
                               "responsibleId",
-                              event.target.value,
                               expense.responsibleId,
                             );
                           }
@@ -593,6 +800,7 @@ export default function ExpensesSheet({
                             discardRow(expense.id);
                           }
                         }}
+                        onBlur={(event) => handleCellBlur(event, expense)}
                         value={responsibleId}
                       >
                         {responsibleOptions.map((responsible) => (
@@ -611,10 +819,10 @@ export default function ExpensesSheet({
                       maxLength={500}
                       name="notes"
                       onChange={(event) =>
-                        setDraftField(
-                          expense.id,
+                        handleFieldChange(
+                          event,
+                          expense,
                           "notes",
-                          event.target.value,
                           expense.notes ?? "",
                         )
                       }
@@ -626,43 +834,31 @@ export default function ExpensesSheet({
                           discardRow(expense.id);
                         }
                       }}
+                      onBlur={(event) => handleCellBlur(event, expense)}
                       placeholder="Opcional"
                       type="text"
                       value={notes}
                     />
                   </td>
                   <td className="px-1 py-1 text-right align-middle">
-                    {dirty ? (
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          className="h-8 rounded-md border border-secondary bg-secondary px-3 text-xs font-semibold text-surface transition hover:bg-secondary/90 disabled:cursor-not-allowed disabled:opacity-60"
-                          disabled={savingRow === expense.id}
-                          onClick={() => saveRow(expense)}
-                          type="button"
-                        >
-                          {savingRow === expense.id
-                            ? "Guardando..."
-                            : "Guardar"}
-                        </button>
-                        <button
-                          className="h-8 rounded-md border border-accent px-3 text-xs font-semibold text-ink transition hover:bg-accent/40 disabled:cursor-not-allowed disabled:opacity-60"
-                          disabled={savingRow === expense.id}
-                          onClick={() => discardRow(expense.id)}
-                          type="button"
-                        >
-                          Descartar
-                        </button>
-                      </div>
-                    ) : (
-                      <ExpenseRemoveButton
-                        action={removeAction.bind(null, expense.id)}
-                        expenseTitle={expense.title}
-                      />
-                    )}
+                    <ExpenseRemoveButton
+                      action={removeAction.bind(null, expense.id)}
+                      expenseTitle={expense.title}
+                    />
                   </td>
                 </tr>
               );
             })}
+
+            {expenses.length > 0 && filteredExpenses.length === 0 ? (
+              <tr>
+                <td colSpan={COLUMN_DEFS.length}>
+                  <p className="px-4 py-6 text-center text-sm text-brand">
+                    No se encontraron gastos que coincidan con los filtros.
+                  </p>
+                </td>
+              </tr>
+            ) : null}
 
             <tr className="bg-secondary/15">
               <td className="px-1 py-1">
@@ -696,6 +892,11 @@ export default function ExpensesSheet({
                   onKeyDown={newRowEscape}
                   value={newDraft.providerId}
                 >
+                  {newDraft.providerId === "" ? (
+                    <option disabled value="">
+                      Elegí un proveedor
+                    </option>
+                  ) : null}
                   {activeProviders.length === 0 ? (
                     <option disabled value="">
                       Sin proveedores
@@ -758,6 +959,23 @@ export default function ExpensesSheet({
                   value={newDraft.paidAmount}
                 />
               </td>
+              <td className="px-2 py-1.5 text-right tabular-nums">
+                {newDraft.cost === "" ? (
+                  <span className="text-xs text-brand">—</span>
+                ) : (
+                  <span
+                    className={
+                      toAmount(newDraft.cost) - toAmount(newDraft.paidAmount) < 0
+                        ? "font-semibold text-danger"
+                        : "text-ink"
+                    }
+                  >
+                    {formatMoney(
+                      toAmount(newDraft.cost) - toAmount(newDraft.paidAmount),
+                    )}
+                  </span>
+                )}
+              </td>
               <td className="px-1 py-1">
                 {creatingFor === "new" ? (
                   <ResponsibleCreateInline
@@ -781,6 +999,11 @@ export default function ExpensesSheet({
                     onKeyDown={newRowEscape}
                     value={newDraft.responsibleId}
                   >
+                    {newDraft.responsibleId === "" ? (
+                      <option disabled value="">
+                        Elegí un responsable
+                      </option>
+                    ) : null}
                     {responsibleOptions.length === 0 ? (
                       <option disabled value="">
                         Creá un responsable
@@ -817,17 +1040,18 @@ export default function ExpensesSheet({
               <td className="px-1 py-1 text-right align-middle">
                 <div className="flex items-center justify-end gap-1.5">
                   <button
-                    className="h-8 rounded-md border border-secondary bg-secondary px-3 text-xs font-semibold text-surface transition hover:bg-secondary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                    aria-label="Agregar gasto"
+                    className="grid size-7 place-items-center rounded-md border border-ink bg-ink text-surface transition hover:bg-ink/85 disabled:cursor-not-allowed disabled:opacity-40"
                     disabled={newRowDisabled}
                     onClick={saveNew}
                     title={
-                      newDraft.responsibleId
-                        ? "Agregar gasto"
-                        : "Primero creá un responsable de pago"
+                      !newDraft.title.trim() || !newDraft.cost || !newDraft.providerId || !newDraft.responsibleId
+                        ? "Completá título, costo, proveedor y responsable"
+                        : "Agregar gasto"
                     }
                     type="button"
                   >
-                    {savingRow === "new" ? "Guardando..." : "Agregar"}
+                    <Check aria-hidden="true" className="size-4" />
                   </button>
                   <button
                     aria-label="Limpiar fila nueva"
@@ -862,6 +1086,9 @@ export default function ExpensesSheet({
               <td className="px-2 py-2.5" />
               <td className="px-2 py-2.5 text-right font-semibold tabular-nums text-ink">
                 {formatMoney(totals.paid)}
+              </td>
+              <td className="px-2 py-2.5 text-right font-semibold tabular-nums text-ink">
+                {formatMoney(totals.pending)}
               </td>
               <td colSpan={3} />
             </tr>
@@ -900,6 +1127,7 @@ function ResponsibleCreateInline({ onSubmit, onCancel }) {
     <div className="grid min-w-0 gap-1">
       <form
         className="flex min-w-0 items-center gap-1"
+        data-row-inline-form
         onSubmit={handleSubmit}
       >
         <input
@@ -916,11 +1144,12 @@ function ResponsibleCreateInline({ onSubmit, onCancel }) {
           value={name}
         />
         <button
-          className="h-8 shrink-0 rounded-md border border-secondary bg-secondary px-2 text-xs font-semibold text-surface transition hover:bg-secondary/90 disabled:cursor-not-allowed disabled:opacity-60"
+          aria-label="Agregar responsable"
+          className="grid size-7 shrink-0 place-items-center rounded-md border border-ink bg-ink text-surface transition hover:bg-ink/85 disabled:cursor-not-allowed disabled:opacity-40"
           disabled={isSubmitting || name.trim().length < 2}
           type="submit"
         >
-          {isSubmitting ? "…" : "Agregar"}
+          <Check aria-hidden="true" className="size-4" />
         </button>
         <button
           aria-label="Cancelar creación"
@@ -951,13 +1180,107 @@ function ResizeHandle({
   return (
     <span
       aria-hidden="true"
-      className={`absolute inset-y-0 -right-px w-0.5 cursor-col-resize touch-none transition ${
-        isDragging ? "bg-ink" : "bg-brand/70 hover:bg-brand"
+      className={`absolute inset-y-0 -right-1.5 w-3 cursor-col-resize touch-none transition ${
+        isDragging ? "bg-ink/15" : "hover:bg-brand/10"
       }`}
       onPointerCancel={onPointerUp}
       onPointerDown={(event) => onPointerDown(columnKey, event)}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
-    />
+    >
+      <span
+        className={`absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 transition ${
+          isDragging ? "bg-ink" : "bg-brand/60"
+        }`}
+      />
+    </span>
+  );
+}
+
+function FilterMultiSelect({ label, options, selected, onChange }) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+
+    function handleOutsideClick(event) {
+      if (rootRef.current && !rootRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+    };
+  }, [open]);
+
+  function toggleValue(value) {
+    if (selected.includes(value)) {
+      onChange(selected.filter((item) => item !== value));
+    } else {
+      onChange([...selected, value]);
+    }
+  }
+
+  return (
+    <div className="relative" ref={rootRef}>
+      <button
+        className={filterMultiControlClass}
+        onClick={() => setOpen((prev) => !prev)}
+        type="button"
+      >
+        {selected.length === 0 ? (
+          <span className="px-1 text-brand">Todos</span>
+        ) : (
+          selected.map((value) => {
+            const option = options.find((item) => item.value === value);
+            return (
+              <span className={filterPillClass} key={value}>
+                {option?.label ?? value}
+                <button
+                  aria-label={`Quitar ${label}: ${option?.label ?? value}`}
+                  className="grid size-4 place-items-center rounded-full text-brand transition hover:bg-brand/10"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    toggleValue(value);
+                  }}
+                  type="button"
+                >
+                  <X aria-hidden="true" className="size-3" />
+                </button>
+              </span>
+            );
+          })
+        )}
+        <ChevronDown aria-hidden="true" className={filterChevronClass} />
+      </button>
+
+      {open ? (
+        <div className="absolute z-20 mt-1 w-full min-w-48 rounded-md border border-accent bg-surface p-1 shadow-xl">
+          {options.map((option) => {
+            const checked = selected.includes(option.value);
+            return (
+              <label
+                className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm text-ink transition hover:bg-accent/40"
+                key={option.value}
+              >
+                <input
+                  checked={checked}
+                  className="size-4 shrink-0 cursor-pointer accent-secondary"
+                  onChange={() => toggleValue(option.value)}
+                  type="checkbox"
+                />
+                <span className="min-w-0 truncate">{option.label}</span>
+              </label>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
   );
 }
