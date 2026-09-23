@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Check } from "lucide-react";
 import StepIndicator from "./StepIndicator";
 import Step1Identity from "./Step1Identity";
 import Step2Details from "./Step2Details";
@@ -9,8 +10,8 @@ import Step3Media from "./Step3Media";
 import { createEvent } from "@/app/(app)/dashboard/actions";
 
 export default function EventOnboardingWizard({ useFirebaseStorage }) {
-  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
+  const [created, setCreated] = useState(false);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -48,8 +49,7 @@ export default function EventOnboardingWizard({ useFirebaseStorage }) {
 
       await createEvent(formData);
 
-      router.push("/dashboard");
-      router.refresh();
+      setCreated(true);
     } finally {
       setLoading(false);
     }
@@ -74,22 +74,41 @@ export default function EventOnboardingWizard({ useFirebaseStorage }) {
 
       <div className="flex h-full max-h-screen flex-col justify-center overflow-y-auto px-8 py-4 md:px-12 lg:px-16">
         <div className="mx-auto w-full max-w-xl">
-          <StepIndicator currentStep={currentStep} />
+          {created ? (
+            <div className="grid justify-items-center gap-6 py-10 text-center">
+              <div className="grid size-20 place-items-center rounded-full bg-secondary/15">
+                <Check aria-hidden="true" className="size-10 text-secondary" />
+              </div>
+              <h2 className="max-w-sm text-2xl font-semibold tracking-wide text-ink sm:text-3xl">
+                Su evento se ha creado con éxito
+              </h2>
+              <Link
+                className="inline-flex h-12 w-full items-center justify-center rounded-md border border-secondary bg-secondary px-6 text-sm font-semibold text-surface transition hover:bg-secondary/90 sm:w-auto"
+                href="/dashboard"
+              >
+                Ver evento
+              </Link>
+            </div>
+          ) : (
+            <>
+              <StepIndicator currentStep={currentStep} />
 
-          {currentStep === 1 && (
-            <Step1Identity form={form} updateField={updateField} onNext={nextStep} />
-          )}
-          {currentStep === 2 && (
-            <Step2Details form={form} updateField={updateField} onBack={prevStep} onNext={nextStep} />
-          )}
-          {currentStep === 3 && (
-            <Step3Media
-              form={form}
-              onBack={prevStep}
-              onCreate={handleCreate}
-              useFirebaseStorage={useFirebaseStorage}
-              loading={loading}
-            />
+              {currentStep === 1 && (
+                <Step1Identity form={form} updateField={updateField} onNext={nextStep} />
+              )}
+              {currentStep === 2 && (
+                <Step2Details form={form} updateField={updateField} onBack={prevStep} onNext={nextStep} />
+              )}
+              {currentStep === 3 && (
+                <Step3Media
+                  form={form}
+                  onBack={prevStep}
+                  onCreate={handleCreate}
+                  useFirebaseStorage={useFirebaseStorage}
+                  loading={loading}
+                />
+              )}
+            </>
           )}
         </div>
       </div>
