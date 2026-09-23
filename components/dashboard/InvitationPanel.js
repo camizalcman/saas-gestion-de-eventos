@@ -38,9 +38,9 @@ export default function InvitationPanel({ invitation, eventTitle }) {
   const formattedDate = formatDate(invitation.date, invitation.time);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-accent bg-surface">
+    <div className="flex h-auto flex-col overflow-hidden rounded-xl border border-accent bg-surface lg:h-full">
       {invitation.heroImageUrl ? (
-        <div className="relative flex-[1.5] w-full overflow-hidden">
+        <div className="relative aspect-[16/9] w-full overflow-hidden lg:aspect-auto lg:flex-[1.5]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             alt="Portada de la invitación"
@@ -56,7 +56,7 @@ export default function InvitationPanel({ invitation, eventTitle }) {
         </div>
       ) : (
         <div
-          className="flex w-full items-center justify-center flex-[1.5]"
+          className="flex aspect-[16/9] w-full items-center justify-center lg:aspect-auto lg:flex-[1.5]"
           style={{ backgroundColor: bg }}
         >
           <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: muted }}>
@@ -65,7 +65,7 @@ export default function InvitationPanel({ invitation, eventTitle }) {
         </div>
       )}
 
-      <div className="flex-1 px-5 py-4" style={{ backgroundColor: bg, color: ink }}>
+      <div className="flex-none px-5 py-4 lg:flex-1" style={{ backgroundColor: bg, color: ink }}>
         {invitation.names ? (
           <h3 className="text-center text-lg font-serif font-semibold">
             {invitation.names}

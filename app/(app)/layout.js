@@ -30,8 +30,8 @@ export default async function AppLayout({ children }) {
         }))}
         isAdmin={profile?.user_type === "admin"}
       />
-      <main className="min-w-0 flex-1 pl-16 lg:pl-0">
-        <div className="mx-auto w-full max-w-6xl px-4 py-7 md:px-6 lg:px-8">
+      <main className="min-w-0 flex-1 pl-0">
+        <div className="mx-auto w-full max-w-6xl px-4 pt-16 pb-7 md:px-6 md:py-7 lg:px-8">
           {children}
         </div>
       </main>

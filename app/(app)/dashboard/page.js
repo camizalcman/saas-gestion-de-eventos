@@ -55,28 +55,30 @@ export default async function DashboardPage() {
 
   return (
     <ToastProvider>
-      <div className="shrink-0">
-        <EventHeader event={event} deleteAction={deleteEvent} />
-      </div>
+      <div className="flex min-h-0 flex-col items-center lg:h-[calc(100vh-3.5rem)] lg:items-stretch">
+        <div className="w-full shrink-0">
+          <EventHeader event={event} deleteAction={deleteEvent} />
+        </div>
 
-      <div className="mt-4 flex-1 min-h-0 lg:mt-5 grid gap-4 lg:grid-cols-[1fr_1fr_minmax(0,0.75fr)]" style={{ minHeight: 0 }}>
-        <div className="min-h-0 lg:col-start-1 lg:row-start-1">
-          <InvitationPanel
-            invitation={hasInvitation ? event.invitation : null}
-            eventTitle={event.title}
-          />
-        </div>
-        <div className="min-h-0 lg:col-start-2 lg:row-start-1">
-          <GuestsPanel guests={guests} />
-        </div>
-        <div className="min-h-0 lg:col-start-1 lg:row-start-2">
-          <ProvidersPanel providers={providers} />
-        </div>
-        <div className="min-h-0 lg:col-start-2 lg:row-start-2">
-          <BudgetPanel budget={event.budget} />
-        </div>
-        <div className="min-h-0 lg:col-start-3 lg:row-span-2">
-          <SchedulePanel schedule={schedule} />
+        <div className="mt-4 w-full flex-1 min-h-0 lg:mt-5 grid gap-4 lg:grid-cols-[1fr_1fr_minmax(0,0.75fr)]" style={{ minHeight: 0 }}>
+          <div className="min-h-0 lg:col-start-1 lg:row-start-1">
+            <InvitationPanel
+              invitation={hasInvitation ? event.invitation : null}
+              eventTitle={event.title}
+            />
+          </div>
+          <div className="min-h-0 lg:col-start-2 lg:row-start-1">
+            <GuestsPanel guests={guests} />
+          </div>
+          <div className="min-h-0 lg:col-start-1 lg:row-start-2">
+            <ProvidersPanel providers={providers} />
+          </div>
+          <div className="min-h-0 lg:col-start-2 lg:row-start-2">
+            <BudgetPanel budget={event.budget} />
+          </div>
+          <div className="min-h-0 lg:col-start-3 lg:row-span-2">
+            <SchedulePanel schedule={schedule} />
+          </div>
         </div>
       </div>
     </ToastProvider>
