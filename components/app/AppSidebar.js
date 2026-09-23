@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   CalendarClock,
+  ChevronsLeft,
+  ChevronsRight,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -42,11 +44,12 @@ function isActive(pathname, href) {
 export default function AppSidebar({ events, activeEventId, isAdmin }) {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState(false);
+  const [desktopExpanded, setDesktopExpanded] = useState(true);
   const items = isAdmin ? [...baseItems, adminItem] : baseItems;
 
-  useEffect(() => {
+  function closeMobileMenu() {
     setExpanded(false);
-  }, [pathname]);
+  }
 
   return (
     <>
@@ -65,37 +68,82 @@ export default function AppSidebar({ events, activeEventId, isAdmin }) {
         />
       )}
 
+      <div
+        aria-hidden="true"
+        className={`hidden shrink-0 lg:block ${
+          desktopExpanded ? "lg:w-64" : "lg:w-[84px]"
+        }`}
+      />
+
       <aside
-        className={`fixed left-0 top-0 z-40 flex h-screen flex-col bg-brand text-surface transition-all duration-300 lg:static lg:z-auto lg:h-screen lg:w-64 lg:border-r lg:border-surface/15 ${
+        className={`fixed left-0 top-0 z-40 flex h-screen flex-col bg-brand text-surface transition-all duration-300 lg:z-auto lg:h-screen lg:border-r lg:border-surface/15 ${
           expanded ? "w-64" : "w-16"
+        } ${
+          desktopExpanded ? "lg:w-64" : "lg:w-[84px]"
         }`}
       >
-        <div className={`px-4 pt-14 lg:pt-5 ${expanded ? "pb-8" : "pb-4"}`}>
-          {expanded ? (
-            <EventSwitcher activeEventId={activeEventId} events={events} />
+        <button
+          aria-label={desktopExpanded ? "Comprimir menú" : "Expandir menú"}
+          className={`absolute top-3 z-50 hidden size-8 place-items-center rounded-md border-surface/25 text-surface transition hover:bg-surface/20 lg:grid ${
+            desktopExpanded ? "right-3" : "left-1/2 -translate-x-1/2"
+          }`}
+          onClick={() => setDesktopExpanded((value) => !value)}
+          type="button"
+        >
+          {desktopExpanded ? (
+            <ChevronsLeft aria-hidden="true" className="size-5" />
           ) : (
-            <div className="flex justify-center">
-              <Link
-                className="text-sm font-serif font-semibold uppercase tracking-[0.14em] text-surface"
-                href="/"
-              >
-                SD
-              </Link>
-            </div>
+            <ChevronsRight aria-hidden="true" className="size-5" />
           )}
+        </button>
+
+        <div className={`px-4 pt-14 lg:pt-14 ${expanded ? "pb-8" : "pb-4"}`}>
+          <div className="hidden lg:block">
+            {desktopExpanded ? (
+              <EventSwitcher activeEventId={activeEventId} events={events} />
+            ) : (
+              <div className="flex justify-center">
+                <Link
+                  className="text-sm font-serif font-semibold uppercase tracking-[0.14em] text-surface"
+                  href="/"
+                  onClick={closeMobileMenu}
+                >
+                  SD
+                </Link>
+              </div>
+            )}
+          </div>
+          <div className="lg:hidden">
+            {expanded ? (
+              <EventSwitcher activeEventId={activeEventId} events={events} />
+            ) : (
+              <div className="flex justify-center">
+                <Link
+                  className="text-sm font-serif font-semibold uppercase tracking-[0.14em] text-surface"
+                  href="/"
+                  onClick={closeMobileMenu}
+                >
+                  SD
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
 
-        {expanded && (
-          <div className="px-5 pb-5">
-            <Link
-              className="min-w-0 overflow-wrap-anywhere text-sm font-serif font-semibold uppercase tracking-[0.14em] text-surface"
-              href="/"
-            >
-              Special Day
-            </Link>
-            <div className="mt-4 border-t border-surface/15" />
-          </div>
-        )}
+        <div
+          className={`${expanded ? "block" : "hidden"} ${
+            desktopExpanded ? "lg:block" : "lg:hidden"
+          } px-5 pb-5`}
+        >
+          <Link
+            className="min-w-0 overflow-wrap-anywhere text-sm font-serif font-semibold uppercase tracking-[0.14em] text-surface"
+            href="/"
+            onClick={closeMobileMenu}
+          >
+            Special Day
+          </Link>
+          <div className="mt-4 border-t border-surface/15" />
+        </div>
 
         <nav aria-label="Secciones" className="flex flex-1 flex-col gap-1 px-2 pb-5 lg:px-4">
           {items.map((item) => {
@@ -109,18 +157,33 @@ export default function AppSidebar({ events, activeEventId, isAdmin }) {
                     ? "flex-row items-center gap-3 px-4"
                     : "flex-col items-center gap-1"
                 } ${
+                  desktopExpanded
+                    ? "lg:flex-row lg:gap-3 lg:px-4"
+                    : "lg:flex-col lg:items-center lg:gap-1 lg:px-3"
+                } ${
                   active
                     ? "bg-surface/20 text-surface ring-1 ring-surface/30"
                     : "text-surface/75 hover:bg-surface/10 hover:text-surface"
                 }`}
                 href={item.href}
                 key={item.href}
+                onClick={closeMobileMenu}
                 title={!expanded ? item.label : undefined}
               >
                 <Icon aria-hidden="true" className="size-4 shrink-0" />
-                {expanded && <span>{item.label}</span>}
+                <span
+                  className={`${expanded ? "" : "hidden"} ${
+                    desktopExpanded ? "lg:inline" : "lg:hidden"
+                  }`}
+                >
+                  {item.label}
+                </span>
                 {!expanded && (
-                  <span className="text-center text-[10px] leading-tight">
+                  <span
+                    className={`text-center text-[10px] leading-tight ${
+                      desktopExpanded ? "lg:hidden" : "lg:inline"
+                    }`}
+                  >
                     {item.label.length > 10
                       ? item.label.slice(0, 8) + "…"
                       : item.label}
@@ -134,15 +197,26 @@ export default function AppSidebar({ events, activeEventId, isAdmin }) {
         <div className="px-2 pb-3 lg:px-4">
           <Link
             href="/dashboard/evento/nuevo"
+            onClick={closeMobileMenu}
             title={!expanded ? "Agregar evento" : undefined}
             className={`flex items-center justify-center rounded-full bg-secondary text-brand transition hover:bg-surface hover:text-brand ${
-              expanded
-                ? "gap-3 px-4 py-2.5 text-sm font-semibold"
-                : "mx-auto size-10"
-            }`}
+                expanded
+                  ? "gap-3 px-4 py-2.5 text-sm font-semibold"
+                  : "mx-auto size-10"
+              } ${
+                desktopExpanded
+                  ? "lg:w-full lg:justify-start lg:gap-3 lg:px-4 lg:py-2.5 lg:text-sm lg:font-semibold"
+                  : "lg:mx-auto lg:size-10"
+              }`}
           >
             <Plus className="size-5 shrink-0" strokeWidth={2.5} />
-            {expanded && <span>Agregar evento</span>}
+            <span
+              className={`${expanded ? "" : "hidden"} ${
+                desktopExpanded ? "lg:inline" : "lg:hidden"
+              }`}
+            >
+              Agregar evento
+            </span>
           </Link>
         </div>
 
@@ -153,14 +227,29 @@ export default function AppSidebar({ events, activeEventId, isAdmin }) {
                 expanded
                   ? "flex-row items-center gap-3 px-4"
                   : "flex-col items-center gap-1"
+              } ${
+                desktopExpanded
+                  ? "lg:flex-row lg:gap-3 lg:px-4"
+                  : "lg:flex-col lg:items-center lg:gap-1 lg:px-3"
               }`}
               href="/dashboard/cuenta"
+              onClick={closeMobileMenu}
               title={!expanded ? "Mi perfil" : undefined}
             >
               <UserRound aria-hidden="true" className="size-4 shrink-0" />
-              {expanded && <span>Mi perfil</span>}
+              <span
+                className={`${expanded ? "" : "hidden"} ${
+                  desktopExpanded ? "lg:inline" : "lg:hidden"
+                }`}
+              >
+                Mi perfil
+              </span>
               {!expanded && (
-                <span className="text-center text-[10px] leading-tight">
+                <span
+                  className={`text-center text-[10px] leading-tight ${
+                    desktopExpanded ? "lg:hidden" : "lg:inline"
+                  }`}
+                >
                   Perfil
                 </span>
               )}
@@ -170,13 +259,27 @@ export default function AppSidebar({ events, activeEventId, isAdmin }) {
                 expanded
                   ? "flex-row items-center gap-3 px-4"
                   : "flex-col items-center gap-1"
+              } ${
+                desktopExpanded
+                  ? "lg:flex-row lg:gap-3 lg:px-4"
+                  : "lg:flex-col lg:items-center lg:gap-1 lg:px-3"
               }`}
               title={!expanded ? "Cerrar sesión" : undefined}
             >
               <LogOut aria-hidden="true" className="size-4 shrink-0" />
-              {expanded && <span>Cerrar sesión</span>}
+              <span
+                className={`${expanded ? "" : "hidden"} ${
+                  desktopExpanded ? "lg:inline" : "lg:hidden"
+                }`}
+              >
+                Cerrar sesión
+              </span>
               {!expanded && (
-                <span className="text-center text-[10px] leading-tight">
+                <span
+                  className={`text-center text-[10px] leading-tight ${
+                    desktopExpanded ? "lg:hidden" : "lg:inline"
+                  }`}
+                >
                   Salir
                 </span>
               )}

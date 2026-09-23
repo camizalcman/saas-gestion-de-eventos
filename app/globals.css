@@ -56,6 +56,30 @@
     overflow-wrap: anywhere;
   }
 
+  .app-scrollbar {
+    scrollbar-color: rgb(32 80 110 / 0.45) rgb(32 80 110 / 0.08);
+    scrollbar-width: thin;
+  }
+
+  .app-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .app-scrollbar::-webkit-scrollbar-track {
+    background: rgb(32 80 110 / 0.08);
+    border-radius: 999px;
+  }
+
+  .app-scrollbar::-webkit-scrollbar-thumb {
+    background: rgb(32 80 110 / 0.45);
+    border: 2px solid var(--color-surface);
+    border-radius: 999px;
+  }
+
+  .app-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--color-secondary);
+  }
+
   .animate-fade-in-up {
     animation: fadeInUp 0.8s ease-out both;
   }

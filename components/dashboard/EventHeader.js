@@ -48,7 +48,7 @@ export default function EventHeader({ event, deleteAction }) {
         </div>
       </div>
 
-      <div className="mt-5 grid gap-3 text-sm text-brand sm:grid-cols-2">
+      <div className="mt-4 gap-10 text-sm text-brand flex">
         <div>
           <span className="block text-xs font-semibold uppercase tracking-wider text-ink/50">
             Fecha
@@ -61,7 +61,7 @@ export default function EventHeader({ event, deleteAction }) {
           </span>
           <span className="mt-0.5 block">{eventTypeLabel(event.eventType)}</span>
         </div>
-        <div className="sm:col-span-2">
+        <div>
           <span className="block text-xs font-semibold uppercase tracking-wider text-ink/50">
             Protagonistas
           </span>

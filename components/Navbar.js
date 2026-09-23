@@ -26,7 +26,7 @@ function NavLink({ href, label, onClick, pathname }) {
 
     return (
       <a
-        className="block px-3 py-2 text-sm font-medium text-surface transition hover:text-accent"
+        className="block px-3 py-2 text-sm font-medium text-surface transition hover:text-secondary"
         href={href}
         onClick={scrollToSection}
       >
@@ -37,7 +37,7 @@ function NavLink({ href, label, onClick, pathname }) {
 
   return (
     <Link
-      className={`block px-3 py-2 text-sm font-medium transition hover:text-accent ${
+      className={`block px-3 py-2 text-sm font-medium transition hover:text-secondary ${
         active ? "text-surface" : "text-surface"
       }`}
       href={href}
@@ -51,10 +51,8 @@ function NavLink({ href, label, onClick, pathname }) {
 export default function Navbar({ actions, profile, user }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const userType = profile?.user_type || "user";
   const links = [
     { href: "/", label: "Inicio" },
-    { href: "/dashboard/suppliers", label: "Proveedores" },
     { href: "#funcionalidades", label: "Funciones" },
     { href: "#preguntas", label: "Preguntas" },
   ];
@@ -94,7 +92,7 @@ export default function Navbar({ actions, profile, user }) {
               {user ? (
                 <>
                   <span className="min-w-0 max-w-64 overflow-wrap-anywhere text-right text-sm text-surface/80">
-                    {user.email || "Sin email"} ({userType})
+                    {profile?.displayName || user.displayName || user.email || "Sin nombre"}
                   </span>
                   <LogoutButton className="h-10 rounded-md border border-accent bg-transparent px-4 text-sm font-semibold text-surface transition hover:border-surface hover:bg-accent/20">
                     Cerrar sesión
@@ -102,7 +100,7 @@ export default function Navbar({ actions, profile, user }) {
                 </>
               ) : (
                 <Link
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-surface transition hover:text-accent"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-surface transition hover:text-secondary"
                   href="/login"
                 >
                   <User className="size-4" aria-hidden="true" />
@@ -151,7 +149,7 @@ export default function Navbar({ actions, profile, user }) {
               {actions}
               {user ? (
                 <span className="overflow-wrap-anywhere text-sm text-surface/80">
-                  {user.email || "Sin email"} ({userType})
+                  {profile?.displayName || user.displayName || user.email || "Sin nombre"}
                 </span>
               ) : null}
             </div>
@@ -162,7 +160,7 @@ export default function Navbar({ actions, profile, user }) {
             </LogoutButton>
           ) : (
             <Link
-              className="mt-3 flex items-center gap-2 text-sm font-semibold text-surface transition hover:text-accent"
+              className="mt-3 flex items-center gap-2 text-sm font-semibold text-surface transition hover:text-secondary"
               href="/login"
               onClick={closeMenu}
             >

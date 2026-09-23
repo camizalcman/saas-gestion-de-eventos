@@ -38,9 +38,9 @@ export default function InvitationPanel({ invitation, eventTitle }) {
   const formattedDate = formatDate(invitation.date, invitation.time);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-accent bg-surface">
+    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-accent bg-surface">
       {invitation.heroImageUrl ? (
-        <div className="relative h-40 w-full overflow-hidden">
+        <div className="relative flex-[1.5] w-full overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             alt="Portada de la invitación"
@@ -56,7 +56,7 @@ export default function InvitationPanel({ invitation, eventTitle }) {
         </div>
       ) : (
         <div
-          className="flex h-24 w-full items-center justify-center"
+          className="flex w-full items-center justify-center flex-[1.5]"
           style={{ backgroundColor: bg }}
         >
           <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: muted }}>
@@ -65,7 +65,7 @@ export default function InvitationPanel({ invitation, eventTitle }) {
         </div>
       )}
 
-      <div className="px-5 py-4" style={{ backgroundColor: bg, color: ink }}>
+      <div className="flex-1 px-5 py-4" style={{ backgroundColor: bg, color: ink }}>
         {invitation.names ? (
           <h3 className="text-center text-lg font-serif font-semibold">
             {invitation.names}
@@ -94,7 +94,7 @@ export default function InvitationPanel({ invitation, eventTitle }) {
         </div>
       </div>
 
-      <div className="border-t border-accent px-5 py-3">
+      <div className="shrink-0 border-t border-accent px-5 py-3">
         <Link
           href="/dashboard/invitacion"
           className="flex w-full items-center justify-center gap-2 rounded-md border border-accent bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition hover:border-secondary hover:bg-secondary/10"

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import AppSidebar from "@/components/app/AppSidebar";
+import AppMain from "@/components/app/AppMain";
 import { getCurrentUser } from "@/lib/firebase/session";
 import { getCurrentUserProfile } from "@/lib/users/users";
 import { listUserEvents } from "@/lib/events/events";
@@ -29,11 +30,7 @@ export default async function AppLayout({ children }) {
         }))}
         isAdmin={profile?.user_type === "admin"}
       />
-      <main className="min-w-0 flex-1 pl-16 lg:pl-0">
-        <div className="mx-auto w-full max-w-6xl px-4 py-7 md:px-6 lg:px-1">
-          {children}
-        </div>
-      </main>
+      <AppMain>{children}</AppMain>
     </div>
   );
 }

@@ -20,7 +20,7 @@ export default function ProvidersPanel({ providers }) {
         <h3 className="text-sm font-semibold text-ink">Proveedores</h3>
       </div>
 
-      <div className="mt-4 flex-1">
+      <div className="app-scrollbar mt-4 min-h-0 flex-1 overflow-y-auto">
         {active.length === 0 ? (
           <p className="text-sm text-brand">
             Todavía no hay proveedores cargados.
@@ -53,7 +53,7 @@ export default function ProvidersPanel({ providers }) {
 
       <Link
         href="/dashboard/proveedores"
-        className="mt-4 flex w-full items-center justify-center gap-2 rounded-md border border-accent bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition hover:border-secondary hover:bg-secondary/10"
+        className="mt-4 flex w-full shrink-0 items-center justify-center gap-2 rounded-md border border-accent bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition hover:border-secondary hover:bg-secondary/10"
       >
         Gestionar proveedores
       </Link>

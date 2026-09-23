@@ -5,7 +5,7 @@ import { useToast } from "@/components/ToastProvider";
 import { SUPPLIER_CATEGORIES } from "@/lib/suppliers/constants";
 
 const inputClass =
-  "h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none transition focus:border-secondary";
+  "h-11 w-full min-w-0 rounded-md border border-accent bg-surface px-3 text-ink outline-none transition focus:border-secondary";
 
 export default function ProviderForm({ action }) {
   const formRef = useRef(null);

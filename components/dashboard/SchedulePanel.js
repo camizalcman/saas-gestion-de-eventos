@@ -13,7 +13,7 @@ export default function SchedulePanel({ schedule }) {
         <h3 className="text-sm font-semibold text-ink">Cronograma</h3>
       </div>
 
-      <div className="mt-4 flex-1">
+      <div className="mt-4 flex-1 overflow-y-auto min-h-0">
         {schedule.length === 0 ? (
           <p className="text-sm text-brand">
             Todavía no hay actividades en el cronograma.
@@ -48,7 +48,7 @@ export default function SchedulePanel({ schedule }) {
 
       <Link
         href="/dashboard/cronograma"
-        className="mt-4 flex w-full items-center justify-center gap-2 rounded-md border border-accent bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition hover:border-secondary hover:bg-secondary/10"
+        className="mt-4 flex w-full shrink-0 items-center justify-center gap-2 rounded-md border border-accent bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition hover:border-secondary hover:bg-secondary/10"
       >
         Organizar cronograma
       </Link>
