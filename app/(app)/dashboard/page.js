@@ -60,22 +60,22 @@ export default async function DashboardPage() {
       </div>
 
       <div className="mt-4 flex-1 min-h-0 lg:mt-5 grid gap-4 lg:grid-cols-[1fr_1fr_minmax(0,0.75fr)]" style={{ minHeight: 0 }}>
-        <div className="col-start-1 row-start-1 min-h-0">
+        <div className="min-h-0 lg:col-start-1 lg:row-start-1">
           <InvitationPanel
             invitation={hasInvitation ? event.invitation : null}
             eventTitle={event.title}
           />
         </div>
-        <div className="col-start-2 row-start-1 min-h-0">
+        <div className="min-h-0 lg:col-start-2 lg:row-start-1">
           <GuestsPanel guests={guests} />
         </div>
-        <div className="col-start-1 row-start-2 min-h-0">
+        <div className="min-h-0 lg:col-start-1 lg:row-start-2">
           <ProvidersPanel providers={providers} />
         </div>
-        <div className="col-start-2 row-start-2 min-h-0">
+        <div className="min-h-0 lg:col-start-2 lg:row-start-2">
           <BudgetPanel budget={event.budget} />
         </div>
-        <div className="col-start-3 row-span-2 min-h-0">
+        <div className="min-h-0 lg:col-start-3 lg:row-span-2">
           <SchedulePanel schedule={schedule} />
         </div>
       </div>

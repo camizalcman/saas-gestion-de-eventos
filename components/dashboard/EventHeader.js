@@ -3,12 +3,25 @@ import { Pencil, Trash2 } from "lucide-react";
 import { EVENT_TYPES } from "@/lib/events/constants";
 import EventDeleteButton from "@/components/events/EventDeleteButton";
 
-function formatDate(value) {
-  if (!value) return "Sin fecha";
+function formatDate(value, fallbackTime = "00:00") {
+  const text = String(value || "").trim();
+  const time = /^\d{2}:\d{2}$/.test(fallbackTime) ? fallbackTime : "00:00";
+  const match = text.match(
+    /^(\d{4}-\d{2}-\d{2})(?:T([01]\d|2[0-3]):([0-5]\d))?$/,
+  );
+
+  if (!match) return "Sin fecha";
+
+  const [, date, hours = time.slice(0, 2), minutes = time.slice(3, 5)] = match;
+  const parsed = new Date(`${date}T${hours}:${minutes}:00Z`);
+
+  if (Number.isNaN(parsed.getTime())) return "Sin fecha";
+
   return new Intl.DateTimeFormat("es-AR", {
     dateStyle: "full",
     timeStyle: "short",
-  }).format(new Date(value));
+    timeZone: "UTC",
+  }).format(parsed);
 }
 
 function eventTypeLabel(value) {
@@ -48,20 +61,22 @@ export default function EventHeader({ event, deleteAction }) {
         </div>
       </div>
 
-      <div className="mt-4 gap-10 text-sm text-brand flex">
-        <div>
+      <div className="mt-4 flex flex-wrap gap-x-10 gap-y-4 text-sm text-brand">
+        <div className="min-w-0">
           <span className="block text-xs font-semibold uppercase tracking-wider text-ink/50">
             Fecha
           </span>
-          <span className="mt-0.5 block">{formatDate(event.date)}</span>
+          <span className="mt-0.5 block">
+            {formatDate(event.date || event.invitation?.date, event.invitation?.time)}
+          </span>
         </div>
-        <div>
+        <div className="min-w-0">
           <span className="block text-xs font-semibold uppercase tracking-wider text-ink/50">
             Tipo de evento
           </span>
           <span className="mt-0.5 block">{eventTypeLabel(event.eventType)}</span>
         </div>
-        <div>
+        <div className="min-w-0">
           <span className="block text-xs font-semibold uppercase tracking-wider text-ink/50">
             Protagonistas
           </span>

@@ -55,11 +55,19 @@ export default function AppSidebar({ events, activeEventId, isAdmin }) {
     <>
       <button
         onClick={() => setExpanded((prev) => !prev)}
-        className="fixed left-0 top-0 z-50 flex h-12 w-16 items-center justify-center bg-brand text-surface lg:hidden"
+        className="fixed left-3 top-3 z-50 flex size-11 items-center justify-center rounded-full border border-secondary/70 bg-brand/95 text-surface shadow-lg shadow-brand/30 backdrop-blur-sm transition hover:scale-105 hover:bg-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-surface lg:hidden"
         aria-label={expanded ? "Cerrar menú" : "Abrir menú"}
       >
         {expanded ? <X className="size-5" /> : <Menu className="size-5" />}
       </button>
+
+      <Link
+        aria-label="Ir al inicio de Special Day"
+        className="fixed right-3 top-3 z-50 flex size-11 items-center justify-center rounded-full border border-secondary/70 bg-brand/95 text-xs font-serif font-semibold tracking-[0.14em] text-surface shadow-lg shadow-brand/30 backdrop-blur-sm transition hover:scale-105 hover:bg-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-surface lg:hidden"
+        href="/"
+      >
+        SD
+      </Link>
 
       {expanded && (
         <div
@@ -76,8 +84,8 @@ export default function AppSidebar({ events, activeEventId, isAdmin }) {
       />
 
       <aside
-        className={`fixed left-0 top-0 z-40 flex h-screen flex-col bg-brand text-surface transition-all duration-300 lg:z-auto lg:h-screen lg:border-r lg:border-surface/15 ${
-          expanded ? "w-64" : "w-16"
+        className={`fixed left-0 top-0 z-40 flex h-screen flex-col bg-brand text-surface transition-all duration-300 lg:flex lg:z-auto lg:h-screen lg:border-r lg:border-surface/15 ${
+          expanded ? "w-64" : "hidden"
         } ${
           desktopExpanded ? "lg:w-64" : "lg:w-[84px]"
         }`}

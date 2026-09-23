@@ -1,3 +1,4 @@
+import PublicInvitation from "@/components/invitation/PublicInvitation";
 import InvitationResponse from "@/components/invitation/InvitationResponse";
 import { findEventByGuestToken } from "@/lib/events/events";
 import { respondToInvitation } from "./actions";
@@ -6,14 +7,25 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Invitacion personalizada | Gestion de eventos",
-  description:
-    "Tu invitacion personalizada para este evento. Proximamente disponible.",
+  description: "Tu invitacion personalizada para este evento.",
 };
 
 export default async function GuestInvitationPage({ params }) {
   const { token } = await params;
   const found = await findEventByGuestToken(token);
+  const event = found?.event || null;
   const guest = found?.guest || null;
+
+  if (event?.invitation) {
+    return (
+      <PublicInvitation
+        event={event}
+        guest={guest}
+        respondAction={respondToInvitation}
+        token={token}
+      />
+    );
+  }
 
   return (
     <main className="min-h-screen bg-surface text-ink">
@@ -22,14 +34,11 @@ export default async function GuestInvitationPage({ params }) {
           Invitacion personalizada
         </p>
         <h1 className="mt-4 text-3xl font-semibold tracking-normal text-ink sm:text-4xl">
-          Tu invitacion esta en camino
+          No pudimos cargar tu invitación
         </h1>
         <p className="mt-5 text-sm leading-6 text-brand">
-          Esta pagina mostrara la tarjeta digital personalizada para vos o tu
-          grupo. Todavia estamos preparandola.
-        </p>
-        <p className="mt-3 break-all font-mono text-xs text-brand/60">
-          Token: {token}
+          El enlace existe, pero todavía no hay una invitación diseñada para
+          este evento.
         </p>
 
         {guest ? (

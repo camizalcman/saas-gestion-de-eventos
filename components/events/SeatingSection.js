@@ -384,16 +384,19 @@ export default function SeatingSection({
 
         <div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <h3 className="text-lg font-semibold text-ink">Salón</h3>
-            <p className="text-sm text-brand">
-              Definí la cantidad de mesas del evento.
-            </p>
+            <div>
+              <h3 className="text-lg font-semibold text-ink">Salón</h3>
+              <p className="text-sm text-brand">
+                Definí la cantidad de mesas del evento.
+              </p>
+            </div>
+            
 
             <form
               className="ml-auto flex flex-wrap items-end gap-3"
               onSubmit={handleTablesSubmit}
             >
-              <label className="grid gap-1" htmlFor="tableCount">
+              <label className="flex items-center gap-3" htmlFor="tableCount">
                 <span className="text-xs font-semibold uppercase tracking-[0.12em] text-brand">
                   Cantidad de mesas
                 </span>
