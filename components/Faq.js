@@ -36,7 +36,7 @@ export default function Faq() {
   const [abierta, setAbierta] = useState(-1);
 
   return (
-    <section id="preguntas" className="mx-auto w-full max-w-3xl scroll-mt-20 px-6 pb-16 pt-30 sm:px-6 lg:px-8">
+    <section id="preguntas" className="mx-auto w-full max-w-3xl scroll-mt-20 px-6 pb-16 pt-30 md:px-8">
       <div className="mb-10 flex flex-col items-center gap-4">
         <h2 className="text-center font-serif text-2xl font-semibold tracking-wide text-ink sm:text-3xl">
           Preguntas frecuentes

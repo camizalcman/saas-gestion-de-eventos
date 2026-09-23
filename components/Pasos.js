@@ -40,7 +40,7 @@ const pasos = [
 export default function Pasos() {
   return (
     <section className="bg-surface py-20 md:py-16">
-      <div className="relative mx-auto w-full max-w-6xl px-8">
+      <div className="relative mx-auto w-full max-w-6xl px-6 md:px-8">
 <div className="mx-auto mb-8 max-w-2xl text-center md:mb-10">
           <h2 className="font-serif mt-3 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
             ¿Cómo utilizarla?

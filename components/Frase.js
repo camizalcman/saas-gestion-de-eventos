@@ -7,7 +7,7 @@ export default function Frase() {
         style={{ backgroundImage: "url('/frase3.jpg')" }}
       />
       <div aria-hidden="true" className="absolute inset-0 bg-brand/70" />
-      <div className="relative mx-auto flex w-full max-w-6xl flex-1 items-center justify-center px-8 md:px-8">
+      <div className="relative mx-auto flex w-full max-w-6xl flex-1 items-center justify-center px-6 md:px-8">
         <blockquote className="text-center">
           <p className="text-4xl font-serif font-regular leading-normal tracking-tight text-surface sm:text-5xl sm:leading-tight">
             Cada celebración

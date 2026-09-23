@@ -17,7 +17,7 @@ export default function Hero({ user }) {
     >
       <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/70 to-transparent" />
 
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-6 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-6 md:px-8">
       <h1 className="mt-3 max-w-3xl text-4xl leading-[1.25] tracking-wide text-surface font-serif sm:text-6xl ">
             <span className="block">Organizá tu</span>
             <span className="block font-bold">próximo evento</span>
