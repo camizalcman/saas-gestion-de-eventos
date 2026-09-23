@@ -54,6 +54,7 @@ export default function Navbar({ actions, profile, user }) {
   const links = [
     { href: "/", label: "Inicio" },
     { href: "#funcionalidades", label: "Funciones" },
+    { href: "#planes", label: "Planes" },
     { href: "#preguntas", label: "Preguntas" },
   ];
 

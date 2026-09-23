@@ -3,6 +3,7 @@ import Frase from "@/components/Frase";
 import Funcionalidades from "@/components/Funcionalidades";
 import Hero from "@/components/Hero";
 import Pasos from "@/components/Pasos";
+import Planes from "@/components/Planes";
 import { getCurrentUser } from "@/lib/firebase/session";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +17,7 @@ export default async function Home() {
       <Funcionalidades />
       <Pasos />
       <Frase />
+      <Planes />
       <Faq />
     </main>
   );

@@ -511,8 +511,8 @@ export default function ExpensesSheet({
         </p>
       ) : null}
 
-      <div className="flex flex-wrap items-end gap-3">
-        <label className="grid gap-1.5">
+      <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-end">
+        <label className="grid min-w-0 gap-1.5">
           <span className={filterLabelClass}>Buscar</span>
           <div className="relative">
             <Search
@@ -530,7 +530,7 @@ export default function ExpensesSheet({
           </div>
         </label>
 
-        <label className="grid gap-1.5">
+        <label className="grid min-w-0 gap-1.5">
           <span className={filterLabelClass}>Responsable</span>
           <FilterMultiSelect
             label="Responsable"
@@ -543,7 +543,7 @@ export default function ExpensesSheet({
           />
         </label>
 
-        <label className="grid gap-1.5">
+        <label className="grid min-w-0 gap-1.5">
           <span className={filterLabelClass}>Estado</span>
           <FilterMultiSelect
             label="Estado"
@@ -557,7 +557,7 @@ export default function ExpensesSheet({
           />
         </label>
 
-        <label className="grid gap-1.5">
+        <label className="grid min-w-0 gap-1.5">
           <span className={filterLabelClass}>Proveedor</span>
           <FilterMultiSelect
             label="Proveedor"
@@ -572,7 +572,7 @@ export default function ExpensesSheet({
 
         {hasActiveFilters ? (
           <button
-            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-accent px-3 text-sm font-semibold text-brand transition hover:bg-accent/40"
+            className="col-span-2 inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-accent px-3 text-sm font-semibold text-brand transition hover:bg-accent/40 sm:w-auto"
             onClick={clearFilters}
             type="button"
           >

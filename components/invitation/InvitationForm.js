@@ -7,6 +7,31 @@ import { INVITATION_TYPOGRAPHIES } from "@/lib/invitation/typographies";
 import { makeInvitationDefaults } from "@/lib/invitation/defaults";
 import InvitationPreview from "@/components/invitation/InvitationPreview";
 
+function ToggleOption({ checked, disabled, label, onChange }) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-4 rounded-md border border-accent p-3 text-sm font-medium text-ink has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
+      <span>{label}</span>
+      <span className="relative shrink-0">
+        <input
+          className="peer sr-only"
+          type="checkbox"
+          checked={checked}
+          disabled={disabled}
+          onChange={(e) => onChange(e.target.checked)}
+        />
+        <span
+          aria-hidden="true"
+          className="block h-7 w-12 rounded-full bg-accent transition peer-checked:bg-secondary peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-secondary"
+        />
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1 top-1 block size-5 rounded-full bg-surface shadow transition peer-checked:translate-x-5"
+        />
+      </span>
+    </label>
+  );
+}
+
 function normalizeLocalImagePath(imageName) {
   const value = String(imageName || "").trim();
 
@@ -411,16 +436,12 @@ export default function InvitationForm({
       </div>
 
       <div className="grid gap-2">
-        <label className="flex items-center gap-3 text-sm font-semibold text-ink">
-          <input
-            className="size-4 accent-secondary"
-            type="checkbox"
-            checked={values.audioEnabled}
-            onChange={(e) => update("audioEnabled", e.target.checked)}
-            disabled={loading}
-          />
-          <span>Música de fondo</span>
-        </label>
+        <ToggleOption
+          checked={values.audioEnabled}
+          disabled={loading}
+          label="Música de fondo"
+          onChange={(value) => update("audioEnabled", value)}
+        />
 
         {values.audioEnabled ? (
           <AudioPicker
@@ -453,16 +474,12 @@ export default function InvitationForm({
         />
       </label>
 
-      <label className="flex items-center gap-3 text-sm font-semibold text-ink">
-        <input
-          className="size-4 accent-secondary"
-          type="checkbox"
-          checked={values.personalTextEnabled}
-          onChange={(e) => update("personalTextEnabled", e.target.checked)}
-          disabled={loading}
-        />
-        <span>Texto personal</span>
-      </label>
+      <ToggleOption
+        checked={values.personalTextEnabled}
+        disabled={loading}
+        label="Texto personal"
+        onChange={(value) => update("personalTextEnabled", value)}
+      />
 
       {values.personalTextEnabled ? (
         <label className={labelClasses}>
@@ -475,16 +492,12 @@ export default function InvitationForm({
         </label>
       ) : null}
 
-      <label className="flex items-center gap-3 text-sm font-semibold text-ink">
-        <input
-          className="size-4 accent-secondary"
-          type="checkbox"
-          checked={values.dateTimeEnabled}
-          onChange={(e) => update("dateTimeEnabled", e.target.checked)}
-          disabled={loading}
-        />
-        <span>Fecha y horario</span>
-      </label>
+      <ToggleOption
+        checked={values.dateTimeEnabled}
+        disabled={loading}
+        label="Fecha y horario"
+        onChange={(value) => update("dateTimeEnabled", value)}
+      />
 
       {values.dateTimeEnabled ? (
         <div className="grid gap-4 sm:grid-cols-2">
@@ -511,16 +524,12 @@ export default function InvitationForm({
         </div>
       ) : null}
 
-      <label className="flex items-center gap-3 text-sm font-semibold text-ink">
-        <input
-          className="size-4 accent-secondary"
-          type="checkbox"
-          checked={values.venueEnabled}
-          onChange={(e) => update("venueEnabled", e.target.checked)}
-          disabled={loading}
-        />
-        <span>Ubicación</span>
-      </label>
+      <ToggleOption
+        checked={values.venueEnabled}
+        disabled={loading}
+        label="Ubicación"
+        onChange={(value) => update("venueEnabled", value)}
+      />
 
       {values.venueEnabled ? (
         <label className={labelClasses}>
@@ -534,16 +543,12 @@ export default function InvitationForm({
         </label>
       ) : null}
 
-      <label className="flex items-center gap-3 text-sm font-semibold text-ink">
-        <input
-          className="size-4 accent-secondary"
-          type="checkbox"
-          checked={values.dressCodeEnabled}
-          onChange={(e) => update("dressCodeEnabled", e.target.checked)}
-          disabled={loading}
-        />
-        <span>Dress code</span>
-      </label>
+      <ToggleOption
+        checked={values.dressCodeEnabled}
+        disabled={loading}
+        label="Dress code"
+        onChange={(value) => update("dressCodeEnabled", value)}
+      />
 
       {values.dressCodeEnabled ? (
         <label className={labelClasses}>
@@ -556,16 +561,12 @@ export default function InvitationForm({
         </label>
       ) : null}
 
-      <label className="flex items-center gap-3 text-sm font-semibold text-ink">
-        <input
-          className="size-4 accent-secondary"
-          type="checkbox"
-          checked={values.giftEnabled}
-          onChange={(e) => update("giftEnabled", e.target.checked)}
-          disabled={loading}
-        />
-        <span>Sección de regalo</span>
-      </label>
+      <ToggleOption
+        checked={values.giftEnabled}
+        disabled={loading}
+        label="Sección de regalo"
+        onChange={(value) => update("giftEnabled", value)}
+      />
 
       {values.giftEnabled ? (
         <label className={labelClasses}>
@@ -578,16 +579,12 @@ export default function InvitationForm({
         </label>
       ) : null}
 
-      <label className="flex items-center gap-3 text-sm font-semibold text-ink">
-        <input
-          className="size-4 accent-secondary"
-          type="checkbox"
-          checked={values.closingTextEnabled}
-          onChange={(e) => update("closingTextEnabled", e.target.checked)}
-          disabled={loading}
-        />
-        <span>Texto de cierre</span>
-      </label>
+      <ToggleOption
+        checked={values.closingTextEnabled}
+        disabled={loading}
+        label="Texto de cierre"
+        onChange={(value) => update("closingTextEnabled", value)}
+      />
 
       {values.closingTextEnabled ? (
         <label className={labelClasses}>
