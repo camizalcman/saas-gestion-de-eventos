@@ -40,7 +40,7 @@ const pasos = [
 export default function Pasos() {
   return (
     <section className="bg-surface py-20 md:py-16">
-      <div className="relative mx-auto w-full max-w-6xl px-6">
+      <div className="relative mx-auto w-full max-w-6xl px-6 md:px-8">
 <div className="mx-auto mb-8 max-w-2xl text-center md:mb-10">
           <h2 className="font-serif mt-3 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
             ¿Cómo utilizarla?
@@ -55,7 +55,7 @@ export default function Pasos() {
               return (
                 <li
                   key={paso.numero}
-                  className="group relative flex flex-col items-start text-left transition duration-300 hover:-translate-y-1"
+                  className="group relative flex flex-col items-center text-center transition duration-300 hover:-translate-y-1"
                 >
                   <div className="relative flex size-14 items-center justify-center rounded-full border border-brand bg-surface transition duration-300 group-hover:border-secondary group-hover:bg-secondary/10">
                     <Icono className="size-6 text-brand transition duration-300 group-hover:text-secondary" />

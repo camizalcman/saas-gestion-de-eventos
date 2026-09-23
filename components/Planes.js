@@ -234,7 +234,7 @@ export default function Planes() {
 
   return (
     <section
-      className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-30 sm:px-6 lg:px-8"
+      className="mx-auto w-full max-w-6xl scroll-mt-20 px-6 py-30 md:px-8"
       id="planes"
     >
       <div className="mb-8 flex flex-col items-center gap-4">
