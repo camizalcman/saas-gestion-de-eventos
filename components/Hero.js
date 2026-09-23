@@ -15,7 +15,7 @@ export default function Hero({ user }) {
       className="relative flex h-[90vh] w-full items-end justify-center pb-12 bg-cover bg-center"
       style={{ backgroundImage: "url('/fotoHero4.jpg')" }}
     >
-      <div className="absolute inset-0 bg-gradient-to-t from-brand via-brand/80 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/70 to-transparent" />
 
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-6 sm:px-6 lg:px-8">
         <h1 className="mt-3 max-w-3xl text-5xl font-normal tracking-normal text-surface font-caladea sm:text-7xl lg:text-8xl">

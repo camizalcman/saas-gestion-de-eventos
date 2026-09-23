@@ -7,11 +7,11 @@
   --font-caladea: var(--font-caladea), Georgia, serif;
 
    /*Paleta del proyecto*/
-  --color-brand:#697C70;      
-  --color-surface: #F2EFE2;    
-  --color-secondary:#90C2E0;  
-  --color-accent: #98AA9D;     
-  --color-ink: #2D3536;        
+  --color-brand:#20506E;      
+  --color-surface: #F7F5EE;    
+  --color-secondary:#74BEC2;  
+  --color-accent: rgb(32,80,110,0.3);     
+  --color-ink: #050505;        
   --color-danger: #C0392B;     
   --color-warning: #E67E22;    
   --color-success: #27AE60;    
