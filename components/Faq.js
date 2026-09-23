@@ -33,7 +33,7 @@ const faqs = [
 ];
 
 export default function Faq() {
-  const [abierta, setAbierta] = useState(0);
+  const [abierta, setAbierta] = useState(-1);
 
   return (
     <section id="preguntas" className="mx-auto w-full max-w-3xl scroll-mt-20 px-4 pb-16 pt-30 sm:px-6 lg:px-8">
