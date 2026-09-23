@@ -162,7 +162,7 @@ export default function Step3Media({ form, onBack, onCreate, useFirebaseStorage,
           onClick={handleFinish}
           disabled={loading}
         >
-          {loading ? "Creando..." : "Crear y finalizar evento"}
+          {loading ? "Creando..." : "Crear evento"}
         </button>
       </div>
     </section>
