@@ -5,7 +5,7 @@ import { Check, Crown, Users } from "lucide-react";
 
 const cardClases = {
   normal:
-    "flex flex-col rounded-3xl border border-secondary bg-white p-7 sm:p-8",
+    "flex flex-col rounded-3xl border border-secondary bg-secondary/20 p-7 sm:p-8",
   destacado:
     "relative flex flex-col rounded-3xl border border-secondary bg-brand p-7 shadow-[0_24px_60px_-24px_rgba(32,80,110,0.45)] sm:p-8",
 };
@@ -38,12 +38,11 @@ const planesPersonales = [
     caracteristicas: [
       "Invitación digital personalizada",
       "Gestión de invitados",
-      "Confirmación de asistencia (RSVP)",
+      "Confirmación de asistencia",
       "Organización de mesas",
       "Cronograma del evento",
       "Gestión de proveedores",
       "Presupuesto",
-      "Acceso a todas las funcionalidades de la plataforma",
     ],
   },
   {
@@ -86,7 +85,7 @@ const planesEmpresas = [
       { texto: "Hasta 5 eventos activos simultáneamente", resaltada: true },
       "Gestión de múltiples eventos",
       "Invitaciones digitales",
-      "Gestión de invitados y RSVP",
+      "Gestión de invitados",
       "Organización de mesas",
       "Cronogramas",
       "Gestión de proveedores",
@@ -107,7 +106,7 @@ const planesEmpresas = [
       { texto: "Eventos activos ilimitados", resaltada: true },
       "Gestión de múltiples eventos simultáneamente",
       "Invitaciones digitales",
-      "Gestión de invitados y RSVP",
+      "Gestión de invitados",
       "Organización de mesas",
       "Cronogramas",
       "Gestión de proveedores",
@@ -170,7 +169,7 @@ function PlanCard({ plan }) {
 
       <div className="mt-0.5 flex items-baseline gap-3 pt-4">
         <span
-          className={`font-serif text-5xl font-semibold tracking-tight ${
+          className={`font-serif text-4xl font-semibold tracking-tight ${
             destacado ? "text-surface" : "text-ink"
           }`}
         >
