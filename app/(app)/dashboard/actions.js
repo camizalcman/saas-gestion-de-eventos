@@ -23,6 +23,7 @@ import {
   removeEventProvider,
   removeEventScheduleItem,
   setEventBudget,
+  setEventDuration,
   setEventGuestTable,
   setEventTableCount,
   setEventTablePositions,
@@ -167,6 +168,18 @@ export async function updateEvent(formData) {
   await updateUserEvent(user.uid, event.id, parseEventForm(formData));
   revalidatePath("/", "layout");
   redirect("/dashboard");
+}
+
+export async function saveEventDuration(formData) {
+  const { user, event } = await requireActiveEvent();
+  const duration = optionalText(formData.get("duration"), {
+    label: "La duración",
+    max: 120,
+  });
+
+  await setEventDuration(user.uid, event.id, duration);
+  revalidatePath("/dashboard/cronograma", "layout");
+  revalidatePath("/dashboard", "layout");
 }
 
 export async function deleteEvent() {

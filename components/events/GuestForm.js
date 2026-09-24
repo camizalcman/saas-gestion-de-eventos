@@ -38,7 +38,7 @@ export default function GuestForm({ action, defaultQuantity = 1 }) {
 
   return (
     <form
-      className="grid min-w-0 gap-3 border border-accent p-4 sm:p-5"
+      className="grid min-w-0 gap-3 rounded-xl border border-accent p-4 sm:p-5"
       onSubmit={handleSubmit}
       ref={formRef}
     >

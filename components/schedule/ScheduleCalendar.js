@@ -29,7 +29,7 @@ function ActivityTimelineItem({ activity, deleteAction, onEdit, providerNames })
         style={{ backgroundColor: activity.color }}
       />
       <article
-        className="border-l-4 p-4 shadow-sm"
+        className="rounded-r-lg border-l-4 p-4 shadow-sm"
         style={{
           backgroundColor: `${activity.color}22`,
           borderLeftColor: activity.color,
@@ -57,7 +57,7 @@ function ActivityTimelineItem({ activity, deleteAction, onEdit, providerNames })
         <div className="mt-4 flex flex-wrap gap-2 border-t border-accent/70 pt-3">
           <button
             aria-label={`Editar actividad ${activity.title}`}
-            className="h-9 border border-accent px-3 text-xs font-semibold text-ink transition hover:border-secondary hover:bg-secondary/10"
+            className="h-9 rounded-md border border-accent px-3 text-xs font-semibold text-ink transition hover:border-secondary hover:bg-secondary/10"
             onClick={() => onEdit(activity)}
             type="button"
           >
@@ -108,7 +108,7 @@ export default function ScheduleCalendar({
     .sort((a, b) => a.startMinutes - b.startMinutes);
 
   return (
-    <section className="min-w-0 border border-accent bg-surface">
+    <section className="min-w-0 overflow-hidden rounded-xl border border-accent bg-surface">
       <div className="border-b border-accent px-5 py-4">
         <h3 className="text-lg font-semibold text-ink">Agenda del día</h3>
         <p className="mt-1 text-sm text-brand">

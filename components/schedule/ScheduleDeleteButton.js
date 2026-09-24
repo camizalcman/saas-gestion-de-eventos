@@ -31,7 +31,7 @@ export default function ScheduleDeleteButton({ action, activityTitle, activityId
     <>
       <button
         aria-label={`Eliminar actividad ${activityTitle}`}
-        className="h-9 border border-brand/40 px-3 text-xs font-semibold text-brand transition hover:border-brand hover:bg-brand/10"
+        className="h-9 rounded-md border border-brand/40 px-3 text-xs font-semibold text-brand transition hover:border-brand hover:bg-brand/10"
         onClick={() => setOpen(true)}
         type="button"
       >

@@ -113,7 +113,7 @@ export default function SupplierForm({
 
   return (
     <form
-      className="grid min-w-0 gap-4 border border-accent p-4 sm:p-5"
+      className="grid min-w-0 gap-4 rounded-xl border border-accent p-4 sm:p-5"
       onSubmit={handleSubmit}
     >
       <label className="grid gap-2 text-sm font-medium text-ink">

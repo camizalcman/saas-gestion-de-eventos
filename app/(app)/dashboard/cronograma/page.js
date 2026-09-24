@@ -6,6 +6,7 @@ import { getActiveEvent } from "@/lib/events/active";
 import {
   addScheduleActivity,
   removeScheduleActivity,
+  saveEventDuration,
   updateScheduleActivity,
 } from "../actions";
 
@@ -31,6 +32,7 @@ export default async function CronogramaPage() {
       <CronogramaSection
         action={addScheduleActivity}
         deleteAction={removeScheduleActivity}
+        durationAction={saveEventDuration}
         event={event}
         updateAction={updateScheduleActivity}
       />
