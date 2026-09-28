@@ -78,12 +78,12 @@ export default function BudgetCard({ action, current = 0 }) {
 
   return (
     <>
-      <article className="rounded-lg bg-secondary p-5 text-surface">
-        <span className="text-xs font-semibold uppercase tracking-[0.14em] text-surface/80">
+      <article className="rounded-lg bg-secondary p-4 text-surface">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-surface/80">
           Presupuesto establecido
         </span>
-        <div className="mt-2 flex items-center justify-between gap-3">
-          <strong className="text-xl font-semibold tabular-nums">
+        <div className="mt-1.5 flex items-center justify-between gap-3">
+          <strong className="text-lg font-semibold tabular-nums">
             {hasBudget ? formatMoney(current) : "Sin definir"}
           </strong>
           <button

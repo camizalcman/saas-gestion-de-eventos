@@ -697,9 +697,14 @@ export async function addExpensePayment(expenseId, formData) {
     required: true,
   });
 
-  await addEventExpensePayment(user.uid, event.id, expenseId, { amount, date });
+  const created = await addEventExpensePayment(user.uid, event.id, expenseId, {
+    amount,
+    date,
+  });
   revalidatePath("/dashboard/presupuesto", "layout");
   revalidatePath("/dashboard", "layout");
+
+  return created ?? null;
 }
 
 export async function updateExpensePayment(expenseId, paymentId, formData) {
@@ -720,12 +725,17 @@ export async function updateExpensePayment(expenseId, paymentId, formData) {
     required: true,
   });
 
-  await updateEventExpensePayment(user.uid, event.id, expenseId, paymentId, {
-    amount,
-    date,
-  });
+  const updated = await updateEventExpensePayment(
+    user.uid,
+    event.id,
+    expenseId,
+    paymentId,
+    { amount, date },
+  );
   revalidatePath("/dashboard/presupuesto", "layout");
   revalidatePath("/dashboard", "layout");
+
+  return updated ?? null;
 }
 
 export async function removeExpensePayment(expenseId, paymentId) {
@@ -739,6 +749,8 @@ export async function removeExpensePayment(expenseId, paymentId) {
   await removeEventExpensePayment(user.uid, event.id, expenseId, paymentId);
   revalidatePath("/dashboard/presupuesto", "layout");
   revalidatePath("/dashboard", "layout");
+
+  return true;
 }
 
 export async function updateExpense(expenseId, formData) {

@@ -58,10 +58,8 @@ export default async function PresupuestoPage() {
         ? "bg-warning"
         : "bg-brand";
   const spentCaption = !hasBudget
-    ? "Definí el presupuesto para ver el avance de lo gastado."
-    : overBudget
-      ? `Gastaste el ${Math.round(spentRawPercent)}% de tu presupuesto - te pasaste ${formatMoney(Math.abs(summary.balance))}`
-      : `Gastaste el ${spentPercent}% de tu presupuesto - quedan ${formatMoney(summary.balance)}`;
+    ? "Definí el presupuesto para ver el avance."
+    : `Gastaste el ${Math.round(spentRawPercent)}% de tu presupuesto`;
 
   return (
     <ToastProvider>
@@ -77,20 +75,20 @@ export default async function PresupuestoPage() {
       <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <BudgetCard action={saveBudget} current={summary.budget} />
 
-        <div className="rounded-lg border border-accent bg-surface p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand">
-            Saldo
+        <div className="rounded-lg border border-accent bg-surface p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand">
+            Costo total
           </p>
-          <p className="mt-2 text-xl font-semibold tabular-nums text-ink">
-            {formatMoney(Math.abs(summary.balance))}
+          <p className="mt-1.5 text-lg font-semibold tabular-nums text-ink">
+            {formatMoney(summary.totalSpent)}
           </p>
-          <div className="mt-4">
+          <div className="mt-3">
             <div
               aria-label="Avance del presupuesto"
               aria-valuemax={100}
               aria-valuemin={0}
               aria-valuenow={spentPercent}
-              className="h-2.5 w-full overflow-hidden rounded-full bg-accent/50"
+              className="h-2 w-full overflow-hidden rounded-full bg-accent/50"
               role="progressbar"
             >
               <div
@@ -98,37 +96,28 @@ export default async function PresupuestoPage() {
                 style={{ width: `${spentPercent}%` }}
               />
             </div>
-            <p className="mt-2 text-xs leading-5 text-brand">
-              {spentCaption}
-            </p>
+            <p className="mt-2 text-xs leading-4 text-brand">{spentCaption}</p>
           </div>
         </div>
-
-        <div className="rounded-lg border border-accent bg-surface p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand">
-            Total gastado
-          </p>
-          <p className="mt-2 text-xl font-semibold tabular-nums text-ink">
-            {formatMoney(summary.totalSpent)}
-          </p>
-          <p className="mt-1 text-sm text-brand">
-            Suma de los costos cargados
-          </p>
-        </div>
-        <div className="rounded-lg border border-accent bg-surface p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand">
+        <div className="rounded-lg border border-accent bg-surface p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand">
             Pendiente de pago
           </p>
-          <p className="mt-2 text-xl font-semibold tabular-nums text-ink">
+          <p className="mt-1.5 text-lg font-semibold tabular-nums text-ink">
             {formatMoney(pendingToPay)}
           </p>
-          <p className="mt-1 text-sm text-brand">
-            Lo que falta pagar
+        </div>
+        <div className="rounded-lg border border-accent bg-surface p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand">
+            Margen restante
+          </p>
+          <p className="mt-1.5 text-lg font-semibold tabular-nums text-ink">
+            {formatMoney(summary.balance)}
           </p>
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-10">
         <ExpensesSheet
           addAction={addExpense}
           addPaymentAction={addExpensePayment}

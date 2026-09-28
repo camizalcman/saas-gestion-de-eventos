@@ -13,7 +13,6 @@ import { useToast } from "@/components/ToastProvider";
 import {
   Search,
   ChevronDown,
-  DollarSign,
   Pencil,
   Plus,
   Trash2,
@@ -35,18 +34,6 @@ function deriveStatus(cost, paidAmount) {
   if (paid <= 0) return "pendiente";
   if (paid >= total) return "pagado";
   return "parcial";
-}
-
-function formatMoney(value) {
-  try {
-    return new Intl.NumberFormat("es-AR", {
-      style: "currency",
-      currency: "ARS",
-      maximumFractionDigits: 0,
-    }).format(toAmount(value));
-  } catch {
-    return `$${toAmount(value).toLocaleString("es-AR")}`;
-  }
 }
 
 function formatAmount(value) {
@@ -82,12 +69,28 @@ const thClass =
 const cellInputClass =
   "w-full min-w-0 bg-transparent px-1.5 py-1 text-sm text-ink outline-none transition placeholder:text-brand/60 focus:bg-surface";
 
-function PesoSign() {
+function PesoSign({ className = "" }) {
   return (
-    <DollarSign
+    <span
       aria-hidden="true"
-      className="size-3.5 shrink-0 text-brand/70"
-    />
+      className={`shrink-0 text-sm tabular-nums ${className}`}
+    >
+      $
+    </span>
+  );
+}
+
+const moneyInputClass =
+  "h-10 w-full min-w-0 rounded-md border border-accent bg-surface pl-7 pr-2 text-right text-sm tabular-nums text-ink outline-none transition placeholder:text-brand/60 focus:border-secondary focus:ring-2 focus:ring-secondary/50";
+
+const moneyInputWrapperClass = "relative block";
+
+function MoneyInput({ className = "", ...props }) {
+  return (
+    <span className={moneyInputWrapperClass}>
+      <PesoSign className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-brand/80" />
+      <input className={`${moneyInputClass} ${className}`} {...props} />
+    </span>
   );
 }
 
@@ -108,10 +111,37 @@ function ExpensePaymentModal({
   const [editAmount, setEditAmount] = useState("");
   const [editDate, setEditDate] = useState(() => todayIsoDate());
   const [isEditing, startEditingTransition] = useTransition();
+  const [payments, setPayments] = useState(() =>
+    Array.isArray(expense.payments) ? expense.payments : [],
+  );
   const amountRef = useRef(null);
+  const optimisticIdRef = useRef(0);
+  const removedIdsRef = useRef(new Set());
 
-  const payments = Array.isArray(expense.payments) ? expense.payments : [];
-  const paid = toAmount(expense.paidAmount);
+  const serverPayments = useMemo(
+    () => (Array.isArray(expense.payments) ? expense.payments : []),
+    [expense.payments],
+  );
+  const serverKey = serverPayments
+    .map((payment) => `${payment?.id}:${payment?.amount}:${payment?.date}`)
+    .join("|");
+
+  useEffect(() => {
+    setPayments((prev) => {
+      const known = new Set(prev.map((payment) => payment?.id));
+      const incoming = serverPayments.filter(
+        (payment) =>
+          !known.has(payment?.id) && !removedIdsRef.current.has(payment?.id),
+      );
+
+      return incoming.length > 0 ? [...prev, ...incoming] : prev;
+    });
+  }, [serverKey, serverPayments]);
+
+  const paid = payments.reduce(
+    (sum, payment) => sum + toAmount(payment?.amount),
+    0,
+  );
   const cost = toAmount(expense.cost);
   const remaining = Math.max(cost - paid, 0);
   const busy = isPending || isEditing;
@@ -151,14 +181,39 @@ function ExpensePaymentModal({
     setError("");
 
     const formData = new FormData(event.currentTarget);
+    optimisticIdRef.current += 1;
+    const optimisticId = `optimistic-${optimisticIdRef.current}`;
+
+    setPayments((prev) => [
+      ...prev,
+      {
+        id: optimisticId,
+        amount: toAmount(formData.get("amount")),
+        date: String(formData.get("date") || ""),
+        createdAt: null,
+      },
+    ]);
 
     startTransition(async () => {
       try {
-        await addAction(formData);
+        const created = await addAction(formData);
+        setPayments((prev) => {
+          const rest = prev.filter((payment) => payment.id !== optimisticId);
+
+          if (!created) return rest;
+
+          return rest.some((payment) => payment.id === created.id)
+            ? rest
+            : [...rest, created];
+        });
         setAmount("");
+        amountRef.current?.focus();
         showToast("Pago registrado");
         router.refresh();
       } catch (submitError) {
+        setPayments((prev) =>
+          prev.filter((payment) => payment.id !== optimisticId),
+        );
         setError(
           submitError?.message || "No se pudo registrar el pago.",
         );
@@ -171,14 +226,41 @@ function ExpensePaymentModal({
     setError("");
 
     const formData = new FormData(event.currentTarget);
+    const nextAmount = toAmount(formData.get("amount"));
+    const nextDate = String(formData.get("date") || "");
+
+    setPayments((prev) =>
+      prev.map((entry) =>
+        entry.id === payment.id ? { ...entry, amount: nextAmount, date: nextDate } : entry,
+      ),
+    );
+    setEditingId(null);
 
     startEditingTransition(async () => {
       try {
-        await updateAction(payment.id, formData);
-        setEditingId(null);
+        const updated = await updateAction(payment.id, formData);
+        if (updated) {
+          setPayments((prev) =>
+            prev.map((entry) => (entry.id === payment.id ? updated : entry)),
+          );
+        } else {
+          setPayments((prev) =>
+            prev.map((entry) =>
+              entry.id === payment.id ? { ...payment } : entry,
+            ),
+          );
+        }
         showToast("Pago actualizado");
         router.refresh();
       } catch (submitError) {
+        setPayments((prev) =>
+          prev.map((entry) =>
+            entry.id === payment.id ? { ...entry, ...payment } : entry,
+          ),
+        );
+        setEditingId(payment.id);
+        setEditAmount(String(nextAmount));
+        setEditDate(nextDate);
         setError(
           submitError?.message || "No se pudo actualizar el pago.",
         );
@@ -190,12 +272,21 @@ function ExpensePaymentModal({
     if (busy) return;
     setError("");
 
+    removedIdsRef.current.add(payment.id);
+    setPayments((prev) => prev.filter((entry) => entry.id !== payment.id));
+
     startTransition(async () => {
       try {
         await removeAction(payment.id);
         showToast("Pago eliminado");
         router.refresh();
       } catch (submitError) {
+        removedIdsRef.current.delete(payment.id);
+        setPayments((prev) =>
+          prev.some((entry) => entry.id === payment.id)
+            ? prev
+            : [...prev, payment],
+        );
         setError(
           submitError?.message || "No se pudo eliminar el pago.",
         );
@@ -211,23 +302,42 @@ function ExpensePaymentModal({
       onClick={handleBackdropClick}
       role="dialog"
     >
-      <div className="w-full max-w-md rounded-lg border border-accent bg-surface p-6 shadow-xl">
+      <div className="w-full max-w-2xl rounded-lg border border-accent bg-surface p-6 shadow-xl">
         <div className="flex items-start justify-between gap-4">
-          <div>
+          <div className="min-w-0">
             <h2
               className="text-lg font-semibold text-ink"
               id="payment-modal-title"
             >
               Pagos de {expense.title}
             </h2>
-            <p className="mt-2 text-sm text-brand">
-              Costo {formatMoney(cost)} · pagado {formatMoney(paid)} · quedan{" "}
-              {formatMoney(remaining)}
-            </p>
+            <div className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+              <span className="flex items-center gap-1.5 text-brand">
+                Costo
+                <span className="flex items-center gap-1 font-bold tabular-nums text-ink">
+                  <PesoSign />
+                  {formatAmount(cost)}
+                </span>
+              </span>
+              <span className="flex items-center gap-1.5 text-brand">
+                Pagado
+                <span className="flex items-center gap-1 font-semibold tabular-nums text-success">
+                  <PesoSign />
+                  {formatAmount(paid)}
+                </span>
+              </span>
+              <span className="flex items-center gap-1.5 text-brand">
+                Pendiente
+                <span className="flex items-center gap-1 font-semibold tabular-nums text-danger">
+                  <PesoSign />
+                  {formatAmount(remaining)}
+                </span>
+              </span>
+            </div>
           </div>
           <button
             aria-label="Cerrar ventana"
-            className="text-brand transition hover:text-ink"
+            className="shrink-0 text-brand transition hover:text-ink"
             disabled={busy}
             onClick={() => {
               setError("");
@@ -241,25 +351,23 @@ function ExpensePaymentModal({
 
         {payments.length > 0 ? (
           <ul className="mt-4 grid gap-1.5">
-            {payments.map((payment) =>
-              editingId === payment.id ? (
+            {payments.map((payment, index) => {
+              const rowKey = `${payment?.id ?? "payment"}-${index}`;
+
+              return editingId === payment.id ? (
                 <li
                   className="rounded-md border border-secondary bg-accent/20 px-3 py-2"
-                  key={payment.id}
+                  key={rowKey}
                 >
                   <form
                     className="grid gap-2"
                     onSubmit={(event) => handleEditSubmit(event, payment)}
                   >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <label className="flex min-w-0 flex-1 items-center gap-1.5">
-                        <span className="shrink-0 text-brand/70">
-                          <DollarSign aria-hidden="true" className="size-4" />
-                        </span>
-                        <span className="sr-only">Monto del pago</span>
-                        <input
+                    <div className="flex flex-wrap items-end gap-2">
+                      <label className="grid min-w-0 flex-1 gap-1 text-xs font-medium text-brand">
+                        Monto del pago
+                        <MoneyInput
                           aria-label="Monto del pago"
-                          className="h-9 w-full min-w-0 rounded-md border border-accent bg-surface px-2 text-right text-sm tabular-nums text-ink outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/50"
                           max={10000000000}
                           min={1}
                           name="amount"
@@ -272,16 +380,18 @@ function ExpensePaymentModal({
                           value={editAmount}
                         />
                       </label>
-                      <input
-                        aria-label="Fecha del pago"
-                        className="h-9 rounded-md border border-accent bg-surface px-2 text-sm text-ink outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/50"
-                        max={todayIsoDate()}
-                        name="date"
-                        onChange={(event) => setEditDate(event.target.value)}
-                        required
-                        type="date"
-                        value={editDate}
-                      />
+                      <label className="grid gap-1 text-xs font-medium text-brand">
+                        Fecha del pago
+                        <input
+                          className="h-10 rounded-md border border-accent bg-surface px-2 text-sm text-ink outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/50"
+                          max={todayIsoDate()}
+                          name="date"
+                          onChange={(event) => setEditDate(event.target.value)}
+                          required
+                          type="date"
+                          value={editDate}
+                        />
+                      </label>
                     </div>
                     <div className="flex justify-end gap-2">
                       <button
@@ -305,14 +415,14 @@ function ExpensePaymentModal({
               ) : (
                 <li
                   className="flex items-center justify-between gap-3 rounded-md border border-accent bg-accent/20 px-3 py-2 text-sm"
-                  key={payment.id}
+                  key={rowKey}
                 >
-                  <span className="min-w-0 text-ink">
-                    <PesoSign />
-                    <span className="ml-1 font-semibold tabular-nums">
+                  <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-ink">
+                    <span className="flex items-center gap-1 font-semibold tabular-nums">
+                      <PesoSign />
                       {formatAmount(payment.amount)}
                     </span>
-                    <span className="ml-2 text-xs text-brand">
+                    <span className="text-xs text-brand">
                       {payment.date
                         ? `el ${formatPaymentDate(payment.date)}`
                         : "sin fecha"}
@@ -341,8 +451,8 @@ function ExpensePaymentModal({
                     </button>
                   </span>
                 </li>
-              ),
-            )}
+              );
+            })}
           </ul>
         ) : (
           <p className="mt-4 border border-dashed border-accent px-3 py-4 text-center text-sm text-brand">
@@ -356,13 +466,9 @@ function ExpensePaymentModal({
         >
           <p className="text-sm font-semibold text-ink">Registrar un pago</p>
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-ink">
-              <span className="shrink-0 text-brand/70">
-                <DollarSign aria-hidden="true" className="size-4" />
-              </span>
-              <span className="shrink-0">Monto pagado</span>
-              <input
-                className="h-10 w-full min-w-0 rounded-md border border-accent bg-surface px-2 text-right text-sm tabular-nums text-ink outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/50"
+            <label className="grid min-w-0 gap-1.5 text-sm font-medium text-ink">
+              Monto pagado
+              <MoneyInput
                 max={10000000000}
                 min={1}
                 name="amount"
@@ -375,8 +481,8 @@ function ExpensePaymentModal({
                 value={amount}
               />
             </label>
-            <label className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-ink">
-              <span className="shrink-0">Fecha del pago</span>
+            <label className="grid min-w-0 gap-1.5 text-sm font-medium text-ink">
+              Fecha del pago
               <input
                 className="h-10 w-full min-w-0 rounded-md border border-accent bg-surface px-2 text-sm text-ink outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/50"
                 max={todayIsoDate()}
@@ -405,7 +511,7 @@ function ExpensePaymentModal({
               }}
               type="button"
             >
-              Cerrar
+              Cancelar
             </button>
             <button
               className="h-10 rounded-md border border-secondary bg-secondary px-4 text-sm font-semibold text-ink transition hover:bg-secondary/90 disabled:cursor-not-allowed disabled:opacity-60"
@@ -1091,7 +1197,7 @@ export default function ExpensesSheet({
                   </td>
                   <td className="px-1 py-1">
                     <div className="flex items-center gap-1">
-                      <PesoSign />
+                      <PesoSign className="text-ink" />
                       <input
                         className={`${cellInputClass} text-right`}
                         disabled={rowDisabled}
@@ -1131,7 +1237,7 @@ export default function ExpensesSheet({
                   </td>
                   <td className="px-1 py-1">
                     <div className="flex items-center justify-end gap-1">
-                      <PesoSign />
+                      <PesoSign className="text-ink" />
                       <span className="min-w-0 truncate text-right text-sm tabular-nums text-ink">
                         {formatAmount(expense.paidAmount)}
                       </span>
@@ -1146,15 +1252,17 @@ export default function ExpensesSheet({
                       </button>
                     </div>
                   </td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">
+                  <td className="px-2 py-1.5 text-right">
                     <span
-                      className={
+                      className={`inline-flex items-center justify-end gap-1 text-sm tabular-nums ${
                         pending < 0
                           ? "font-semibold text-danger"
                           : "text-ink"
-                      }
+                      }`}
                     >
-                      {formatMoney(pending)}
+                      {pending < 0 ? "-" : null}
+                      <PesoSign />
+                      {formatAmount(Math.abs(pending))}
                     </span>
                   </td>
                   <td className="px-1 py-1">
@@ -1298,7 +1406,7 @@ export default function ExpensesSheet({
               </td>
               <td className="px-1 py-1">
                 <div className="flex items-center gap-1">
-                  <PesoSign />
+                  <PesoSign className="text-ink" />
                   <input
                     className={`${cellInputClass} text-right`}
                     disabled={savingRow === "new"}
@@ -1330,7 +1438,7 @@ export default function ExpensesSheet({
               </td>
               <td className="px-1 py-1">
                 <div className="flex items-center gap-1">
-                  <PesoSign />
+                  <PesoSign className="text-ink" />
                   <input
                     className={`${cellInputClass} text-right`}
                     disabled={savingRow === "new"}
@@ -1352,19 +1460,25 @@ export default function ExpensesSheet({
                   />
                 </div>
               </td>
-              <td className="px-2 py-1.5 text-right tabular-nums">
+              <td className="px-2 py-1.5 text-right">
                 {newDraft.cost === "" ? (
                   <span className="text-xs text-brand">—</span>
                 ) : (
                   <span
-                    className={
+                    className={`inline-flex items-center justify-end gap-1 text-sm tabular-nums ${
                       toAmount(newDraft.cost) - toAmount(newDraft.paidAmount) < 0
                         ? "font-semibold text-danger"
                         : "text-ink"
-                    }
+                    }`}
                   >
-                    {formatMoney(
-                      toAmount(newDraft.cost) - toAmount(newDraft.paidAmount),
+                    {toAmount(newDraft.cost) - toAmount(newDraft.paidAmount) < 0
+                      ? "-"
+                      : null}
+                    <PesoSign />
+                    {formatAmount(
+                      Math.abs(
+                        toAmount(newDraft.cost) - toAmount(newDraft.paidAmount),
+                      ),
                     )}
                   </span>
                 )}
@@ -1474,14 +1588,24 @@ export default function ExpensesSheet({
               </th>
               <td className="px-2 py-2.5" />
               <td className="px-2 py-2.5 text-right font-semibold tabular-nums text-ink">
-                {formatMoney(totals.cost)}
+                <span className="inline-flex items-center justify-end gap-1 text-sm">
+                  <PesoSign />
+                  {formatAmount(totals.cost)}
+                </span>
               </td>
               <td className="px-2 py-2.5" />
               <td className="px-2 py-2.5 text-right font-semibold tabular-nums text-ink">
-                {formatMoney(totals.paid)}
+                <span className="inline-flex items-center justify-end gap-1 text-sm">
+                  <PesoSign />
+                  {formatAmount(totals.paid)}
+                </span>
               </td>
               <td className="px-2 py-2.5 text-right font-semibold tabular-nums text-ink">
-                {formatMoney(totals.pending)}
+                <span className="inline-flex items-center justify-end gap-1 text-sm">
+                  {totals.pending < 0 ? "-" : null}
+                  <PesoSign />
+                  {formatAmount(Math.abs(totals.pending))}
+                </span>
               </td>
               <td colSpan={3} />
             </tr>
