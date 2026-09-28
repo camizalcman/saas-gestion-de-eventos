@@ -22,10 +22,12 @@ import {
   removeEventPaymentResponsible,
   removeEventProvider,
   removeEventScheduleItem,
+  removeEventTable,
   setEventBudget,
   setEventDuration,
   setEventGuestTable,
   setEventTableCount,
+  setEventTableName,
   setEventTablePositions,
   setUserEventInvitation,
   updateEventExpense,
@@ -62,6 +64,8 @@ const TYPOGRAPHY_IDS = INVITATION_TYPOGRAPHIES.map((typography) => typography.id
 const SUPPLIER_CATEGORY_VALUES = SUPPLIER_CATEGORIES.map(
   (category) => category.value,
 );
+const TABLE_REDUCTION_ERROR =
+  "No podés reducir la cantidad de mesas. Para quitar una mesa usá el ícono de eliminar.";
 
 function cookieOptions() {
   return {
@@ -336,6 +340,10 @@ export async function saveEventTables(formData) {
     label: "La cantidad de mesas",
   });
 
+  if (count < (event.tableCount || 0)) {
+    throw new Error(TABLE_REDUCTION_ERROR);
+  }
+
   await setEventTableCount(user.uid, event.id, count);
   revalidatePath("/dashboard/invitados", "layout");
   revalidatePath("/dashboard", "layout");
@@ -370,6 +378,44 @@ export async function saveEventTablePositions(formData) {
     );
 
   await setEventTablePositions(user.uid, event.id, positions);
+  revalidatePath("/dashboard/invitados", "layout");
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function renameEventTable(formData) {
+  const { user, event } = await requireActiveEvent();
+  const tableNumber = tableNumberInput(formData.get("tableNumber"), {
+    label: "La mesa",
+    max: event.tableCount,
+  });
+
+  if (!tableNumber) {
+    throw new Error("La mesa es obligatoria.");
+  }
+
+  const name = requiredText(formData.get("name"), {
+    label: "El nombre de la mesa",
+    min: 1,
+    max: 60,
+  });
+
+  await setEventTableName(user.uid, event.id, tableNumber, name);
+  revalidatePath("/dashboard/invitados", "layout");
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function removeTable(tableNumber) {
+  const { user, event } = await requireActiveEvent();
+  const number = tableNumberInput(String(tableNumber ?? ""), {
+    label: "La mesa",
+    max: event.tableCount,
+  });
+
+  if (!number) {
+    throw new Error("La mesa es obligatoria.");
+  }
+
+  await removeEventTable(user.uid, event.id, number);
   revalidatePath("/dashboard/invitados", "layout");
   revalidatePath("/dashboard", "layout");
 }
