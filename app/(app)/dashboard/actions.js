@@ -8,6 +8,7 @@ import { ACTIVE_EVENT_COOKIE, getActiveEvent } from "@/lib/events/active";
 import { getCurrentUser } from "@/lib/firebase/session";
 import {
   addEventExpense,
+  addEventExpensePayment,
   addEventGuest,
   addEventPaymentResponsible,
   addEventProvider,
@@ -17,6 +18,7 @@ import {
   deriveGuestStatus,
   listUserEvents,
   removeEventExpense,
+  removeEventExpensePayment,
   removeEventGuest,
   removeEventGuestMember,
   removeEventPaymentResponsible,
@@ -31,6 +33,7 @@ import {
   setEventTablePositions,
   setUserEventInvitation,
   updateEventExpense,
+  updateEventExpensePayment,
   updateEventGuestField,
   updateEventScheduleItem,
   updateEventPaymentResponsible,
@@ -609,9 +612,6 @@ function parseExpenseForm(formData) {
       label: "El costo total",
       required: true,
     }),
-    paidAmount: moneyInput(formData.get("paidAmount"), {
-      label: "El monto pagado",
-    }),
     providerId: requiredText(formData.get("providerId"), {
       label: "El proveedor",
       min: 1,
@@ -669,7 +669,74 @@ export async function addExpense(formData) {
   const expense = parseExpenseForm(formData);
   validateExpenseRefs(event, expense);
 
-  await addEventExpense(user.uid, event.id, expense);
+  await addEventExpense(user.uid, event.id, {
+    ...expense,
+    paidAmount: moneyInput(formData.get("paidAmount"), {
+      label: "El monto pagado",
+    }),
+  });
+  revalidatePath("/dashboard/presupuesto", "layout");
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function addExpensePayment(expenseId, formData) {
+  const { user, event } = await requireActiveEvent();
+  const expense = (event.expenses || []).find((entry) => entry.id === expenseId);
+
+  if (!expense) {
+    throw new Error("Gasto no encontrado.");
+  }
+
+  const amount = moneyInput(formData.get("amount"), {
+    label: "El monto del pago",
+    required: true,
+    min: 1,
+  });
+  const date = dateInput(formData.get("date"), {
+    label: "La fecha del pago",
+    required: true,
+  });
+
+  await addEventExpensePayment(user.uid, event.id, expenseId, { amount, date });
+  revalidatePath("/dashboard/presupuesto", "layout");
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function updateExpensePayment(expenseId, paymentId, formData) {
+  const { user, event } = await requireActiveEvent();
+  const expense = (event.expenses || []).find((entry) => entry.id === expenseId);
+
+  if (!expense) {
+    throw new Error("Gasto no encontrado.");
+  }
+
+  const amount = moneyInput(formData.get("amount"), {
+    label: "El monto del pago",
+    required: true,
+    min: 1,
+  });
+  const date = dateInput(formData.get("date"), {
+    label: "La fecha del pago",
+    required: true,
+  });
+
+  await updateEventExpensePayment(user.uid, event.id, expenseId, paymentId, {
+    amount,
+    date,
+  });
+  revalidatePath("/dashboard/presupuesto", "layout");
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function removeExpensePayment(expenseId, paymentId) {
+  const { user, event } = await requireActiveEvent();
+  const expense = (event.expenses || []).find((entry) => entry.id === expenseId);
+
+  if (!expense) {
+    throw new Error("Gasto no encontrado.");
+  }
+
+  await removeEventExpensePayment(user.uid, event.id, expenseId, paymentId);
   revalidatePath("/dashboard/presupuesto", "layout");
   revalidatePath("/dashboard", "layout");
 }

@@ -78,13 +78,16 @@ export default function BudgetCard({ action, current = 0 }) {
 
   return (
     <>
-      <article className="rounded-lg bg-secondary p-6 text-surface">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-surface/80">
-            Presupuesto establecido
-          </span>
+      <article className="rounded-lg bg-secondary p-5 text-surface">
+        <span className="text-xs font-semibold uppercase tracking-[0.14em] text-surface/80">
+          Presupuesto establecido
+        </span>
+        <div className="mt-2 flex items-center justify-between gap-3">
+          <strong className="text-xl font-semibold tabular-nums">
+            {hasBudget ? formatMoney(current) : "Sin definir"}
+          </strong>
           <button
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-surface/40 px-3 text-xs font-semibold text-surface transition hover:bg-surface/20 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-md border border-surface/40 px-2.5 text-xs font-semibold text-surface transition hover:bg-surface/20 disabled:cursor-not-allowed disabled:opacity-60"
             onClick={() => setOpen(true)}
             type="button"
           >
@@ -92,9 +95,6 @@ export default function BudgetCard({ action, current = 0 }) {
             {hasBudget ? "Editar" : "Definir"}
           </button>
         </div>
-        <strong className="mt-3 block text-2xl font-semibold tabular-nums">
-          {hasBudget ? formatMoney(current) : "Sin definir"}
-        </strong>
       </article>
 
       {open ? (
