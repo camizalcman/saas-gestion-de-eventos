@@ -4,9 +4,19 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Check, X } from "lucide-react";
 import GuestStatusBadge from "@/components/events/GuestStatusBadge";
+import { DIETARY_RESTRICTIONS } from "@/lib/events/constants";
 
 const buttonBase =
   "inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50";
+
+const fieldBase =
+  "h-10 w-full rounded-md border border-accent bg-surface px-3 text-sm text-ink transition disabled:opacity-50";
+
+const answeredStatuses = ["confirmado", "rechazado"];
+
+function answeredStatus(status) {
+  return answeredStatuses.includes(status) ? status : null;
+}
 
 function SelectionButton({ active, disabled, onClick, tone, children }) {
   const activeClass =
@@ -28,32 +38,89 @@ function SelectionButton({ active, disabled, onClick, tone, children }) {
   );
 }
 
-function PersonRow({ name, status, selected, disabled, onSelect }) {
+function PersonRow({
+  inputId,
+  name,
+  status,
+  selected,
+  disabled,
+  onSelect,
+  dietary,
+  dietaryNote,
+  onDietaryChange,
+  onDietaryNoteChange,
+}) {
   return (
-    <div className="flex flex-col gap-3 border border-accent bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="font-semibold text-ink">{name}</span>
-        <GuestStatusBadge status={selected || status} />
+    <div className="flex flex-col gap-4 border border-accent bg-surface p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="font-semibold text-ink">{name}</span>
+          <GuestStatusBadge status={selected || status} />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <SelectionButton
+            active={selected === "confirmado"}
+            disabled={disabled}
+            onClick={() => onSelect("confirmado")}
+            tone="confirm"
+          >
+            <Check aria-hidden="true" className="size-4" strokeWidth={2} />
+            Confirmar
+          </SelectionButton>
+          <SelectionButton
+            active={selected === "rechazado"}
+            disabled={disabled}
+            onClick={() => onSelect("rechazado")}
+            tone="reject"
+          >
+            <X aria-hidden="true" className="size-4" strokeWidth={2} />
+            Rechazar
+          </SelectionButton>
+        </div>
       </div>
-      <div className="flex flex-wrap gap-2">
-        <SelectionButton
-          active={selected === "confirmado"}
-          disabled={disabled}
-          onClick={() => onSelect("confirmado")}
-          tone="confirm"
+
+      <div className="flex flex-col gap-2 sm:max-w-sm">
+        <label
+          className="text-xs font-semibold uppercase tracking-[0.12em] text-brand"
+          htmlFor={inputId}
         >
-          <Check aria-hidden="true" className="size-4" strokeWidth={2} />
-          Confirmar
-        </SelectionButton>
-        <SelectionButton
-          active={selected === "rechazado"}
+          Restricción alimentaria
+        </label>
+        <select
+          className={fieldBase}
           disabled={disabled}
-          onClick={() => onSelect("rechazado")}
-          tone="reject"
+          id={inputId}
+          onChange={(event) => onDietaryChange(event.target.value)}
+          value={dietary}
         >
-          <X aria-hidden="true" className="size-4" strokeWidth={2} />
-          Rechazar
-        </SelectionButton>
+          <option value="">Sin restricción</option>
+          {DIETARY_RESTRICTIONS.map((restriction) => (
+            <option key={restriction.value} value={restriction.value}>
+              {restriction.label}
+            </option>
+          ))}
+        </select>
+
+        {dietary === "otro" ? (
+          <>
+            <label
+              className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-brand"
+              htmlFor={`${inputId}-note`}
+            >
+              ¿Cuál?
+            </label>
+            <input
+              className={fieldBase}
+              disabled={disabled}
+              id={`${inputId}-note`}
+              maxLength={200}
+              onChange={(event) => onDietaryNoteChange(event.target.value)}
+              placeholder="Escribí el detalle"
+              type="text"
+              value={dietaryNote}
+            />
+          </>
+        ) : null}
       </div>
     </div>
   );
@@ -108,6 +175,8 @@ export default function InvitationResponse({ token, guest, respondAction }) {
         memberId: member.id,
         name: member.name,
         status: member.status,
+        dietary: member.dietary || "",
+        dietaryNote: member.dietaryNote || "",
       }))
     : [
         {
@@ -115,6 +184,8 @@ export default function InvitationResponse({ token, guest, respondAction }) {
           memberId: null,
           name: guest.name,
           status: guest.status,
+          dietary: guest.dietary || "",
+          dietaryNote: guest.dietaryNote || "",
         },
       ];
 
@@ -122,60 +193,87 @@ export default function InvitationResponse({ token, guest, respondAction }) {
     const initial = {};
 
     for (const person of people) {
-      if (person.status === "confirmado" || person.status === "rechazado") {
-        initial[person.key] = person.status;
+      const current = answeredStatus(person.status);
+
+      if (current) {
+        initial[person.key] = current;
       }
     }
 
     return initial;
   });
 
-  function selectPerson(person, response) {
-    setSelections((prev) => ({ ...prev, [person.key]: response }));
+  const [diets, setDiets] = useState(() => {
+    const initial = {};
 
-    if (isGroup) {
-      return;
+    for (const person of people) {
+      initial[person.key] = {
+        dietary: person.dietary,
+        dietaryNote: person.dietaryNote,
+      };
     }
 
-    setError("");
-    startTransition(async () => {
-      try {
-        await respondAction(token, response, person.memberId);
-        setModal({ confirmed: response === "confirmado" });
-        router.refresh();
-      } catch (submitError) {
-        setError(
-          submitError?.message || "No se pudo registrar tu respuesta.",
-        );
-      }
-    });
+    return initial;
+  });
+
+  const [message, setMessage] = useState(guest.message || "");
+
+  function selectPerson(person, response) {
+    setSelections((prev) => ({ ...prev, [person.key]: response }));
   }
 
-  function confirmGroupSelection() {
-    const entries = people
-      .map((person) => ({ person, response: selections[person.key] }))
-      .filter(
-        (entry) =>
-          entry.response === "confirmado" || entry.response === "rechazado",
-      );
+  function changeDietary(person, value) {
+    setDiets((prev) => ({
+      ...prev,
+      [person.key]: { dietary: value, dietaryNote: "" },
+    }));
+  }
 
-    if (entries.length === 0) return;
+  function changeDietaryNote(person, value) {
+    setDiets((prev) => ({
+      ...prev,
+      [person.key]: { ...prev[person.key], dietaryNote: value },
+    }));
+  }
+
+  const hasChanges =
+    message !== (guest.message || "") ||
+    people.some((person) => {
+      const diet = diets[person.key] || {};
+
+      return (
+        (selections[person.key] || null) !== answeredStatus(person.status) ||
+        (diet.dietary || "") !== (person.dietary || "") ||
+        (diet.dietaryNote || "") !== (person.dietaryNote || "")
+      );
+    });
+
+  function submitResponse() {
+    const responses = people.length
+      ? people.map((person) => ({
+          memberId: person.memberId,
+          response: selections[person.key] || null,
+          dietary: diets[person.key].dietary,
+          dietaryNote:
+            diets[person.key].dietary === "otro"
+              ? diets[person.key].dietaryNote
+              : "",
+        }))
+      : [{ memberId: null, response: null, dietary: "", dietaryNote: "" }];
+
+    const anyConfirmed = responses.some(
+      (entry) => entry.response === "confirmado",
+    );
 
     setError("");
     startTransition(async () => {
       try {
-        let anyConfirmed = false;
-
-        for (const entry of entries) {
-          await respondAction(token, entry.response, entry.person.memberId);
-          if (entry.response === "confirmado") anyConfirmed = true;
-        }
-
+        await respondAction(token, { responses, message });
         setModal({ confirmed: anyConfirmed });
         router.refresh();
       } catch (submitError) {
         setError(
-          submitError?.message || "No se pudieron registrar las respuestas.",
+          submitError?.message || "No se pudo registrar tu respuesta.",
         );
       }
     });
@@ -194,9 +292,14 @@ export default function InvitationResponse({ token, guest, respondAction }) {
       ) : (
         people.map((person) => (
           <PersonRow
+            dietary={diets[person.key].dietary}
+            dietaryNote={diets[person.key].dietaryNote}
             disabled={isPending}
+            inputId={`dietary-${person.key}`}
             key={person.key}
             name={person.name}
+            onDietaryChange={(value) => changeDietary(person, value)}
+            onDietaryNoteChange={(value) => changeDietaryNote(person, value)}
             onSelect={(response) => selectPerson(person, response)}
             selected={selections[person.key]}
             status={person.status}
@@ -204,22 +307,38 @@ export default function InvitationResponse({ token, guest, respondAction }) {
         ))
       )}
 
+      <div className="mt-3 flex flex-col gap-2 border border-accent bg-surface p-4">
+        <label
+          className="text-xs font-semibold uppercase tracking-[0.12em] text-brand"
+          htmlFor="invitation-message"
+        >
+          Mensaje para los novios
+        </label>
+        <textarea
+          className="min-h-24 w-full rounded-md border border-accent bg-surface p-3 text-sm text-ink transition disabled:opacity-50"
+          disabled={isPending}
+          id="invitation-message"
+          maxLength={500}
+          onChange={(event) => setMessage(event.target.value)}
+          placeholder="Dejá un mensaje, una aclaración, lo que quieras"
+          value={message}
+        />
+      </div>
+
       {error ? (
         <p className="border border-brand/40 bg-brand/10 px-3 py-2 text-sm text-brand">
           {error}
         </p>
       ) : null}
 
-      {isGroup && people.length > 0 ? (
-        <button
-          className="h-11 w-full rounded-md border border-secondary bg-secondary px-4 text-sm font-semibold text-surface transition hover:bg-secondary/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:self-start"
-          disabled={isPending || Object.keys(selections).length === 0}
-          onClick={confirmGroupSelection}
-          type="button"
-        >
-          {isPending ? "Enviando..." : "Confirmar selección"}
-        </button>
-      ) : null}
+      <button
+        className="h-11 w-full rounded-md border border-secondary bg-secondary px-4 text-sm font-semibold text-surface transition hover:bg-secondary/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:self-start"
+        disabled={isPending || !hasChanges}
+        onClick={submitResponse}
+        type="button"
+      >
+        {isPending ? "Enviando..." : "Enviar respuesta"}
+      </button>
 
       <ThanksModal
         confirmed={modal?.confirmed}
