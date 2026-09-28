@@ -7,10 +7,13 @@ import { computeBudgetSummary } from "@/lib/events/events";
 import { getCurrentUser } from "@/lib/firebase/session";
 import {
   addExpense,
+  addExpensePayment,
   addPaymentResponsible,
   removeExpense,
+  removeExpensePayment,
   saveBudget,
   updateExpense,
+  updateExpensePayment,
 } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +42,24 @@ export default async function PresupuestoPage() {
   const responsibles = event.paymentResponsibles || [];
   const summary = computeBudgetSummary(event);
   const pendingToPay = Math.max(summary.totalSpent - summary.totalPaid, 0);
+  const hasBudget = summary.budget > 0;
+  const spentPercent = hasBudget
+    ? Math.min(100, Math.round((summary.totalSpent / summary.budget) * 100))
+    : 0;
+  const spentRawPercent = hasBudget
+    ? (summary.totalSpent / summary.budget) * 100
+    : 0;
+  const overBudget = hasBudget && summary.balance < 0;
+  const spentFill = !hasBudget
+    ? "bg-accent"
+    : overBudget
+      ? "bg-danger"
+      : spentRawPercent >= 80
+        ? "bg-warning"
+        : "bg-brand";
+  const spentCaption = !hasBudget
+    ? "Definí el presupuesto para ver el avance."
+    : `Gastaste el ${Math.round(spentRawPercent)}% de tu presupuesto`;
 
   return (
     <ToastProvider>
@@ -51,42 +72,64 @@ export default async function PresupuestoPage() {
         </p>
       </header>
 
-      <div className="mt-7 grid gap-4 sm:grid-cols-3">
+      <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <BudgetCard action={saveBudget} current={summary.budget} />
-        <div className="rounded-lg border border-accent bg-surface p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand">
-            Total gastado
+
+        <div className="rounded-lg border border-accent bg-surface p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand">
+            Costo total
           </p>
-          <p className="mt-3 text-2xl font-semibold tabular-nums text-ink">
+          <p className="mt-1.5 text-lg font-semibold tabular-nums text-ink">
             {formatMoney(summary.totalSpent)}
           </p>
-          <p className="mt-1 text-sm text-brand">
-            Suma de los costos cargados
-          </p>
+          <div className="mt-3">
+            <div
+              aria-label="Avance del presupuesto"
+              aria-valuemax={100}
+              aria-valuemin={0}
+              aria-valuenow={spentPercent}
+              className="h-2 w-full overflow-hidden rounded-full bg-accent/50"
+              role="progressbar"
+            >
+              <div
+                className={`h-full rounded-full ${spentFill}`}
+                style={{ width: `${spentPercent}%` }}
+              />
+            </div>
+            <p className="mt-2 text-xs leading-4 text-brand">{spentCaption}</p>
+          </div>
         </div>
-        <div className="rounded-lg border border-accent bg-surface p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand">
+        <div className="rounded-lg border border-accent bg-surface p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand">
             Pendiente de pago
           </p>
-          <p className="mt-3 text-2xl font-semibold tabular-nums text-ink">
+          <p className="mt-1.5 text-lg font-semibold tabular-nums text-ink">
             {formatMoney(pendingToPay)}
           </p>
-          <p className="mt-1 text-sm text-brand">
-            Lo que falta pagar (saldo)
+        </div>
+        <div className="rounded-lg border border-accent bg-surface p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand">
+            Margen restante
+          </p>
+          <p className="mt-1.5 text-lg font-semibold tabular-nums text-ink">
+            {formatMoney(summary.balance)}
           </p>
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-10">
         <ExpensesSheet
           addAction={addExpense}
+          addPaymentAction={addExpensePayment}
           addResponsibleAction={addPaymentResponsible}
           expenses={expenses}
           providers={providers}
           removeAction={removeExpense}
+          removePaymentAction={removeExpensePayment}
           responsibles={responsibles}
           storageKey={`expenses-sheet-columns:${user.uid}`}
           updateAction={updateExpense}
+          updatePaymentAction={updateExpensePayment}
         />
       </div>
     </ToastProvider>

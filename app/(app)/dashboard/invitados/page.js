@@ -12,6 +12,8 @@ import {
   assignGuestTable,
   removeGuest,
   removeGuestMember,
+  removeTable,
+  renameEventTable,
   saveEventTablePositions,
   saveEventTables,
 } from "../actions";
@@ -64,6 +66,8 @@ export default async function InvitadosPage() {
       <SeatingSection
         assignAction={assignGuestTable}
         confirmedGuests={event.confirmedGuests || []}
+        renameTableAction={renameEventTable}
+        removeTableAction={removeTable}
         savePositionsAction={saveEventTablePositions}
         tableCount={event.tableCount || 0}
         tables={event.tables || []}
