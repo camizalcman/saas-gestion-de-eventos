@@ -47,7 +47,7 @@ export default function SupplierModal({ action, useFirebaseStorage = false }) {
   return (
     <>
       <button
-        className="inline-flex h-11 w-full items-center justify-center border border-secondary bg-secondary px-4 text-sm font-semibold text-surface transition hover:bg-secondary/90 sm:w-auto"
+        className="inline-flex h-11 w-full items-center justify-center rounded-md border border-secondary bg-secondary px-4 text-sm font-semibold text-surface transition hover:bg-secondary/90 sm:w-auto"
         type="button"
         onClick={() => setOpen(true)}
       >
@@ -66,7 +66,7 @@ export default function SupplierModal({ action, useFirebaseStorage = false }) {
 
       {open ? (
         <div
-          aria-labelledby="supplier-modal-title"
+          aria-label="Agregar proveedor"
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-brand/70 p-4 sm:p-8"
           role="dialog"
@@ -84,9 +84,6 @@ export default function SupplierModal({ action, useFirebaseStorage = false }) {
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
                   Galeria de proveedores
                 </p>
-                <h2 className="mt-2 text-xl font-semibold text-ink" id="supplier-modal-title">
-                  Agregar proveedor
-                </h2>
               </div>
               <button
                 aria-label="Cerrar ventana"

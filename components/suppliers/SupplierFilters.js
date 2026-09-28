@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Check } from "lucide-react";
 import {
   SUPPLIER_CATEGORIES,
   SUPPLIER_PROVINCES,
@@ -12,14 +13,14 @@ export default function SupplierFilters({ filters }) {
   return (
     <form
       action="/dashboard/suppliers"
-      className="grid gap-4 border border-accent p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end"
+      className="grid min-w-0 gap-3 rounded-2xl border border-accent bg-surface p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end"
       method="get"
     >
       {filters.search ? <input name="search" type="hidden" value={filters.search} /> : null}
-      <label className="grid gap-2 text-sm font-semibold text-ink">
+      <label className="grid min-w-0 gap-2 text-sm font-semibold text-ink">
         <span>Categoria</span>
         <select
-          className="h-11 border border-accent bg-surface px-3 font-normal text-ink outline-none transition focus:border-secondary"
+          className="h-11 w-full min-w-0 rounded-lg border border-accent bg-surface px-3 font-normal text-ink outline-none transition focus:border-secondary"
           defaultValue={filters.category}
           name="category"
         >
@@ -32,10 +33,10 @@ export default function SupplierFilters({ filters }) {
         </select>
       </label>
 
-      <label className="grid gap-2 text-sm font-semibold text-ink">
+      <label className="grid min-w-0 gap-2 text-sm font-semibold text-ink">
         <span>Provincia</span>
         <select
-          className="h-11 border border-accent bg-surface px-3 font-normal text-ink outline-none transition placeholder:text-brand/60 focus:border-secondary"
+          className="h-11 w-full min-w-0 rounded-lg border border-accent bg-surface px-3 font-normal text-ink outline-none transition placeholder:text-brand/60 focus:border-secondary"
           defaultValue={filters.province}
           name="province"
         >
@@ -48,10 +49,10 @@ export default function SupplierFilters({ filters }) {
         </select>
       </label>
 
-      <label className="grid gap-2 text-sm font-semibold text-ink">
+      <label className="grid min-w-0 gap-2 text-sm font-semibold text-ink">
         <span>Localidad</span>
         <input
-          className="h-11 border border-accent bg-surface px-3 font-normal text-ink outline-none transition placeholder:text-brand/60 focus:border-secondary"
+          className="h-11 w-full min-w-0 rounded-lg border border-accent bg-surface px-3 font-normal text-ink outline-none transition placeholder:text-brand/60 focus:border-secondary"
           defaultValue={filters.locality}
           name="locality"
           placeholder="Ej: Godoy Cruz"
@@ -59,12 +60,14 @@ export default function SupplierFilters({ filters }) {
         />
       </label>
 
-      <div className="flex flex-col gap-2 sm:col-span-2 lg:col-span-1">
+      <div className="flex min-w-0 flex-col items-center gap-2 sm:col-span-2 lg:col-span-1">
         <button
-          className="h-11 border border-secondary bg-secondary px-4 text-sm font-semibold text-surface transition hover:bg-secondary/90"
+          aria-label="Aplicar filtros"
+          className="inline-flex size-11 items-center justify-center rounded-full border border-secondary bg-secondary text-surface transition hover:bg-secondary/90"
+          title="Aplicar filtros"
           type="submit"
         >
-          Aplicar filtros
+          <Check aria-hidden="true" className="size-4" />
         </button>
         {hasFilters ? (
           <Link

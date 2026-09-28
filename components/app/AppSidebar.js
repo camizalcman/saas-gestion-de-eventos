@@ -84,7 +84,7 @@ export default function AppSidebar({ events, activeEventId, isAdmin }) {
       />
 
       <aside
-        className={`fixed left-0 top-0 z-40 flex h-screen flex-col bg-brand text-surface transition-all duration-300 lg:flex lg:z-auto lg:h-screen lg:border-r lg:border-surface/15 ${
+        className={`fixed left-0 top-0 z-40 flex h-screen flex-col bg-brand text-surface transition-all duration-300 lg:flex lg:z-40 lg:h-screen lg:border-r lg:border-surface/15 ${
           expanded ? "w-64" : "hidden"
         } ${
           desktopExpanded ? "lg:w-64" : "lg:w-[84px]"

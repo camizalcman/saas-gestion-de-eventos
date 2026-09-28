@@ -113,12 +113,6 @@ export default function PublicInvitation({
           ) : null}
         </div>
 
-        {target > 0 ? (
-          <div className="mt-12">
-            <Countdown target={target} palette={palette} />
-          </div>
-        ) : null}
-
         {invitation.venue ? (
           <section
             className="mt-20 flex flex-col items-center gap-3 border-t pt-12 text-center"
@@ -146,6 +140,20 @@ export default function PublicInvitation({
               </a>
             ) : null}
           </section>
+        ) : null}
+
+        {guest && respondAction && token ? (
+          <InvitationResponse
+            guest={guest}
+            respondAction={respondAction}
+            token={token}
+          />
+        ) : null}
+
+        {target > 0 ? (
+          <div className="mt-12">
+            <Countdown target={target} palette={palette} />
+          </div>
         ) : null}
 
         {invitation.dressCode ? (
@@ -196,17 +204,11 @@ export default function PublicInvitation({
           </p>
         ) : null}
 
-        <div className="mt-16">
-          {guest && respondAction && token ? (
-            <InvitationResponse
-              guest={guest}
-              respondAction={respondAction}
-              token={token}
-            />
-          ) : (
+        {!guest ? (
+          <div className="mt-16">
             <InvitationActions eventId={event.id} palette={palette} />
-          )}
-        </div>
+          </div>
+        ) : null}
 
         <p className="mt-10 text-center text-xs" style={{ color: secondary }}>
           {event.title}

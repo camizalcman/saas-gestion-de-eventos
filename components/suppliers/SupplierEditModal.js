@@ -47,7 +47,7 @@ export default function SupplierEditModal({ action, supplier, useFirebaseStorage
   return (
     <>
       <button
-        className="h-9 border border-accent px-3 text-sm font-semibold text-ink transition hover:border-secondary hover:bg-secondary/10"
+        className="h-9 rounded-full border border-accent px-3 text-sm font-semibold text-ink transition hover:border-secondary hover:bg-secondary/10"
         onClick={() => setOpen(true)}
         type="button"
       >

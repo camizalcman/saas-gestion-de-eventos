@@ -50,68 +50,58 @@ export default async function SuppliersPage({ searchParams }) {
       <Navbar user={user} profile={profile} />
       <main className="min-h-screen bg-surface text-ink">
         <div className="mx-auto w-full max-w-6xl px-4 py-7 sm:px-6 lg:px-10">
-          <div className="flex items-center justify-between border-b border-accent pb-6">
-            <Link
-              className="inline-flex items-center gap-2 text-sm font-semibold text-secondary transition hover:text-ink"
-              href="/"
-            >
-              <ArrowLeft className="size-4" />
-              Volver al inicio
-            </Link>
+
+          <div className="flex items-center justify-between  pb-6">
             <Link
               className="inline-flex items-center gap-2 text-sm font-semibold text-secondary transition hover:text-ink"
               href="/dashboard"
             >
-              Ir al dashboard
-              <ArrowLeft className="size-4 rotate-180" />
+              <ArrowLeft className="size-4" />
+              Volver al dashboard
             </Link>
           </div>
 
-          <header className="mt-6 border-b border-accent pb-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
-              Recursos para tus eventos
-            </p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-4xl">
-              Galeria de proveedores
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-brand">
-              Explora proveedores de servicios para encontrar opciones para tus proximos eventos.
-            </p>
+          <header className="mt-6 pb-6">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+
+              <div>
+                <h1 className="mt-2 text-3xl font-semibold tracking-normal text-ink sm:text-4xl">
+                  Galeria de proveedores
+                </h1>
+                <p className="mt-3 max-w-2xl text-md leading-6 text-brand">
+                  Explora proveedores de servicios para encontrar opciones para tus proximos eventos.
+                </p>
+              </div>
+
+              {isAdmin ? (
+                <div className="flex flex-col gap-2 w-[20%]">
+                  <SupplierModal
+                    action={createSupplierAction}
+                    useFirebaseStorage={process.env.FIREBASE_STORAGE === "true"}
+                  />
+                  <p className="text-sm leading-6 text-brand text-right">
+                    Este proveedor quedara disponible en la galeria general.
+                  </p>
+                </div>
+              ) : null}
+
+            </div>
+
           </header>
 
-          {isAdmin ? (
-            <section className="mt-8 flex flex-col gap-4 border-b border-accent pb-7 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-ink">Agregar proveedor</h2>
-                <p className="mt-1 text-sm leading-6 text-brand">
-                  Este proveedor quedara disponible en la galeria general.
-                </p>
+          <section className="mt-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 flex-1">
+                <SupplierFiltersToggle filters={filters} />
               </div>
-              <SupplierModal
-                action={createSupplierAction}
-                useFirebaseStorage={process.env.FIREBASE_STORAGE === "true"}
+              <SupplierSearchBar
+                defaultValue={filters.search}
+                category={filters.category}
+                province={filters.province}
+                locality={filters.locality}
               />
-            </section>
-          ) : null}
-
-          <section className="mt-8 border-b border-accent pb-7">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-ink">Buscar proveedores</h2>
-                <p className="mt-1 text-sm leading-6 text-brand">
-                  Filtra la galeria por categoria y ubicacion.
-                </p>
-              </div>
-              <SupplierFiltersToggle filters={filters} />
             </div>
           </section>
-
-          <SupplierSearchBar
-            defaultValue={filters.search}
-            category={filters.category}
-            province={filters.province}
-            locality={filters.locality}
-          />
 
           {events.length === 0 ? (
             <div className="mt-8 border border-accent bg-surface p-6 text-sm leading-6 text-brand">

@@ -100,7 +100,7 @@ export default function SupplierAddButton({ action, supplierName, events }) {
   return (
     <>
       <button
-        className="h-9 border border-secondary bg-secondary px-3 text-sm font-semibold text-surface transition hover:bg-secondary/90"
+        className="h-9 rounded-full border border-secondary bg-secondary px-3 text-sm font-semibold text-surface transition hover:bg-secondary/90"
         onClick={hasMultipleEvents ? openSelector : () => { setSelectedEvent(events[0]); setStep("confirming"); }}
         type="button"
       >

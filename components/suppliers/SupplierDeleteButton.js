@@ -60,7 +60,7 @@ export default function SupplierDeleteButton({ action, supplierName }) {
   return (
     <>
       <button
-        className="h-9 border border-brand/40 px-3 text-sm font-semibold text-brand transition hover:bg-brand/10"
+        className="h-9 rounded-full border border-brand/40 px-3 text-sm font-semibold text-brand transition hover:bg-brand/10"
         onClick={() => setOpen(true)}
         type="button"
       >

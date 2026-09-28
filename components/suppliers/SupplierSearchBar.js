@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Search } from "lucide-react";
 
 export default function SupplierSearchBar({ defaultValue, category, province, locality }) {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function SupplierSearchBar({ defaultValue, category, province, lo
     <style>{`input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }`}</style>
     <form
       action={buildBase()}
-      className="mt-8 flex gap-3"
+      className="flex w-full gap-3 sm:w-[30%] sm:max-w-[30%]"
       method="get"
     >
       {category ? <input name="category" type="hidden" value={category} /> : null}
@@ -34,7 +35,7 @@ export default function SupplierSearchBar({ defaultValue, category, province, lo
       {locality ? <input name="locality" type="hidden" value={locality} /> : null}
       <div className="relative min-w-0 flex-1">
         <input
-          className="h-11 w-full border border-accent bg-surface px-4 pr-10 text-sm text-ink outline-none transition placeholder:text-brand/60 focus:border-secondary"
+          className="h-11 w-full rounded-full border border-accent bg-surface px-4 pr-10 text-sm text-ink outline-none transition placeholder:text-brand/60 focus:border-secondary"
           name="search"
           onChange={(e) => setValue(e.target.value)}
           placeholder="Buscar por nombre, categoría o ubicación..."
@@ -54,10 +55,12 @@ export default function SupplierSearchBar({ defaultValue, category, province, lo
         ) : null}
       </div>
       <button
-        className="h-11 shrink-0 border border-secondary bg-secondary px-5 text-sm font-semibold text-surface transition hover:bg-secondary/90"
+        aria-label="Buscar proveedores"
+        className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-secondary bg-secondary text-surface transition hover:bg-secondary/90"
+        title="Buscar proveedores"
         type="submit"
       >
-        Buscar
+        <Search aria-hidden="true" className="size-4" />
       </button>
     </form>
     </>
