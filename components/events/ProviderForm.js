@@ -7,22 +7,27 @@ import { SUPPLIER_CATEGORIES } from "@/lib/suppliers/constants";
 const inputClass =
   "h-11 w-full min-w-0 rounded-md border border-accent bg-surface px-3 text-ink outline-none transition focus:border-secondary";
 
-export default function ProviderForm({ action }) {
+export default function ProviderForm({ action, updateAction, provider, onCancel }) {
   const formRef = useRef(null);
   const showToast = useToast();
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const isEditing = Boolean(provider);
 
   function handleSubmit(event) {
     event.preventDefault();
     setError("");
     const formData = new FormData(event.currentTarget);
+    if (isEditing) {
+      formData.set("providerId", provider.id);
+    }
 
     startTransition(async () => {
       try {
-        await action(formData);
+        await (isEditing ? updateAction(formData) : action(formData));
         formRef.current?.reset();
-        showToast("Proveedor agregado a tu evento");
+        onCancel?.();
+        showToast(isEditing ? "Proveedor actualizado" : "Proveedor agregado a tu evento");
       } catch (submitError) {
         setError(submitError?.message || "No se pudo agregar el proveedor.");
       }
@@ -31,6 +36,7 @@ export default function ProviderForm({ action }) {
 
   return (
     <form
+      key={provider?.id || "new-provider"}
       className="grid min-w-0 gap-3 rounded-xl border border-accent p-4 sm:p-5"
       onSubmit={handleSubmit}
       ref={formRef}
@@ -47,12 +53,18 @@ export default function ProviderForm({ action }) {
           placeholder="Ej. Salón Teresita"
           required
           type="text"
+          defaultValue={provider?.name || ""}
         />
       </label>
 
       <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Categoria</span>
-        <select className={inputClass} name="category" required>
+        <select
+          className={inputClass}
+          defaultValue={provider?.category || SUPPLIER_CATEGORIES[0]?.value}
+          name="category"
+          required
+        >
           {SUPPLIER_CATEGORIES.map((category) => (
             <option key={category.value} value={category.value}>
               {category.label}
@@ -69,6 +81,7 @@ export default function ProviderForm({ action }) {
           name="whatsapp"
           placeholder="Ej. +54 9 11 2345-6789"
           type="text"
+          defaultValue={provider?.whatsapp || ""}
         />
       </label>
 
@@ -81,6 +94,7 @@ export default function ProviderForm({ action }) {
             name="instagram"
             placeholder="Ej. @salonteresita"
             type="text"
+            defaultValue={provider?.instagram || ""}
           />
         </label>
         <label className="grid gap-2 text-sm font-medium text-ink">
@@ -91,6 +105,7 @@ export default function ProviderForm({ action }) {
             name="website"
             placeholder="Ej. https://..."
             type="text"
+            defaultValue={provider?.website || ""}
           />
         </label>
       </div>
@@ -101,13 +116,31 @@ export default function ProviderForm({ action }) {
         </p>
       ) : null}
 
-      <button
-        className="h-11 w-full rounded-md border border-secondary bg-secondary px-4 text-sm font-semibold text-surface transition hover:bg-secondary/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:self-start"
-        disabled={isPending}
-        type="submit"
-      >
-        {isPending ? "Agregando..." : "Agregar proveedor"}
-      </button>
+      <div className="flex flex-wrap gap-3">
+        <button
+          className="h-11 w-full rounded-md border border-secondary bg-secondary px-4 text-sm font-semibold text-surface transition hover:bg-secondary/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:self-start"
+          disabled={isPending}
+          type="submit"
+        >
+          {isPending
+            ? isEditing
+              ? "Guardando..."
+              : "Agregando..."
+            : isEditing
+              ? "Guardar proveedor"
+              : "Agregar proveedor"}
+        </button>
+        {isEditing ? (
+          <button
+            className="h-11 w-full rounded-md border border-accent bg-surface px-4 text-sm font-semibold text-ink transition hover:bg-accent/40 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+            disabled={isPending}
+            onClick={onCancel}
+            type="button"
+          >
+            Cancelar
+          </button>
+        ) : null}
+      </div>
     </form>
   );
 }

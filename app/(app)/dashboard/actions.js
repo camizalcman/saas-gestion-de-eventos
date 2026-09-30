@@ -35,6 +35,7 @@ import {
   updateEventExpense,
   updateEventExpensePayment,
   updateEventGuestField,
+  updateEventProvider,
   updateEventScheduleItem,
   updateEventPaymentResponsible,
   updateUserEvent,
@@ -498,6 +499,18 @@ export async function addProvider(formData) {
   const { user, event } = await requireActiveEvent();
   const provider = parseProviderForm(formData);
   await addEventProvider(user.uid, event.id, provider);
+  revalidatePath("/dashboard/proveedores", "layout");
+}
+
+export async function updateProvider(formData) {
+  const { user, event } = await requireActiveEvent();
+  const providerId = requiredText(formData.get("providerId"), {
+    label: "El proveedor",
+    max: 200,
+  });
+  const provider = parseProviderForm(formData);
+
+  await updateEventProvider(user.uid, event.id, providerId, provider);
   revalidatePath("/dashboard/proveedores", "layout");
 }
 
