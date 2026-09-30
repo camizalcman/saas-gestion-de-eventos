@@ -1,9 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
-import { Search, ChevronDown, Trash2, X, Check } from "lucide-react";
+import {
+  Search,
+  ChevronDown,
+  Pencil,
+  Plus,
+  Trash2,
+  X,
+  Check,
+} from "lucide-react";
 import ExpenseRemoveButton from "./ExpenseRemoveButton";
 import ExpenseStatusBadge from "./ExpenseStatusBadge";
 
@@ -21,16 +36,31 @@ function deriveStatus(cost, paidAmount) {
   return "parcial";
 }
 
-function formatMoney(value) {
+function formatAmount(value) {
   try {
     return new Intl.NumberFormat("es-AR", {
-      style: "currency",
-      currency: "ARS",
       maximumFractionDigits: 0,
     }).format(toAmount(value));
   } catch {
-    return `$${toAmount(value).toLocaleString("es-AR")}`;
+    return toAmount(value).toLocaleString("es-AR");
   }
+}
+
+function formatPaymentDate(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || ""));
+
+  if (!match) {
+    return "";
+  }
+
+  return `${match[3]}/${match[2]}`;
+}
+
+function todayIsoDate() {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
 }
 
 const thClass =
@@ -38,6 +68,464 @@ const thClass =
 
 const cellInputClass =
   "w-full min-w-0 bg-transparent px-1.5 py-1 text-sm text-ink outline-none transition placeholder:text-brand/60 focus:bg-surface";
+
+function PesoSign({ className = "" }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`shrink-0 text-sm tabular-nums ${className}`}
+    >
+      $
+    </span>
+  );
+}
+
+const moneyInputClass =
+  "h-10 w-full min-w-0 rounded-md border border-accent bg-surface pl-7 pr-2 text-right text-sm tabular-nums text-ink outline-none transition placeholder:text-brand/60 focus:border-secondary focus:ring-2 focus:ring-secondary/50";
+
+const moneyInputWrapperClass = "relative block";
+
+function MoneyInput({ className = "", ...props }) {
+  return (
+    <span className={moneyInputWrapperClass}>
+      <PesoSign className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-brand/80" />
+      <input className={`${moneyInputClass} ${className}`} {...props} />
+    </span>
+  );
+}
+
+function ExpensePaymentModal({
+  addAction,
+  expense,
+  onClose,
+  removeAction,
+  updateAction,
+}) {
+  const router = useRouter();
+  const showToast = useToast();
+  const [error, setError] = useState("");
+  const [isPending, startTransition] = useTransition();
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState(() => todayIsoDate());
+  const [editingId, setEditingId] = useState(null);
+  const [editAmount, setEditAmount] = useState("");
+  const [editDate, setEditDate] = useState(() => todayIsoDate());
+  const [isEditing, startEditingTransition] = useTransition();
+  const [payments, setPayments] = useState(() =>
+    Array.isArray(expense.payments) ? expense.payments : [],
+  );
+  const amountRef = useRef(null);
+  const optimisticIdRef = useRef(0);
+  const removedIdsRef = useRef(new Set());
+
+  const serverPayments = useMemo(
+    () => (Array.isArray(expense.payments) ? expense.payments : []),
+    [expense.payments],
+  );
+  const serverKey = serverPayments
+    .map((payment) => `${payment?.id}:${payment?.amount}:${payment?.date}`)
+    .join("|");
+
+  useEffect(() => {
+    setPayments((prev) => {
+      const known = new Set(prev.map((payment) => payment?.id));
+      const incoming = serverPayments.filter(
+        (payment) =>
+          !known.has(payment?.id) && !removedIdsRef.current.has(payment?.id),
+      );
+
+      return incoming.length > 0 ? [...prev, ...incoming] : prev;
+    });
+  }, [serverKey, serverPayments]);
+
+  const paid = payments.reduce(
+    (sum, payment) => sum + toAmount(payment?.amount),
+    0,
+  );
+  const cost = toAmount(expense.cost);
+  const remaining = Math.max(cost - paid, 0);
+  const busy = isPending || isEditing;
+
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.key === "Escape" && !busy) {
+        setError("");
+        onClose();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    amountRef.current?.focus();
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [busy, onClose]);
+
+  function handleBackdropClick(event) {
+    if (event.target === event.currentTarget && !busy) {
+      setError("");
+      onClose();
+    }
+  }
+
+  function startEditing(payment) {
+    setError("");
+    setEditingId(payment.id);
+    setEditAmount(String(payment.amount));
+    setEditDate(payment.date || todayIsoDate());
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    setError("");
+
+    const formData = new FormData(event.currentTarget);
+    optimisticIdRef.current += 1;
+    const optimisticId = `optimistic-${optimisticIdRef.current}`;
+
+    setPayments((prev) => [
+      ...prev,
+      {
+        id: optimisticId,
+        amount: toAmount(formData.get("amount")),
+        date: String(formData.get("date") || ""),
+        createdAt: null,
+      },
+    ]);
+
+    startTransition(async () => {
+      try {
+        const created = await addAction(formData);
+        setPayments((prev) => {
+          const rest = prev.filter((payment) => payment.id !== optimisticId);
+
+          if (!created) return rest;
+
+          return rest.some((payment) => payment.id === created.id)
+            ? rest
+            : [...rest, created];
+        });
+        setAmount("");
+        amountRef.current?.focus();
+        showToast("Pago registrado");
+        router.refresh();
+      } catch (submitError) {
+        setPayments((prev) =>
+          prev.filter((payment) => payment.id !== optimisticId),
+        );
+        setError(
+          submitError?.message || "No se pudo registrar el pago.",
+        );
+      }
+    });
+  }
+
+  function handleEditSubmit(event, payment) {
+    event.preventDefault();
+    setError("");
+
+    const formData = new FormData(event.currentTarget);
+    const nextAmount = toAmount(formData.get("amount"));
+    const nextDate = String(formData.get("date") || "");
+
+    setPayments((prev) =>
+      prev.map((entry) =>
+        entry.id === payment.id ? { ...entry, amount: nextAmount, date: nextDate } : entry,
+      ),
+    );
+    setEditingId(null);
+
+    startEditingTransition(async () => {
+      try {
+        const updated = await updateAction(payment.id, formData);
+        if (updated) {
+          setPayments((prev) =>
+            prev.map((entry) => (entry.id === payment.id ? updated : entry)),
+          );
+        } else {
+          setPayments((prev) =>
+            prev.map((entry) =>
+              entry.id === payment.id ? { ...payment } : entry,
+            ),
+          );
+        }
+        showToast("Pago actualizado");
+        router.refresh();
+      } catch (submitError) {
+        setPayments((prev) =>
+          prev.map((entry) =>
+            entry.id === payment.id ? { ...entry, ...payment } : entry,
+          ),
+        );
+        setEditingId(payment.id);
+        setEditAmount(String(nextAmount));
+        setEditDate(nextDate);
+        setError(
+          submitError?.message || "No se pudo actualizar el pago.",
+        );
+      }
+    });
+  }
+
+  function handleRemove(payment) {
+    if (busy) return;
+    setError("");
+
+    removedIdsRef.current.add(payment.id);
+    setPayments((prev) => prev.filter((entry) => entry.id !== payment.id));
+
+    startTransition(async () => {
+      try {
+        await removeAction(payment.id);
+        showToast("Pago eliminado");
+        router.refresh();
+      } catch (submitError) {
+        removedIdsRef.current.delete(payment.id);
+        setPayments((prev) =>
+          prev.some((entry) => entry.id === payment.id)
+            ? prev
+            : [...prev, payment],
+        );
+        setError(
+          submitError?.message || "No se pudo eliminar el pago.",
+        );
+      }
+    });
+  }
+
+  return (
+    <div
+      aria-labelledby="payment-modal-title"
+      aria-modal="true"
+      className="fixed inset-0 z-50 grid place-items-center bg-brand/70 p-4"
+      onClick={handleBackdropClick}
+      role="dialog"
+    >
+      <div className="w-full max-w-2xl rounded-lg border border-accent bg-surface p-6 shadow-xl">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2
+              className="text-lg font-semibold text-ink"
+              id="payment-modal-title"
+            >
+              Pagos de {expense.title}
+            </h2>
+            <div className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+              <span className="flex items-center gap-1.5 text-brand">
+                Costo
+                <span className="flex items-center gap-1 font-bold tabular-nums text-ink">
+                  <PesoSign />
+                  {formatAmount(cost)}
+                </span>
+              </span>
+              <span className="flex items-center gap-1.5 text-brand">
+                Pagado
+                <span className="flex items-center gap-1 font-semibold tabular-nums text-success">
+                  <PesoSign />
+                  {formatAmount(paid)}
+                </span>
+              </span>
+              <span className="flex items-center gap-1.5 text-brand">
+                Pendiente
+                <span className="flex items-center gap-1 font-semibold tabular-nums text-danger">
+                  <PesoSign />
+                  {formatAmount(remaining)}
+                </span>
+              </span>
+            </div>
+          </div>
+          <button
+            aria-label="Cerrar ventana"
+            className="shrink-0 text-brand transition hover:text-ink"
+            disabled={busy}
+            onClick={() => {
+              setError("");
+              onClose();
+            }}
+            type="button"
+          >
+            <X aria-hidden="true" className="size-5" />
+          </button>
+        </div>
+
+        {payments.length > 0 ? (
+          <ul className="mt-4 grid gap-1.5">
+            {payments.map((payment, index) => {
+              const rowKey = `${payment?.id ?? "payment"}-${index}`;
+
+              return editingId === payment.id ? (
+                <li
+                  className="rounded-md border border-secondary bg-accent/20 px-3 py-2"
+                  key={rowKey}
+                >
+                  <form
+                    className="grid gap-2"
+                    onSubmit={(event) => handleEditSubmit(event, payment)}
+                  >
+                    <div className="flex flex-wrap items-end gap-2">
+                      <label className="grid min-w-0 flex-1 gap-1 text-xs font-medium text-brand">
+                        Monto del pago
+                        <MoneyInput
+                          aria-label="Monto del pago"
+                          max={10000000000}
+                          min={1}
+                          name="amount"
+                          onChange={(event) =>
+                            setEditAmount(event.target.value)
+                          }
+                          required
+                          step={1}
+                          type="number"
+                          value={editAmount}
+                        />
+                      </label>
+                      <label className="grid gap-1 text-xs font-medium text-brand">
+                        Fecha del pago
+                        <input
+                          className="h-10 rounded-md border border-accent bg-surface px-2 text-sm text-ink outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/50"
+                          max={todayIsoDate()}
+                          name="date"
+                          onChange={(event) => setEditDate(event.target.value)}
+                          required
+                          type="date"
+                          value={editDate}
+                        />
+                      </label>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <button
+                        className="h-8 rounded-md border border-accent bg-surface px-3 text-xs font-semibold text-ink transition hover:bg-accent/40 disabled:cursor-not-allowed disabled:opacity-60"
+                        disabled={isEditing}
+                        onClick={() => setEditingId(null)}
+                        type="button"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        className="h-8 rounded-md border border-secondary bg-secondary px-3 text-xs font-semibold text-ink transition hover:bg-secondary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                        disabled={isEditing}
+                        type="submit"
+                      >
+                        {isEditing ? "Guardando..." : "Guardar"}
+                      </button>
+                    </div>
+                  </form>
+                </li>
+              ) : (
+                <li
+                  className="flex items-center justify-between gap-3 rounded-md border border-accent bg-accent/20 px-3 py-2 text-sm"
+                  key={rowKey}
+                >
+                  <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-ink">
+                    <span className="flex items-center gap-1 font-semibold tabular-nums">
+                      <PesoSign />
+                      {formatAmount(payment.amount)}
+                    </span>
+                    <span className="text-xs text-brand">
+                      {payment.date
+                        ? `el ${formatPaymentDate(payment.date)}`
+                        : "sin fecha"}
+                    </span>
+                  </span>
+                  <span className="flex shrink-0 items-center gap-1.5">
+                    <button
+                      aria-label={`Editar el pago de ${formatAmount(payment.amount)}`}
+                      className="grid size-7 place-items-center rounded-md border border-accent text-brand transition hover:bg-accent/40 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={busy}
+                      onClick={() => startEditing(payment)}
+                      title="Editar este pago"
+                      type="button"
+                    >
+                      <Pencil aria-hidden="true" className="size-3.5" />
+                    </button>
+                    <button
+                      aria-label={`Quitar el pago de ${formatAmount(payment.amount)}`}
+                      className="grid size-7 place-items-center rounded-md border border-accent text-brand transition hover:bg-brand/10 hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={busy}
+                      onClick={() => handleRemove(payment)}
+                      title="Quitar este pago"
+                      type="button"
+                    >
+                      <Trash2 aria-hidden="true" className="size-3.5" />
+                    </button>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="mt-4 border border-dashed border-accent px-3 py-4 text-center text-sm text-brand">
+            Todavía no hay pagos registrados.
+          </p>
+        )}
+
+        <form
+          className="mt-5 grid gap-3 border-t border-accent pt-5"
+          onSubmit={handleSubmit}
+        >
+          <p className="text-sm font-semibold text-ink">Registrar un pago</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="grid min-w-0 gap-1.5 text-sm font-medium text-ink">
+              Monto pagado
+              <MoneyInput
+                max={10000000000}
+                min={1}
+                name="amount"
+                onChange={(event) => setAmount(event.target.value)}
+                placeholder="Ej. 20000"
+                ref={amountRef}
+                required
+                step={1}
+                type="number"
+                value={amount}
+              />
+            </label>
+            <label className="grid min-w-0 gap-1.5 text-sm font-medium text-ink">
+              Fecha del pago
+              <input
+                className="h-10 w-full min-w-0 rounded-md border border-accent bg-surface px-2 text-sm text-ink outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/50"
+                max={todayIsoDate()}
+                name="date"
+                onChange={(event) => setDate(event.target.value)}
+                required
+                type="date"
+                value={date}
+              />
+            </label>
+          </div>
+
+          {error ? (
+            <p className="rounded-md border border-brand/40 bg-brand/10 px-3 py-2 text-sm text-brand">
+              {error}
+            </p>
+          ) : null}
+
+          <div className="mt-1 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button
+              className="h-10 rounded-md border border-accent bg-surface px-4 text-sm font-semibold text-ink transition hover:bg-accent/40 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={busy}
+              onClick={() => {
+                setError("");
+                onClose();
+              }}
+              type="button"
+            >
+              Cancelar
+            </button>
+            <button
+              className="h-10 rounded-md border border-secondary bg-secondary px-4 text-sm font-semibold text-ink transition hover:bg-secondary/90 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={busy || amount.trim() === ""}
+              type="submit"
+            >
+              {isPending ? "Guardando..." : "Agregar pago"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 const cellSelectClass =
   "w-full min-w-0 cursor-pointer bg-transparent px-1.5 py-1 text-sm text-ink outline-none transition focus:bg-surface";
@@ -60,9 +548,9 @@ const filterPillClass =
 const DEFAULT_COLUMN_WIDTHS = {
   title: 190,
   provider: 150,
-  cost: 115,
+  cost: 130,
   status: 115,
-  paid: 115,
+  paid: 150,
   pending: 115,
   responsible: 180,
   notes: 180,
@@ -127,9 +615,12 @@ export default function ExpensesSheet({
   providers,
   responsibles,
   addAction,
+  addPaymentAction,
   addResponsibleAction,
   updateAction,
   removeAction,
+  removePaymentAction,
+  updatePaymentAction,
   storageKey,
 }) {
   const router = useRouter();
@@ -147,6 +638,7 @@ export default function ExpensesSheet({
   const [newResponsibles, setNewResponsibles] = useState([]);
   const [creatingFor, setCreatingFor] = useState(null);
   const [savingRow, setSavingRow] = useState(null);
+  const [paymentForId, setPaymentForId] = useState(null);
   const [error, setError] = useState("");
   const [, startTransition] = useTransition();
 
@@ -260,8 +752,9 @@ export default function ExpensesSheet({
       }
       if (statusFilter.length > 0) {
         const cost = draft.cost ?? String(expense.cost);
-        const paid = draft.paidAmount ?? String(expense.paidAmount);
-        if (!statusFilter.includes(deriveStatus(cost, paid))) return false;
+        if (!statusFilter.includes(deriveStatus(cost, expense.paidAmount))) {
+          return false;
+        }
       }
       return true;
     });
@@ -332,7 +825,6 @@ export default function ExpensesSheet({
     formData.set("title", draft.title ?? expense.title);
     formData.set("providerId", draft.providerId ?? expense.providerId);
     formData.set("cost", draft.cost ?? String(expense.cost));
-    formData.set("paidAmount", draft.paidAmount ?? String(expense.paidAmount));
     formData.set("responsibleId", draft.responsibleId ?? expense.responsibleId);
     formData.set("notes", draft.notes ?? expense.notes ?? "");
 
@@ -470,14 +962,23 @@ export default function ExpensesSheet({
     });
   }
 
+  const closePaymentModal = useCallback(() => {
+    setPaymentForId(null);
+  }, []);
+
+  const paymentFor = useMemo(
+    () => expenses.find((expense) => expense.id === paymentForId) || null,
+    [expenses, paymentForId],
+  );
+
   const totals = filteredExpenses.reduce(
     (acc, expense) => {
       const draft = drafts[expense.id] || {};
-      acc.cost += toAmount(draft.cost ?? String(expense.cost));
-      acc.paid += toAmount(draft.paidAmount ?? String(expense.paidAmount));
-      acc.pending +=
-        toAmount(draft.cost ?? String(expense.cost)) -
-        toAmount(draft.paidAmount ?? String(expense.paidAmount));
+      const cost = toAmount(draft.cost ?? String(expense.cost));
+      const paid = toAmount(expense.paidAmount);
+      acc.cost += cost;
+      acc.paid += paid;
+      acc.pending += cost - paid;
       return acc;
     },
     { cost: 0, paid: 0, pending: 0 },
@@ -618,7 +1119,7 @@ export default function ExpensesSheet({
               const title = draft.title ?? expense.title;
               const providerId = draft.providerId ?? expense.providerId;
               const cost = draft.cost ?? String(expense.cost);
-              const paid = draft.paidAmount ?? String(expense.paidAmount);
+              const paid = String(expense.paidAmount);
               const responsibleId = draft.responsibleId ?? expense.responsibleId;
               const notes = draft.notes ?? expense.notes ?? "";
               const dirty = Object.keys(draft).length > 0;
@@ -695,33 +1196,36 @@ export default function ExpensesSheet({
                     </select>
                   </td>
                   <td className="px-1 py-1">
-                    <input
-                      className={`${cellInputClass} text-right`}
-                      disabled={rowDisabled}
-                      max={10000000000}
-                      min={0}
-                      name="cost"
-                      onChange={(event) =>
-                        handleFieldChange(
-                          event,
-                          expense,
-                          "cost",
-                          String(expense.cost),
-                        )
-                      }
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") {
-                          event.preventDefault();
-                          saveRow(expense);
-                        } else if (event.key === "Escape") {
-                          discardRow(expense.id);
+                    <div className="flex items-center gap-1">
+                      <PesoSign className="text-ink" />
+                      <input
+                        className={`${cellInputClass} text-right`}
+                        disabled={rowDisabled}
+                        max={10000000000}
+                        min={0}
+                        name="cost"
+                        onChange={(event) =>
+                          handleFieldChange(
+                            event,
+                            expense,
+                            "cost",
+                            String(expense.cost),
+                          )
                         }
-                      }}
-                      onBlur={(event) => handleCellBlur(event, expense)}
-                      step={1}
-                      type="number"
-                      value={cost}
-                    />
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            saveRow(expense);
+                          } else if (event.key === "Escape") {
+                            discardRow(expense.id);
+                          }
+                        }}
+                        onBlur={(event) => handleCellBlur(event, expense)}
+                        step={1}
+                        type="number"
+                        value={cost}
+                      />
+                    </div>
                   </td>
                   <td className="px-2 py-1.5 align-middle">
                     <ExpenseStatusBadge status={status} />
@@ -732,43 +1236,33 @@ export default function ExpensesSheet({
                     ) : null}
                   </td>
                   <td className="px-1 py-1">
-                    <input
-                      className={`${cellInputClass} text-right`}
-                      disabled={rowDisabled}
-                      max={10000000000}
-                      min={0}
-                      name="paidAmount"
-                      onChange={(event) =>
-                        handleFieldChange(
-                          event,
-                          expense,
-                          "paidAmount",
-                          String(expense.paidAmount),
-                        )
-                      }
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") {
-                          event.preventDefault();
-                          saveRow(expense);
-                        } else if (event.key === "Escape") {
-                          discardRow(expense.id);
-                        }
-                      }}
-                      onBlur={(event) => handleCellBlur(event, expense)}
-                      step={1}
-                      type="number"
-                      value={paid}
-                    />
+                    <div className="flex items-center justify-end gap-1">
+                      <PesoSign className="text-ink" />
+                      <span className="min-w-0 truncate text-right text-sm tabular-nums text-ink">
+                        {formatAmount(expense.paidAmount)}
+                      </span>
+                      <button
+                        aria-label={`Registrar un pago de ${expense.title}`}
+                        className="grid size-6 shrink-0 place-items-center rounded-md border border-accent text-brand transition hover:bg-accent/40"
+                        onClick={() => setPaymentForId(expense.id)}
+                        title="Registrar un pago"
+                        type="button"
+                      >
+                        <Plus aria-hidden="true" className="size-3.5" />
+                      </button>
+                    </div>
                   </td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">
+                  <td className="px-2 py-1.5 text-right">
                     <span
-                      className={
+                      className={`inline-flex items-center justify-end gap-1 text-sm tabular-nums ${
                         pending < 0
                           ? "font-semibold text-danger"
                           : "text-ink"
-                      }
+                      }`}
                     >
-                      {formatMoney(pending)}
+                      {pending < 0 ? "-" : null}
+                      <PesoSign />
+                      {formatAmount(Math.abs(pending))}
                     </span>
                   </td>
                   <td className="px-1 py-1">
@@ -911,24 +1405,27 @@ export default function ExpensesSheet({
                 </select>
               </td>
               <td className="px-1 py-1">
-                <input
-                  className={`${cellInputClass} text-right`}
-                  disabled={savingRow === "new"}
-                  max={10000000000}
-                  min={0}
-                  name="cost"
-                  onChange={(event) =>
-                    setNewDraft((prev) => ({
-                      ...prev,
-                      cost: event.target.value,
-                    }))
-                  }
-                  onKeyDown={newRowKeyDown}
-                  placeholder="0"
-                  step={1}
-                  type="number"
-                  value={newDraft.cost}
-                />
+                <div className="flex items-center gap-1">
+                  <PesoSign className="text-ink" />
+                  <input
+                    className={`${cellInputClass} text-right`}
+                    disabled={savingRow === "new"}
+                    max={10000000000}
+                    min={0}
+                    name="cost"
+                    onChange={(event) =>
+                      setNewDraft((prev) => ({
+                        ...prev,
+                        cost: event.target.value,
+                      }))
+                    }
+                    onKeyDown={newRowKeyDown}
+                    placeholder="0"
+                    step={1}
+                    type="number"
+                    value={newDraft.cost}
+                  />
+                </div>
               </td>
               <td className="px-2 py-1.5 align-middle">
                 {newDraft.cost === "" ? (
@@ -940,38 +1437,48 @@ export default function ExpensesSheet({
                 )}
               </td>
               <td className="px-1 py-1">
-                <input
-                  className={`${cellInputClass} text-right`}
-                  disabled={savingRow === "new"}
-                  max={10000000000}
-                  min={0}
-                  name="paidAmount"
-                  onChange={(event) =>
-                    setNewDraft((prev) => ({
-                      ...prev,
-                      paidAmount: event.target.value,
-                    }))
-                  }
-                  onKeyDown={newRowKeyDown}
-                  placeholder="0"
-                  step={1}
-                  type="number"
-                  value={newDraft.paidAmount}
-                />
+                <div className="flex items-center gap-1">
+                  <PesoSign className="text-ink" />
+                  <input
+                    className={`${cellInputClass} text-right`}
+                    disabled={savingRow === "new"}
+                    max={10000000000}
+                    min={0}
+                    name="paidAmount"
+                    onChange={(event) =>
+                      setNewDraft((prev) => ({
+                        ...prev,
+                        paidAmount: event.target.value,
+                      }))
+                    }
+                    onKeyDown={newRowKeyDown}
+                    placeholder="0"
+                    step={1}
+                    title="Monto ya pagado: se registra como un pago de hoy"
+                    type="number"
+                    value={newDraft.paidAmount}
+                  />
+                </div>
               </td>
-              <td className="px-2 py-1.5 text-right tabular-nums">
+              <td className="px-2 py-1.5 text-right">
                 {newDraft.cost === "" ? (
                   <span className="text-xs text-brand">—</span>
                 ) : (
                   <span
-                    className={
+                    className={`inline-flex items-center justify-end gap-1 text-sm tabular-nums ${
                       toAmount(newDraft.cost) - toAmount(newDraft.paidAmount) < 0
                         ? "font-semibold text-danger"
                         : "text-ink"
-                    }
+                    }`}
                   >
-                    {formatMoney(
-                      toAmount(newDraft.cost) - toAmount(newDraft.paidAmount),
+                    {toAmount(newDraft.cost) - toAmount(newDraft.paidAmount) < 0
+                      ? "-"
+                      : null}
+                    <PesoSign />
+                    {formatAmount(
+                      Math.abs(
+                        toAmount(newDraft.cost) - toAmount(newDraft.paidAmount),
+                      ),
                     )}
                   </span>
                 )}
@@ -1081,14 +1588,24 @@ export default function ExpensesSheet({
               </th>
               <td className="px-2 py-2.5" />
               <td className="px-2 py-2.5 text-right font-semibold tabular-nums text-ink">
-                {formatMoney(totals.cost)}
+                <span className="inline-flex items-center justify-end gap-1 text-sm">
+                  <PesoSign />
+                  {formatAmount(totals.cost)}
+                </span>
               </td>
               <td className="px-2 py-2.5" />
               <td className="px-2 py-2.5 text-right font-semibold tabular-nums text-ink">
-                {formatMoney(totals.paid)}
+                <span className="inline-flex items-center justify-end gap-1 text-sm">
+                  <PesoSign />
+                  {formatAmount(totals.paid)}
+                </span>
               </td>
               <td className="px-2 py-2.5 text-right font-semibold tabular-nums text-ink">
-                {formatMoney(totals.pending)}
+                <span className="inline-flex items-center justify-end gap-1 text-sm">
+                  {totals.pending < 0 ? "-" : null}
+                  <PesoSign />
+                  {formatAmount(Math.abs(totals.pending))}
+                </span>
               </td>
               <td colSpan={3} />
             </tr>
@@ -1099,6 +1616,16 @@ export default function ExpensesSheet({
       <p className="text-xs leading-5 text-brand sm:hidden">
         Deslizá horizontalmente para ver todas las columnas.
       </p>
+
+      {paymentFor ? (
+        <ExpensePaymentModal
+          addAction={addPaymentAction.bind(null, paymentFor.id)}
+          expense={paymentFor}
+          onClose={closePaymentModal}
+          removeAction={removePaymentAction.bind(null, paymentFor.id)}
+          updateAction={updatePaymentAction.bind(null, paymentFor.id)}
+        />
+      ) : null}
     </div>
   );
 }

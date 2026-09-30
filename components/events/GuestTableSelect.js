@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-export default function GuestTableSelect({ person, tableCount, action }) {
+export default function GuestTableSelect({ person, tableLabels = [], action }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [value, setValue] = useState(person.tableNumber ?? "");
@@ -49,15 +49,11 @@ export default function GuestTableSelect({ person, tableCount, action }) {
         value={value}
       >
         <option value="">Sin mesa</option>
-        {tableCount > 0
-          ? Array.from({ length: tableCount }, (_, index) => index + 1).map(
-              (number) => (
-                <option key={number} value={number}>
-                  {`Mesa ${number}`}
-                </option>
-              ),
-            )
-          : null}
+        {tableLabels.map((label, index) => (
+          <option key={index + 1} value={index + 1}>
+            {label}
+          </option>
+        ))}
       </select>
       {error ? (
         <p className="max-w-48 text-[11px] leading-4 text-brand" role="alert">

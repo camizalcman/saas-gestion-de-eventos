@@ -44,8 +44,8 @@ export default function SupplierCard({ supplier, addButton, editButton, deleteBu
   const whatsappUrl = getWhatsappUrl(supplier.whatsapp);
 
   return (
-    <article className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-accent bg-surface shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
-      <div className="relative aspect-[16/10] overflow-hidden bg-secondary/20">
+    <article className="group flex min-w-0 flex-col overflow-hidden rounded-xl border border-accent bg-surface">
+      <div className="relative aspect-[4/3] overflow-hidden border-b border-accent bg-secondary/20">
         {supplier.imageUrl ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img

@@ -18,7 +18,7 @@ export default function GuestList({
   );
 
   return (
-    <div className="overflow-x-auto border border-accent">
+    <div className="overflow-x-auto rounded-xl border border-accent">
       <table className="w-full min-w-[760px] text-left text-sm">
         <thead className="bg-accent/60 text-xs uppercase tracking-[0.12em] text-brand">
           <tr>

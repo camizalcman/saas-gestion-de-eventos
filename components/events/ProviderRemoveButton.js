@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
 import { useToast } from "@/components/ToastProvider";
 
 export default function ProviderRemoveButton({
@@ -67,11 +68,13 @@ export default function ProviderRemoveButton({
   return (
     <>
       <button
-        className="h-9 border border-brand/40 px-3 text-sm font-semibold text-brand transition hover:bg-brand/10"
+        aria-label={`Quitar ${providerName}`}
+        className="inline-flex size-9 items-center justify-center rounded-full border border-brand/40 text-brand transition hover:bg-brand/10"
         onClick={() => setOpen(true)}
+        title="Quitar proveedor"
         type="button"
       >
-        Quitar
+        <Trash2 aria-hidden="true" className="size-4" />
       </button>
 
       {open ? (

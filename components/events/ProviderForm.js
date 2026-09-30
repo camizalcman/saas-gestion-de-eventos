@@ -31,10 +31,12 @@ export default function ProviderForm({ action }) {
 
   return (
     <form
-      className="grid min-w-0 gap-3 border border-accent p-4 sm:p-5"
+      className="grid min-w-0 gap-3 rounded-xl border border-accent p-4 sm:p-5"
       onSubmit={handleSubmit}
       ref={formRef}
     >
+      <h2 className="text-lg font-semibold text-ink">Agregar proveedor</h2>
+
       <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Proveedor</span>
         <input
@@ -50,11 +52,7 @@ export default function ProviderForm({ action }) {
 
       <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Categoria</span>
-        <select
-          className={inputClass}
-          name="category"
-          required
-        >
+        <select className={inputClass} name="category" required>
           {SUPPLIER_CATEGORIES.map((category) => (
             <option key={category.value} value={category.value}>
               {category.label}

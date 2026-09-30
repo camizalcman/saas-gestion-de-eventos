@@ -8,6 +8,7 @@ import { ACTIVE_EVENT_COOKIE, getActiveEvent } from "@/lib/events/active";
 import { getCurrentUser } from "@/lib/firebase/session";
 import {
   addEventExpense,
+  addEventExpensePayment,
   addEventGuest,
   addEventPaymentResponsible,
   addEventProvider,
@@ -17,17 +18,22 @@ import {
   deriveGuestStatus,
   listUserEvents,
   removeEventExpense,
+  removeEventExpensePayment,
   removeEventGuest,
   removeEventGuestMember,
   removeEventPaymentResponsible,
   removeEventProvider,
   removeEventScheduleItem,
+  removeEventTable,
   setEventBudget,
+  setEventDuration,
   setEventGuestTable,
   setEventTableCount,
+  setEventTableName,
   setEventTablePositions,
   setUserEventInvitation,
   updateEventExpense,
+  updateEventExpensePayment,
   updateEventGuestField,
   updateEventScheduleItem,
   updateEventPaymentResponsible,
@@ -61,6 +67,8 @@ const TYPOGRAPHY_IDS = INVITATION_TYPOGRAPHIES.map((typography) => typography.id
 const SUPPLIER_CATEGORY_VALUES = SUPPLIER_CATEGORIES.map(
   (category) => category.value,
 );
+const TABLE_REDUCTION_ERROR =
+  "No podés reducir la cantidad de mesas. Para quitar una mesa usá el ícono de eliminar.";
 
 function cookieOptions() {
   return {
@@ -167,6 +175,18 @@ export async function updateEvent(formData) {
   await updateUserEvent(user.uid, event.id, parseEventForm(formData));
   revalidatePath("/", "layout");
   redirect("/dashboard");
+}
+
+export async function saveEventDuration(formData) {
+  const { user, event } = await requireActiveEvent();
+  const duration = optionalText(formData.get("duration"), {
+    label: "La duración",
+    max: 120,
+  });
+
+  await setEventDuration(user.uid, event.id, duration);
+  revalidatePath("/dashboard/cronograma", "layout");
+  revalidatePath("/dashboard", "layout");
 }
 
 export async function deleteEvent() {
@@ -323,6 +343,10 @@ export async function saveEventTables(formData) {
     label: "La cantidad de mesas",
   });
 
+  if (count < (event.tableCount || 0)) {
+    throw new Error(TABLE_REDUCTION_ERROR);
+  }
+
   await setEventTableCount(user.uid, event.id, count);
   revalidatePath("/dashboard/invitados", "layout");
   revalidatePath("/dashboard", "layout");
@@ -357,6 +381,44 @@ export async function saveEventTablePositions(formData) {
     );
 
   await setEventTablePositions(user.uid, event.id, positions);
+  revalidatePath("/dashboard/invitados", "layout");
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function renameEventTable(formData) {
+  const { user, event } = await requireActiveEvent();
+  const tableNumber = tableNumberInput(formData.get("tableNumber"), {
+    label: "La mesa",
+    max: event.tableCount,
+  });
+
+  if (!tableNumber) {
+    throw new Error("La mesa es obligatoria.");
+  }
+
+  const name = requiredText(formData.get("name"), {
+    label: "El nombre de la mesa",
+    min: 1,
+    max: 60,
+  });
+
+  await setEventTableName(user.uid, event.id, tableNumber, name);
+  revalidatePath("/dashboard/invitados", "layout");
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function removeTable(tableNumber) {
+  const { user, event } = await requireActiveEvent();
+  const number = tableNumberInput(String(tableNumber ?? ""), {
+    label: "La mesa",
+    max: event.tableCount,
+  });
+
+  if (!number) {
+    throw new Error("La mesa es obligatoria.");
+  }
+
+  await removeEventTable(user.uid, event.id, number);
   revalidatePath("/dashboard/invitados", "layout");
   revalidatePath("/dashboard", "layout");
 }
@@ -550,9 +612,6 @@ function parseExpenseForm(formData) {
       label: "El costo total",
       required: true,
     }),
-    paidAmount: moneyInput(formData.get("paidAmount"), {
-      label: "El monto pagado",
-    }),
     providerId: requiredText(formData.get("providerId"), {
       label: "El proveedor",
       min: 1,
@@ -610,9 +669,88 @@ export async function addExpense(formData) {
   const expense = parseExpenseForm(formData);
   validateExpenseRefs(event, expense);
 
-  await addEventExpense(user.uid, event.id, expense);
+  await addEventExpense(user.uid, event.id, {
+    ...expense,
+    paidAmount: moneyInput(formData.get("paidAmount"), {
+      label: "El monto pagado",
+    }),
+  });
   revalidatePath("/dashboard/presupuesto", "layout");
   revalidatePath("/dashboard", "layout");
+}
+
+export async function addExpensePayment(expenseId, formData) {
+  const { user, event } = await requireActiveEvent();
+  const expense = (event.expenses || []).find((entry) => entry.id === expenseId);
+
+  if (!expense) {
+    throw new Error("Gasto no encontrado.");
+  }
+
+  const amount = moneyInput(formData.get("amount"), {
+    label: "El monto del pago",
+    required: true,
+    min: 1,
+  });
+  const date = dateInput(formData.get("date"), {
+    label: "La fecha del pago",
+    required: true,
+  });
+
+  const created = await addEventExpensePayment(user.uid, event.id, expenseId, {
+    amount,
+    date,
+  });
+  revalidatePath("/dashboard/presupuesto", "layout");
+  revalidatePath("/dashboard", "layout");
+
+  return created ?? null;
+}
+
+export async function updateExpensePayment(expenseId, paymentId, formData) {
+  const { user, event } = await requireActiveEvent();
+  const expense = (event.expenses || []).find((entry) => entry.id === expenseId);
+
+  if (!expense) {
+    throw new Error("Gasto no encontrado.");
+  }
+
+  const amount = moneyInput(formData.get("amount"), {
+    label: "El monto del pago",
+    required: true,
+    min: 1,
+  });
+  const date = dateInput(formData.get("date"), {
+    label: "La fecha del pago",
+    required: true,
+  });
+
+  const updated = await updateEventExpensePayment(
+    user.uid,
+    event.id,
+    expenseId,
+    paymentId,
+    { amount, date },
+  );
+  revalidatePath("/dashboard/presupuesto", "layout");
+  revalidatePath("/dashboard", "layout");
+
+  return updated ?? null;
+}
+
+export async function removeExpensePayment(expenseId, paymentId) {
+  const { user, event } = await requireActiveEvent();
+  const expense = (event.expenses || []).find((entry) => entry.id === expenseId);
+
+  if (!expense) {
+    throw new Error("Gasto no encontrado.");
+  }
+
+  await removeEventExpensePayment(user.uid, event.id, expenseId, paymentId);
+  revalidatePath("/dashboard/presupuesto", "layout");
+  revalidatePath("/dashboard", "layout");
+
+  return true;
 }
 
 export async function updateExpense(expenseId, formData) {

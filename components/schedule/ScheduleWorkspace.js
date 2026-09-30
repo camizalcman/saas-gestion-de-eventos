@@ -15,7 +15,7 @@ export default function ScheduleWorkspace({
   const formAction = editingActivity ? updateAction : action;
 
   return (
-    <div className="grid gap-6 p-5 sm:p-8 lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)]">
+    <div className="grid w-full gap-6 py-5 sm:py-8 lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)]">
       <ScheduleActivityForm
         action={formAction}
         initialActivity={editingActivity}

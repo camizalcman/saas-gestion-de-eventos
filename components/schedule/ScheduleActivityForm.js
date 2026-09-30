@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 const inputClassName =
-  "h-11 w-full border border-accent bg-surface px-3 text-sm text-ink outline-none transition focus:border-secondary";
+  "h-11 w-full rounded-md border border-accent bg-surface px-3 text-sm text-ink outline-none transition focus:border-secondary";
 
 export default function ScheduleActivityForm({
   action,
@@ -47,7 +47,7 @@ export default function ScheduleActivityForm({
 
   return (
     <form
-      className="grid gap-5 border border-accent bg-surface p-5"
+      className="grid gap-5 rounded-xl border border-accent bg-surface p-5"
       onSubmit={handleSubmit}
     >
       <div>
@@ -96,7 +96,7 @@ export default function ScheduleActivityForm({
       <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Descripción o detalles <span className="font-normal text-brand">(opcional)</span></span>
         <textarea
-          className="min-h-24 resize-y border border-accent bg-surface px-3 py-3 text-sm text-ink outline-none transition focus:border-secondary"
+          className="min-h-24 resize-y rounded-md border border-accent bg-surface px-3 py-3 text-sm text-ink outline-none transition focus:border-secondary"
           defaultValue={initialActivity?.description || ""}
           name="description"
           placeholder="Agregá indicaciones o información importante"
@@ -117,7 +117,7 @@ export default function ScheduleActivityForm({
               return (
                 <button
                   aria-pressed={selected}
-                  className={`flex min-h-11 items-center justify-between gap-3 border px-3 py-2 text-left text-sm transition ${
+                  className={`flex min-h-11 items-center justify-between gap-3 rounded-md border px-3 py-2 text-left text-sm transition ${
                     selected
                       ? "border-secondary bg-secondary/10 text-ink"
                       : "border-accent bg-surface text-brand hover:border-secondary"
@@ -131,7 +131,7 @@ export default function ScheduleActivityForm({
                   </span>
                   <span
                     aria-hidden="true"
-                    className={`flex size-5 shrink-0 items-center justify-center border text-xs font-semibold ${
+                    className={`flex size-5 shrink-0 items-center justify-center rounded border text-xs font-semibold ${
                       selected
                         ? "border-secondary bg-secondary text-surface"
                         : "border-accent text-transparent"
@@ -153,7 +153,7 @@ export default function ScheduleActivityForm({
         <span>Color de la actividad</span>
         <input
           aria-label="Color de la actividad"
-          className="size-11 cursor-pointer border border-accent bg-surface p-1"
+          className="size-11 cursor-pointer rounded-md border border-accent bg-surface p-1"
           defaultValue={initialActivity?.color || "#B58B63"}
           name="color"
           type="color"
@@ -162,7 +162,7 @@ export default function ScheduleActivityForm({
 
       <div className="grid gap-2 sm:grid-cols-2">
         <button
-          className="h-11 border border-secondary bg-secondary px-4 text-sm font-semibold text-surface transition hover:bg-secondary/90"
+          className="h-11 rounded-md border border-secondary bg-secondary px-4 text-sm font-semibold text-surface transition hover:bg-secondary/90"
           disabled={loading}
           type="submit"
         >
@@ -174,7 +174,7 @@ export default function ScheduleActivityForm({
         </button>
         {initialActivity ? (
           <button
-            className="h-11 border border-accent px-4 text-sm font-semibold text-ink transition hover:border-secondary hover:bg-secondary/10"
+            className="h-11 rounded-md border border-accent px-4 text-sm font-semibold text-ink transition hover:border-secondary hover:bg-secondary/10"
             disabled={loading}
             onClick={onCancel}
             type="button"
@@ -189,7 +189,7 @@ export default function ScheduleActivityForm({
       ) : null}
 
       {error ? (
-        <p className="border border-brand/40 bg-brand/10 p-3 text-sm leading-6 text-brand">
+        <p className="rounded-md border border-brand/40 bg-brand/10 p-3 text-sm leading-6 text-brand">
           {error}
         </p>
       ) : null}
