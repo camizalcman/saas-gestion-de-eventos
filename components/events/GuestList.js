@@ -19,7 +19,7 @@ export default function GuestList({
 
   return (
     <div className="overflow-x-auto rounded-xl border border-accent">
-      <table className="w-full min-w-[760px] text-left text-sm">
+      <table className="w-full min-w-[900px] text-left text-sm">
         <thead className="bg-accent/60 text-xs uppercase tracking-[0.12em] text-brand">
           <tr>
             <th className="px-4 py-3 font-semibold" scope="col">
@@ -30,6 +30,9 @@ export default function GuestList({
             </th>
             <th className="px-4 py-3 font-semibold" scope="col">
               Estado
+            </th>
+            <th className="px-4 py-3 font-semibold" scope="col">
+              Dieta
             </th>
             <th className="px-4 py-3 font-semibold" scope="col">
               Link
@@ -58,7 +61,7 @@ export default function GuestList({
             <td className="px-4 py-3 font-semibold text-brand">
               {totalConfirmed} confirmados
             </td>
-            <td colSpan={2} />
+            <td colSpan={3} />
           </tr>
         </tfoot>
       </table>
