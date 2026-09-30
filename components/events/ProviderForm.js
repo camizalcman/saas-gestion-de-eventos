@@ -35,46 +35,46 @@ export default function ProviderForm({ action }) {
       onSubmit={handleSubmit}
       ref={formRef}
     >
-      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_200px] sm:items-end">
-        <label className="grid gap-2 text-sm font-medium text-ink">
-          <span>Proveedor</span>
-          <input
-            className={inputClass}
-            maxLength={120}
-            minLength={2}
-            name="name"
-            placeholder="Ej. Salón Teresita"
-            required
-            type="text"
-          />
-        </label>
-        <label className="grid gap-2 text-sm font-medium text-ink">
-          <span>Categoria</span>
-          <select
-            className={inputClass}
-            name="category"
-            required
-          >
-            {SUPPLIER_CATEGORIES.map((category) => (
-              <option key={category.value} value={category.value}>
-                {category.label}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <label className="grid gap-2 text-sm font-medium text-ink">
+        <span>Proveedor</span>
+        <input
+          className={inputClass}
+          maxLength={120}
+          minLength={2}
+          name="name"
+          placeholder="Ej. Salón Teresita"
+          required
+          type="text"
+        />
+      </label>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <label className="grid gap-2 text-sm font-medium text-ink">
-          <span>WhatsApp</span>
-          <input
-            className={inputClass}
-            maxLength={60}
-            name="whatsapp"
-            placeholder="Ej. +54 9 11 2345-6789"
-            type="text"
-          />
-        </label>
+      <label className="grid gap-2 text-sm font-medium text-ink">
+        <span>Categoria</span>
+        <select
+          className={inputClass}
+          name="category"
+          required
+        >
+          {SUPPLIER_CATEGORIES.map((category) => (
+            <option key={category.value} value={category.value}>
+              {category.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="grid gap-2 text-sm font-medium text-ink">
+        <span>WhatsApp</span>
+        <input
+          className={inputClass}
+          maxLength={60}
+          name="whatsapp"
+          placeholder="Ej. +54 9 11 2345-6789"
+          type="text"
+        />
+      </label>
+
+      <div className="grid gap-3 sm:grid-cols-2">
         <label className="grid gap-2 text-sm font-medium text-ink">
           <span>Instagram</span>
           <input

@@ -444,7 +444,7 @@ export default async function AdminPage() {
           />
           <EventTypeDonut
             data={stats.eventsByType}
-            title="Eventos por tipo de evento"
+            title="Cantidad por tipo de evento"
             total={stats.totalEvents}
           />
         </div>
