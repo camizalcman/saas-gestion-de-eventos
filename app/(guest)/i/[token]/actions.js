@@ -1,11 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { respondToGuestInvitation } from "@/lib/events/events";
+import { submitGuestInvitation } from "@/lib/events/events";
 
-export async function respondToInvitation(token, response, memberId = null) {
-  await respondToGuestInvitation(token, { memberId, response });
+export async function respondToInvitation(token, payload) {
+  const eventId = await submitGuestInvitation(token, payload);
 
   revalidatePath(`/i/${token}`);
+  revalidatePath("/dashboard/invitados");
   revalidatePath("/", "layout");
+
+  return eventId;
 }
