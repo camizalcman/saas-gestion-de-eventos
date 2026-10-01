@@ -401,6 +401,48 @@ export default async function AdminPage() {
         )}
       </section>
 
+      <section className="mt-7" id="contrataciones-proveedores">
+        <div className="mb-3 grid gap-1">
+          <h2 className="text-lg font-semibold text-ink">
+            Contrataciones por proveedor
+          </h2>
+          <p className="text-sm leading-6 text-brand">
+            Cantidad de eventos que contrataron proveedores de la galería general.
+          </p>
+        </div>
+
+        {stats.supplierContractings.length === 0 ? (
+          <div className="border border-accent bg-surface p-6 text-sm text-brand">
+            Todavía no hay proveedores en la galería general.
+          </div>
+        ) : (
+          <div className="overflow-x-auto rounded-lg border border-accent">
+            <table className="w-full min-w-[560px] text-left text-sm">
+              <thead className="bg-accent/60 text-xs uppercase tracking-[0.12em] text-brand">
+                <tr>
+                  <th className="px-4 py-3 font-semibold" scope="col">Proveedor</th>
+                  <th className="px-4 py-3 font-semibold" scope="col">Categoría</th>
+                  <th className="px-4 py-3 text-right font-semibold" scope="col">
+                    Eventos contratados
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-accent">
+                {stats.supplierContractings.map((supplier) => (
+                  <tr className="bg-surface" key={supplier.id}>
+                    <td className="px-4 py-3 font-medium text-ink">{supplier.name}</td>
+                    <td className="px-4 py-3 text-brand">{supplier.category}</td>
+                    <td className="px-4 py-3 text-right font-semibold tabular-nums text-ink">
+                      {supplier.count}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
       <section className="mt-7" id="estadisticas">
         <div className="mb-3 grid gap-1">
           <h2 className="text-lg font-semibold text-ink">Estadísticas por mes</h2>

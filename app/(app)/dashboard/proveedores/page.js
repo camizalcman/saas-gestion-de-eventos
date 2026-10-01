@@ -25,7 +25,7 @@ export default async function ProveedoresPage() {
         </h1>
         <Link
           className="inline-flex h-11 items-center rounded-xl border border-secondary bg-secondary px-5 text-sm font-semibold text-surface transition hover:bg-secondary/90"
-          href="/dashboard/suppliers"
+          href="/dashboard/proveedores/galeria"
         >
           Buscar más proveedores
         </Link>

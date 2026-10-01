@@ -7,7 +7,7 @@ import { SUPPLIER_CATEGORIES } from "@/lib/suppliers/constants";
 const inputClass =
   "h-11 w-full min-w-0 rounded-md border border-accent bg-surface px-3 text-ink outline-none transition focus:border-secondary";
 
-export default function ProviderForm({ action, updateAction, provider, onCancel }) {
+export default function ProviderForm({ action, updateAction, provider, onCancel, onSuccess }) {
   const formRef = useRef(null);
   const showToast = useToast();
   const [error, setError] = useState("");
@@ -24,9 +24,10 @@ export default function ProviderForm({ action, updateAction, provider, onCancel 
 
     startTransition(async () => {
       try {
-        await (isEditing ? updateAction(formData) : action(formData));
+        const result = await (isEditing ? updateAction(formData) : action(formData));
         formRef.current?.reset();
         onCancel?.();
+        onSuccess?.(result);
         showToast(isEditing ? "Proveedor actualizado" : "Proveedor agregado a tu evento");
       } catch (submitError) {
         setError(submitError?.message || "No se pudo agregar el proveedor.");

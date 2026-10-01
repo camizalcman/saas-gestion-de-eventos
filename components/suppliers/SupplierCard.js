@@ -1,4 +1,10 @@
-import { AtSign, Globe2, MapPin, MessageCircle } from "lucide-react";
+import {
+  AtSign,
+  CalendarDays,
+  Globe2,
+  MapPin,
+  MessageCircle,
+} from "lucide-react";
 import {
   SUPPLIER_CATEGORIES,
   SUPPLIER_PROVINCES,
@@ -37,7 +43,13 @@ function ContactLink({ href, label, icon: Icon }) {
   );
 }
 
-export default function SupplierCard({ supplier, addButton, editButton, deleteButton }) {
+export default function SupplierCard({
+  supplier,
+  addButton,
+  editButton,
+  deleteButton,
+  contractingCount = 0,
+}) {
   const location = [supplier.locality, getProvinceLabel(supplier.province)]
     .filter(Boolean)
     .join(", ");
@@ -60,6 +72,10 @@ export default function SupplierCard({ supplier, addButton, editButton, deleteBu
         )}
         <span className="absolute left-3 top-3 rounded-full bg-surface/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-brand backdrop-blur-sm">
           {getCategoryLabel(supplier.category)}
+        </span>
+        <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-surface/90 px-3 py-1 text-[10px] font-bold tracking-[0.04em] text-brand backdrop-blur-sm">
+          <CalendarDays aria-hidden="true" className="size-3" />
+          {contractingCount} {contractingCount === 1 ? "evento" : "eventos"}
         </span>
       </div>
 

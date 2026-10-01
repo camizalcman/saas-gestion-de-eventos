@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getActiveEvent } from "@/lib/events/active";
-import { addEventProvider, getUserEvent, syncSupplierInEvents } from "@/lib/events/events";
+import { addEventProvider, syncSupplierInEvents } from "@/lib/events/events";
 import { getCurrentUser } from "@/lib/firebase/session";
 import {
   createSupplier,
@@ -49,7 +49,7 @@ export async function createSupplierAction(formData) {
   await requireAdmin();
   await createSupplier(parseSupplierForm(formData));
 
-  revalidatePath("/dashboard/suppliers");
+  revalidatePath("/dashboard/proveedores/galeria");
   revalidatePath("/dashboard");
 }
 
@@ -70,7 +70,7 @@ export async function updateSupplierAction(id, formData) {
     imageUrl: data.imageUrl || "",
   }, data);
 
-  revalidatePath("/dashboard/suppliers");
+  revalidatePath("/dashboard/proveedores/galeria");
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/proveedores", "layout");
 }
@@ -83,21 +83,20 @@ export async function deleteSupplierAction(id) {
 
   await syncSupplierInEvents(id, { deleted: true }, supplier);
 
-  revalidatePath("/dashboard/suppliers");
+  revalidatePath("/dashboard/proveedores/galeria");
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/proveedores", "layout");
+  revalidatePath("/dashboard/proveedores/galeria");
 }
 
-export async function addSupplierToEvent(supplierId, eventId) {
+export async function addSupplierToEvent(supplierId) {
   const user = await getCurrentUser();
 
   if (!user) {
     redirect("/login");
   }
 
-  const event = eventId
-    ? await getUserEvent(user.uid, eventId)
-    : await getActiveEvent(user);
+  const event = await getActiveEvent(user);
 
   if (!event) {
     throw new Error("No tenés ningún evento creado.");

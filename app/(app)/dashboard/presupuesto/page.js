@@ -8,6 +8,7 @@ import { getCurrentUser } from "@/lib/firebase/session";
 import {
   addExpense,
   addExpensePayment,
+  addProviderForExpense,
   addPaymentResponsible,
   removeExpense,
   removeExpensePayment,
@@ -121,6 +122,7 @@ export default async function PresupuestoPage() {
         <ExpensesSheet
           addAction={addExpense}
           addPaymentAction={addExpensePayment}
+          addProviderAction={addProviderForExpense}
           addResponsibleAction={addPaymentResponsible}
           expenses={expenses}
           providers={providers}

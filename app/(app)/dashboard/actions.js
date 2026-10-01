@@ -502,6 +502,17 @@ export async function addProvider(formData) {
   revalidatePath("/dashboard/proveedores", "layout");
 }
 
+export async function addProviderForExpense(formData) {
+  const { user, event } = await requireActiveEvent();
+  const provider = parseProviderForm(formData);
+  const providerId = await addEventProvider(user.uid, event.id, provider);
+
+  revalidatePath("/dashboard/proveedores", "layout");
+  revalidatePath("/dashboard/presupuesto", "layout");
+
+  return { ...provider, id: providerId, deleted: false };
+}
+
 export async function updateProvider(formData) {
   const { user, event } = await requireActiveEvent();
   const providerId = requiredText(formData.get("providerId"), {

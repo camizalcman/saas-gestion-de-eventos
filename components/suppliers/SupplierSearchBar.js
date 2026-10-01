@@ -14,7 +14,9 @@ export default function SupplierSearchBar({ defaultValue, category, province, lo
     if (province) params.set("province", province);
     if (locality) params.set("locality", locality);
     const qs = params.toString();
-    return qs ? `/dashboard/suppliers?${qs}` : "/dashboard/suppliers";
+    return qs
+      ? `/dashboard/proveedores/galeria?${qs}`
+      : "/dashboard/proveedores/galeria";
   }
 
   function handleClear() {

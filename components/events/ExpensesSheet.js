@@ -21,6 +21,41 @@ import {
 } from "lucide-react";
 import ExpenseRemoveButton from "./ExpenseRemoveButton";
 import ExpenseStatusBadge from "./ExpenseStatusBadge";
+import ProviderForm from "./ProviderForm";
+
+const CREATE_PROVIDER_VALUE = "__create_provider__";
+
+function CreateProviderModal({ action, onClose, onSuccess }) {
+  return (
+    <div
+      aria-label="Crear proveedor"
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-brand/70 p-4 sm:p-8"
+      role="dialog"
+    >
+      <button
+        aria-label="Cerrar ventana"
+        className="absolute inset-0 h-full w-full cursor-default"
+        onClick={onClose}
+        type="button"
+      />
+      <div className="relative z-10 my-auto w-full max-w-2xl border border-accent bg-surface p-4 shadow-2xl sm:p-5">
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <h2 className="text-lg font-semibold text-ink">Crear proveedor</h2>
+          <button
+            aria-label="Cerrar ventana"
+            className="inline-flex size-9 items-center justify-center border border-accent text-lg text-ink transition hover:border-secondary hover:bg-secondary/10"
+            onClick={onClose}
+            type="button"
+          >
+            <X aria-hidden="true" className="size-4" />
+          </button>
+        </div>
+        <ProviderForm action={action} onSuccess={onSuccess} />
+      </div>
+    </div>
+  );
+}
 
 function toAmount(value) {
   const parsed = Number(value);
@@ -616,6 +651,7 @@ export default function ExpensesSheet({
   responsibles,
   addAction,
   addPaymentAction,
+  addProviderAction,
   addResponsibleAction,
   updateAction,
   removeAction,
@@ -636,6 +672,8 @@ export default function ExpensesSheet({
     notes: "",
   }));
   const [newResponsibles, setNewResponsibles] = useState([]);
+  const [createdProvider, setCreatedProvider] = useState(null);
+  const [isCreatingProvider, setIsCreatingProvider] = useState(false);
   const [creatingFor, setCreatingFor] = useState(null);
   const [savingRow, setSavingRow] = useState(null);
   const [paymentForId, setPaymentForId] = useState(null);
@@ -723,7 +761,12 @@ export default function ExpensesSheet({
   );
   const tableWidth = Math.max(totalWidth, 760);
 
-  const activeProviders = providers.filter((provider) => !provider.deleted);
+  const providerEntries = createdProvider && !providers.some(
+    (provider) => provider.id === createdProvider.id,
+  )
+    ? [...providers, createdProvider]
+    : providers;
+  const activeProviders = providerEntries.filter((provider) => !provider.deleted);
   const responsibleOptions = responsibles.concat(
     newResponsibles.filter(
       (entry) => !responsibles.some((existing) => existing.id === entry.id),
@@ -810,6 +853,28 @@ export default function ExpensesSheet({
       responsibleId: "",
       notes: "",
     });
+  }
+
+  function handleProviderSelect(event) {
+    const value = event.target.value;
+
+    if (value === CREATE_PROVIDER_VALUE) {
+      setIsCreatingProvider(true);
+      return;
+    }
+
+    setNewDraft((prev) => ({ ...prev, providerId: value }));
+  }
+
+  function handleCreatedProvider(provider) {
+    if (!provider?.id) {
+      setError("No se pudo identificar el proveedor creado.");
+      return;
+    }
+
+    setCreatedProvider(provider);
+    setNewDraft((prev) => ({ ...prev, providerId: provider.id }));
+    setIsCreatingProvider(false);
   }
 
   function saveRow(expense) {
@@ -999,9 +1064,17 @@ export default function ExpensesSheet({
         </p>
       ) : null}
 
+      {isCreatingProvider ? (
+        <CreateProviderModal
+          action={addProviderAction}
+          onClose={() => setIsCreatingProvider(false)}
+          onSuccess={handleCreatedProvider}
+        />
+      ) : null}
+
       {activeProviders.length === 0 ? (
         <p className="rounded-md border border-brand/40 bg-brand/10 px-3 py-2 text-sm text-brand">
-          Cargá proveedores en la sección{" "}
+          Podés crear un proveedor directamente desde el selector de esta fila o cargarlo en la sección{" "}
           <a
             className="font-semibold underline-offset-4 hover:underline"
             href="/dashboard/proveedores"
@@ -1376,13 +1449,8 @@ export default function ExpensesSheet({
               <td className="px-1 py-1">
                 <select
                   className={cellSelectClass}
-                  disabled={savingRow === "new" || activeProviders.length === 0}
-                  onChange={(event) =>
-                    setNewDraft((prev) => ({
-                      ...prev,
-                      providerId: event.target.value,
-                    }))
-                  }
+                   disabled={savingRow === "new"}
+                   onChange={handleProviderSelect}
                   onKeyDown={newRowEscape}
                   value={newDraft.providerId}
                 >
@@ -1395,13 +1463,15 @@ export default function ExpensesSheet({
                     <option disabled value="">
                       Sin proveedores
                     </option>
-                  ) : (
-                    activeProviders.map((provider) => (
-                      <option key={provider.id} value={provider.id}>
-                        {provider.name}
-                      </option>
-                    ))
-                  )}
+                  ) : null}
+                  {activeProviders.map((provider) => (
+                    <option key={provider.id} value={provider.id}>
+                      {provider.name}
+                    </option>
+                  ))}
+                  <option value={CREATE_PROVIDER_VALUE}>
+                    Crear proveedor
+                  </option>
                 </select>
               </td>
               <td className="px-1 py-1">

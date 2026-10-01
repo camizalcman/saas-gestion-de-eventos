@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import Navbar from "@/components/Navbar";
 import SupplierCard from "@/components/suppliers/SupplierCard";
 import SupplierAddButton from "@/components/suppliers/SupplierAddButton";
 import SupplierDeleteButton from "@/components/suppliers/SupplierDeleteButton";
@@ -9,9 +8,12 @@ import SupplierEditModal from "@/components/suppliers/SupplierEditModal";
 import SupplierFiltersToggle from "@/components/suppliers/SupplierFiltersToggle";
 import SupplierSearchBar from "@/components/suppliers/SupplierSearchBar";
 import SupplierModal from "@/components/suppliers/SupplierModal";
-import { listUserEvents } from "@/lib/events/events";
+import { getActiveEvent } from "@/lib/events/active";
 import { getCurrentUser } from "@/lib/firebase/session";
-import { getSuppliers } from "@/lib/suppliers/suppliers";
+import {
+  getSupplierEventCounts,
+  getSuppliers,
+} from "@/lib/suppliers/suppliers";
 import { getCurrentUserProfile } from "@/lib/users/users";
 import {
   createSupplierAction,
@@ -43,25 +45,25 @@ export default async function SuppliersPage({ searchParams }) {
     search: getQueryValue(query?.search),
   };
   const suppliers = await getSuppliers(filters);
-  const events = await listUserEvents(user.uid);
+  const supplierEventCounts = await getSupplierEventCounts(
+    suppliers.map((supplier) => supplier.id),
+  );
+  const activeEvent = await getActiveEvent(user);
 
   return (
-    <>
-      <Navbar user={user} profile={profile} />
-      <main className="min-h-screen bg-surface text-ink">
-        <div className="mx-auto w-full max-w-6xl px-4 py-7 sm:px-6 lg:px-10">
+    <div>
+      <div className="pb-6">
+        <Link
+          aria-label="Volver a proveedores"
+          className="inline-flex size-10 items-center justify-center rounded-full border border-secondary text-secondary transition hover:bg-secondary hover:text-surface"
+          href="/dashboard/proveedores"
+          title="Volver a proveedores"
+        >
+          <ArrowLeft aria-hidden="true" className="size-5" />
+        </Link>
+      </div>
 
-          <div className="flex items-center justify-between  pb-6">
-            <Link
-              className="inline-flex items-center gap-2 text-sm font-semibold text-secondary transition hover:text-ink"
-              href="/dashboard"
-            >
-              <ArrowLeft className="size-4" />
-              Volver al dashboard
-            </Link>
-          </div>
-
-          <header className="mt-6 pb-6">
+      <header className="pb-6">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
 
               <div>
@@ -87,9 +89,9 @@ export default async function SuppliersPage({ searchParams }) {
 
             </div>
 
-          </header>
+      </header>
 
-          <section className="mt-8">
+      <section className="mt-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 flex-1">
                 <SupplierFiltersToggle filters={filters} />
@@ -101,19 +103,19 @@ export default async function SuppliersPage({ searchParams }) {
                 locality={filters.locality}
               />
             </div>
-          </section>
+      </section>
 
-          {events.length === 0 ? (
-            <div className="mt-8 border border-accent bg-surface p-6 text-sm leading-6 text-brand">
-              Debés{" "}
-              <Link className="font-semibold text-secondary underline-offset-4 hover:underline" href="/dashboard/evento/nuevo">
-                crear un evento
-              </Link>{" "}
-              para agregar proveedores.
-            </div>
-          ) : null}
+      {!activeEvent ? (
+        <div className="mt-8 border border-accent bg-surface p-6 text-sm leading-6 text-brand">
+          Debés{" "}
+          <Link className="font-semibold text-secondary underline-offset-4 hover:underline" href="/dashboard/evento/nuevo">
+            crear un evento
+          </Link>{" "}
+          para agregar proveedores.
+        </div>
+      ) : null}
 
-          <section className="mt-8">
+      <section className="mt-8">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold text-ink">Proveedores disponibles</h2>
               <span className="text-sm text-brand">{suppliers.length} total</span>
@@ -131,11 +133,12 @@ export default async function SuppliersPage({ searchParams }) {
                   <SupplierCard
                     key={supplier.id}
                     supplier={supplier}
+                    contractingCount={supplierEventCounts[supplier.id] || 0}
                     addButton={
                       <SupplierAddButton
                         action={addSupplierToEvent.bind(null, supplier.id)}
                         supplierName={supplier.name}
-                        events={events}
+                        event={activeEvent}
                       />
                     }
                     editButton={
@@ -159,9 +162,7 @@ export default async function SuppliersPage({ searchParams }) {
                 ))}
               </div>
             )}
-          </section>
-        </div>
-      </main>
-    </>
+      </section>
+    </div>
   );
 }

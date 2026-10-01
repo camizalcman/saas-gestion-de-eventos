@@ -12,7 +12,7 @@ export default function SupplierFilters({ filters }) {
 
   return (
     <form
-      action="/dashboard/suppliers"
+      action="/dashboard/proveedores/galeria"
       className="grid min-w-0 gap-3 rounded-2xl border border-accent bg-surface p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end"
       method="get"
     >
@@ -72,7 +72,7 @@ export default function SupplierFilters({ filters }) {
         {hasFilters ? (
           <Link
             className="inline-flex h-9 items-center justify-center text-sm font-semibold text-brand underline-offset-4 hover:underline"
-            href="/dashboard/suppliers"
+            href="/dashboard/proveedores/galeria"
           >
             Limpiar filtros
           </Link>
