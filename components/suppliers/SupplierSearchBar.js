@@ -29,7 +29,7 @@ export default function SupplierSearchBar({ defaultValue, category, province, lo
     <style>{`input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }`}</style>
     <form
       action={buildBase()}
-      className="flex w-full gap-3 sm:w-[30%] sm:max-w-[30%]"
+      className="flex w-full gap-3 lg:w-[30%] lg:max-w-[30%]"
       method="get"
     >
       {category ? <input name="category" type="hidden" value={category} /> : null}

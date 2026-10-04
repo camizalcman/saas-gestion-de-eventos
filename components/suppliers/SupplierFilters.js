@@ -1,20 +1,47 @@
+"use client";
+
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   SUPPLIER_CATEGORIES,
   SUPPLIER_PROVINCES,
 } from "@/lib/suppliers/constants";
 
+const GALLERY_PATH = "/dashboard/proveedores/galeria";
+
 export default function SupplierFilters({ filters }) {
+  const router = useRouter();
   const hasFilters = Boolean(
     filters.category || filters.province || filters.locality,
   );
 
+  function applyFilters(form) {
+    const params = new URLSearchParams();
+
+    for (const [key, value] of new FormData(form)) {
+      const text = String(value).trim();
+      if (text) params.set(key, text);
+    }
+
+    const qs = params.toString();
+    router.push(qs ? `${GALLERY_PATH}?${qs}` : GALLERY_PATH);
+  }
+
+  function applyLocality(input) {
+    if (input.value.trim() !== (filters.locality || "")) {
+      applyFilters(input.form);
+    }
+  }
+
   return (
     <form
-      action="/dashboard/proveedores/galeria"
-      className="grid min-w-0 gap-3 rounded-2xl border border-accent bg-surface p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end"
+      action={GALLERY_PATH}
+      className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end"
       method="get"
+      onSubmit={(event) => {
+        event.preventDefault();
+        applyFilters(event.currentTarget);
+      }}
     >
       {filters.search ? <input name="search" type="hidden" value={filters.search} /> : null}
       <label className="grid min-w-0 gap-2 text-sm font-semibold text-ink">
@@ -23,6 +50,7 @@ export default function SupplierFilters({ filters }) {
           className="h-11 w-full min-w-0 rounded-lg border border-accent bg-surface px-3 font-normal text-ink outline-none transition focus:border-secondary"
           defaultValue={filters.category}
           name="category"
+          onChange={(event) => applyFilters(event.currentTarget.form)}
         >
           <option value="">Todas las categorias</option>
           {SUPPLIER_CATEGORIES.map((category) => (
@@ -39,6 +67,7 @@ export default function SupplierFilters({ filters }) {
           className="h-11 w-full min-w-0 rounded-lg border border-accent bg-surface px-3 font-normal text-ink outline-none transition placeholder:text-brand/60 focus:border-secondary"
           defaultValue={filters.province}
           name="province"
+          onChange={(event) => applyFilters(event.currentTarget.form)}
         >
           <option value="">Todas las provincias</option>
           {SUPPLIER_PROVINCES.map((province) => (
@@ -55,29 +84,29 @@ export default function SupplierFilters({ filters }) {
           className="h-11 w-full min-w-0 rounded-lg border border-accent bg-surface px-3 font-normal text-ink outline-none transition placeholder:text-brand/60 focus:border-secondary"
           defaultValue={filters.locality}
           name="locality"
+          onBlur={(event) => applyLocality(event.currentTarget)}
+          onChange={(event) => {
+            if (event.currentTarget.value === "") applyLocality(event.currentTarget);
+          }}
           placeholder="Ej: Godoy Cruz"
           type="search"
         />
       </label>
 
-      <div className="flex min-w-0 flex-col items-center gap-2 sm:col-span-2 lg:col-span-1">
-        <button
-          aria-label="Aplicar filtros"
-          className="inline-flex size-11 items-center justify-center rounded-full border border-secondary bg-secondary text-surface transition hover:bg-secondary/90"
-          title="Aplicar filtros"
-          type="submit"
-        >
-          <Check aria-hidden="true" className="size-4" />
-        </button>
-        {hasFilters ? (
+      {hasFilters ? (
+        <div className="flex min-w-0 items-center justify-center sm:col-span-2 lg:col-span-1">
           <Link
-            className="inline-flex h-9 items-center justify-center text-sm font-semibold text-brand underline-offset-4 hover:underline"
-            href="/dashboard/proveedores/galeria"
+            className="inline-flex h-11 items-center justify-center text-sm font-semibold text-brand underline-offset-4 hover:underline"
+            href={
+              filters.search
+                ? `${GALLERY_PATH}?search=${encodeURIComponent(filters.search)}`
+                : GALLERY_PATH
+            }
           >
             Limpiar filtros
           </Link>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </form>
   );
 }
