@@ -9,7 +9,7 @@ import Step2Details from "./Step2Details";
 import Step3Media from "./Step3Media";
 import { createEvent } from "@/app/(app)/dashboard/actions";
 
-export default function EventOnboardingWizard({ useFirebaseStorage }) {
+export default function EventOnboardingWizard({ availableImages }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [created, setCreated] = useState(false);
   const [form, setForm] = useState({
@@ -20,7 +20,6 @@ export default function EventOnboardingWizard({ useFirebaseStorage }) {
     date: "",
     location: "",
     imageUrl: "",
-    imagePath: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +30,7 @@ export default function EventOnboardingWizard({ useFirebaseStorage }) {
   const nextStep = () => setCurrentStep((step) => Math.min(step + 1, 3));
   const prevStep = () => setCurrentStep((step) => Math.max(step - 1, 1));
 
-  async function handleCreate(image) {
+  async function handleCreate() {
     setLoading(true);
 
     try {
@@ -42,8 +41,8 @@ export default function EventOnboardingWizard({ useFirebaseStorage }) {
       formData.set("protagonists", form.protagonists);
       formData.set("date", form.date);
       formData.set("location", form.location);
-      formData.set("imageUrl", image.imageUrl);
-      formData.set("imagePath", image.imagePath);
+      formData.set("imageUrl", form.imageUrl);
+      formData.set("imagePath", "");
 
       await createEvent(formData);
 
@@ -99,10 +98,11 @@ export default function EventOnboardingWizard({ useFirebaseStorage }) {
               )}
               {currentStep === 3 && (
                 <Step3Media
+                  availableImages={availableImages}
                   form={form}
+                  updateField={updateField}
                   onBack={prevStep}
                   onCreate={handleCreate}
-                  useFirebaseStorage={useFirebaseStorage}
                   loading={loading}
                 />
               )}

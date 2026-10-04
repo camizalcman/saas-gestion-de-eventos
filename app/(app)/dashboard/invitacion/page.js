@@ -5,25 +5,10 @@ import path from "path";
 import InvitationForm from "@/components/invitation/InvitationForm";
 import { getCurrentUser } from "@/lib/firebase/session";
 import { getActiveEvent } from "@/lib/events/active";
+import { listLocalEventImages } from "@/lib/events/localImages";
 import { saveInvitation } from "../actions";
 
 export const dynamic = "force-dynamic";
-
-const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
-
-function listLocalEventImages() {
-  const dir = path.join(process.cwd(), "public", "events");
-
-  try {
-    return fs
-      .readdirSync(dir)
-      .filter((file) => IMAGE_EXTENSIONS.has(path.extname(file).toLowerCase()))
-      .map((file) => `/events/${file}`)
-      .sort();
-  } catch {
-    return [];
-  }
-}
 
 const AUDIO_EXTENSIONS = new Set([".mp3", ".ogg", ".wav", ".m4a"]);
 
