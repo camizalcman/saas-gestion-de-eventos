@@ -8,6 +8,7 @@ import {
   useState,
   useTransition,
 } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
 import {
@@ -22,8 +23,6 @@ import {
 import ExpenseRemoveButton from "./ExpenseRemoveButton";
 import ExpenseStatusBadge from "./ExpenseStatusBadge";
 import ProviderForm from "./ProviderForm";
-
-const CREATE_PROVIDER_VALUE = "__create_provider__";
 
 function CreateProviderModal({ action, onClose, onSuccess }) {
   return (
@@ -563,7 +562,16 @@ function ExpensePaymentModal({
 }
 
 const cellSelectClass =
-  "w-full min-w-0 cursor-pointer bg-transparent px-1.5 py-1 text-sm text-ink outline-none transition focus:bg-surface";
+  "flex w-full min-w-0 cursor-pointer items-center justify-between gap-1 bg-transparent px-1.5 py-1 text-left text-sm text-ink outline-none transition hover:bg-surface focus:bg-surface disabled:cursor-not-allowed disabled:opacity-60";
+
+const cellSelectPanelClass =
+  "max-h-56 overflow-y-auto rounded-md border border-accent bg-surface p-1 shadow-xl";
+
+const cellSelectOptionClass =
+  "flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-ink transition hover:bg-accent/40";
+
+const cellSelectCreateClass =
+  "mt-1 flex w-full cursor-pointer items-center gap-1.5 rounded-full border border-secondary bg-secondary/15 px-2.5 py-1 text-left text-sm font-semibold text-brand transition hover:bg-secondary/35";
 
 const filterLabelClass =
   "text-[10px] font-semibold uppercase tracking-[0.12em] text-brand";
@@ -855,14 +863,7 @@ export default function ExpensesSheet({
     });
   }
 
-  function handleProviderSelect(event) {
-    const value = event.target.value;
-
-    if (value === CREATE_PROVIDER_VALUE) {
-      setIsCreatingProvider(true);
-      return;
-    }
-
+  function handleProviderSelect(value) {
     setNewDraft((prev) => ({ ...prev, providerId: value }));
   }
 
@@ -960,7 +961,11 @@ export default function ExpensesSheet({
   }
 
   function handleFieldChange(event, expense, field, original) {
-    setDraftField(expense.id, field, event.target.value, original);
+    handleValueChange(event.target.value, expense, field, original);
+  }
+
+  function handleValueChange(value, expense, field, original) {
+    setDraftField(expense.id, field, value, original);
     scheduleRowSave(expense);
   }
 
@@ -968,7 +973,7 @@ export default function ExpensesSheet({
     if (savingRow === expense.id) return;
     if (!draftsRef.current[expense.id]) return;
 
-    const related = event.relatedTarget;
+    const related = event?.relatedTarget;
     if (related instanceof HTMLElement) {
       if (related.closest("[data-row-inline-form]")) return;
     }
@@ -1242,12 +1247,12 @@ export default function ExpensesSheet({
                     />
                   </td>
                   <td className="px-1 py-1">
-                    <select
-                      className={cellSelectClass}
+                    <CellSelect
                       disabled={rowDisabled}
-                      onChange={(event) =>
-                        handleFieldChange(
-                          event,
+                      onBlur={(event) => handleCellBlur(event, expense)}
+                      onChangeValue={(value) =>
+                        handleValueChange(
+                          value,
                           expense,
                           "providerId",
                           expense.providerId,
@@ -1258,15 +1263,12 @@ export default function ExpensesSheet({
                           discardRow(expense.id);
                         }
                       }}
-                      onBlur={(event) => handleCellBlur(event, expense)}
+                      options={activeProviders.map((provider) => ({
+                        label: provider.name,
+                        value: provider.id,
+                      }))}
                       value={providerId}
-                    >
-                      {activeProviders.map((provider) => (
-                        <option key={provider.id} value={provider.id}>
-                          {provider.name}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </td>
                   <td className="px-1 py-1">
                     <div className="flex items-center gap-1">
@@ -1347,36 +1349,30 @@ export default function ExpensesSheet({
                         }
                       />
                     ) : (
-                      <select
-                        className={cellSelectClass}
+                      <CellSelect
+                        createLabel="Crear responsable"
                         disabled={rowDisabled}
-                        onChange={(event) => {
-                          if (event.target.value === "__create__") {
-                            setCreatingFor(expense.id);
-                          } else {
-                            handleFieldChange(
-                              event,
-                              expense,
-                              "responsibleId",
-                              expense.responsibleId,
-                            );
-                          }
-                        }}
+                        onBlur={(event) => handleCellBlur(event, expense)}
+                        onChangeValue={(value) =>
+                          handleValueChange(
+                            value,
+                            expense,
+                            "responsibleId",
+                            expense.responsibleId,
+                          )
+                        }
+                        onCreate={() => setCreatingFor(expense.id)}
                         onKeyDown={(event) => {
                           if (event.key === "Escape") {
                             discardRow(expense.id);
                           }
                         }}
-                        onBlur={(event) => handleCellBlur(event, expense)}
+                        options={responsibleOptions.map((responsible) => ({
+                          label: responsible.name,
+                          value: responsible.id,
+                        }))}
                         value={responsibleId}
-                      >
-                        {responsibleOptions.map((responsible) => (
-                          <option key={responsible.id} value={responsible.id}>
-                            {responsible.name}
-                          </option>
-                        ))}
-                        <option value="__create__">+ Crear nuevo</option>
-                      </select>
+                      />
                     )}
                   </td>
                   <td className="px-1 py-1">
@@ -1447,32 +1443,20 @@ export default function ExpensesSheet({
                 />
               </td>
               <td className="px-1 py-1">
-                <select
-                  className={cellSelectClass}
-                   disabled={savingRow === "new"}
-                   onChange={handleProviderSelect}
+                <CellSelect
+                  createLabel="Crear proveedor"
+                  disabled={savingRow === "new"}
+                  emptyLabel="Elegí un proveedor"
+                  noOptionsLabel="Sin proveedores"
+                  onChangeValue={handleProviderSelect}
+                  onCreate={() => setIsCreatingProvider(true)}
                   onKeyDown={newRowEscape}
+                  options={activeProviders.map((provider) => ({
+                    label: provider.name,
+                    value: provider.id,
+                  }))}
                   value={newDraft.providerId}
-                >
-                  {newDraft.providerId === "" ? (
-                    <option disabled value="">
-                      Elegí un proveedor
-                    </option>
-                  ) : null}
-                  {activeProviders.length === 0 ? (
-                    <option disabled value="">
-                      Sin proveedores
-                    </option>
-                  ) : null}
-                  {activeProviders.map((provider) => (
-                    <option key={provider.id} value={provider.id}>
-                      {provider.name}
-                    </option>
-                  ))}
-                  <option value={CREATE_PROVIDER_VALUE}>
-                    Crear proveedor
-                  </option>
-                </select>
+                />
               </td>
               <td className="px-1 py-1">
                 <div className="flex items-center gap-1">
@@ -1560,40 +1544,25 @@ export default function ExpensesSheet({
                     onSubmit={(name) => handleCreateResponsible(name, "new")}
                   />
                 ) : (
-                  <select
-                    className={cellSelectClass}
+                  <CellSelect
+                    createLabel="Crear responsable"
                     disabled={savingRow === "new"}
-                    onChange={(event) => {
-                      if (event.target.value === "__create__") {
-                        setCreatingFor("new");
-                      } else {
-                        setNewDraft((prev) => ({
-                          ...prev,
-                          responsibleId: event.target.value,
-                        }));
-                      }
-                    }}
+                    emptyLabel="Elegí un responsable"
+                    noOptionsLabel="Creá un responsable"
+                    onChangeValue={(value) =>
+                      setNewDraft((prev) => ({
+                        ...prev,
+                        responsibleId: value,
+                      }))
+                    }
+                    onCreate={() => setCreatingFor("new")}
                     onKeyDown={newRowEscape}
+                    options={responsibleOptions.map((responsible) => ({
+                      label: responsible.name,
+                      value: responsible.id,
+                    }))}
                     value={newDraft.responsibleId}
-                  >
-                    {newDraft.responsibleId === "" ? (
-                      <option disabled value="">
-                        Elegí un responsable
-                      </option>
-                    ) : null}
-                    {responsibleOptions.length === 0 ? (
-                      <option disabled value="">
-                        Creá un responsable
-                      </option>
-                    ) : (
-                      responsibleOptions.map((responsible) => (
-                        <option key={responsible.id} value={responsible.id}>
-                          {responsible.name}
-                        </option>
-                      ))
-                    )}
-                    <option value="__create__">+ Crear nuevo</option>
-                  </select>
+                  />
                 )}
               </td>
               <td className="px-1 py-1">
@@ -1791,6 +1760,234 @@ function ResizeHandle({
         }`}
       />
     </span>
+  );
+}
+
+function CellSelect({
+  createLabel,
+  disabled = false,
+  emptyLabel,
+  noOptionsLabel,
+  onBlur,
+  onChangeValue,
+  onCreate,
+  onKeyDown,
+  options,
+  value,
+}) {
+  const [position, setPosition] = useState(null);
+  const rootRef = useRef(null);
+  const triggerRef = useRef(null);
+  const panelRef = useRef(null);
+  const isOpen = position !== null;
+
+  const selectedLabel =
+    options.find((option) => option.value === value)?.label ??
+    (value ? "" : (noOptionsLabel ?? emptyLabel ?? ""));
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    function handlePointerDown(event) {
+      const target = event.target;
+      if (
+        rootRef.current?.contains(target) ||
+        panelRef.current?.contains(target)
+      ) {
+        return;
+      }
+      setPosition(null);
+    }
+
+    function handleWindowChange() {
+      setPosition(null);
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    window.addEventListener("resize", handleWindowChange);
+    window.addEventListener("scroll", handleWindowChange, true);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      window.removeEventListener("resize", handleWindowChange);
+      window.removeEventListener("scroll", handleWindowChange, true);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    panel.focus();
+
+    const panelHeight = panel.getBoundingClientRect().height;
+    if (window.innerHeight - panel.getBoundingClientRect().bottom < 8) {
+      setPosition((prev) =>
+        prev
+          ? { ...prev, top: Math.max(8, prev.top - panelHeight - 8) }
+          : prev,
+      );
+    }
+  }, [isOpen]);
+
+  function openPanel() {
+    if (disabled) return;
+    const rect = triggerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const panelHeight = Math.min(
+      224,
+      Math.max(options.length + (onCreate ? 1.6 : 1), 1) * 32 + 8,
+    );
+    const fitsBelow = window.innerHeight - rect.bottom >= panelHeight + 8;
+
+    setPosition({
+      left: rect.left,
+      top: fitsBelow ? rect.bottom + 4 : rect.top - panelHeight - 4,
+      width: rect.width,
+    });
+  }
+
+  function closePanel({ returnFocus = false } = {}) {
+    setPosition(null);
+    if (returnFocus) triggerRef.current?.focus();
+  }
+
+  function choose(nextValue) {
+    closePanel({ returnFocus: true });
+    onChangeValue?.(nextValue);
+  }
+
+  function startCreate() {
+    closePanel();
+    onCreate?.();
+  }
+
+  function handlePanelKeyDown(event) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      closePanel({ returnFocus: true });
+      onKeyDown?.(event);
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      const active = document.activeElement;
+      if (active?.dataset.createOption === "true") {
+        startCreate();
+      } else if (active instanceof HTMLElement && active.dataset.value) {
+        choose(active.dataset.value);
+      }
+    }
+  }
+
+  return (
+    <div
+      className="relative min-w-0"
+      onBlur={(event) => {
+        const next = event.relatedTarget;
+        if (
+          next instanceof HTMLElement &&
+          (rootRef.current?.contains(next) || panelRef.current?.contains(next))
+        ) {
+          return;
+        }
+        onBlur?.(event);
+      }}
+      ref={rootRef}
+    >
+      <button
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        className={cellSelectClass}
+        disabled={disabled}
+        onClick={() => (isOpen ? closePanel() : openPanel())}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            if (!isOpen) openPanel();
+            return;
+          }
+          onKeyDown?.(event);
+        }}
+        ref={triggerRef}
+        type="button"
+      >
+        <span
+          className={`min-w-0 truncate ${selectedLabel ? "" : "text-brand/60"}`}
+        >
+          {selectedLabel}
+        </span>
+        <ChevronDown aria-hidden="true" className="size-3.5 shrink-0 text-brand" />
+      </button>
+
+      {isOpen
+        ? createPortal(
+            <div
+              className={`fixed z-50 ${cellSelectPanelClass}`}
+              onKeyDown={handlePanelKeyDown}
+              ref={panelRef}
+              role="listbox"
+              style={{
+                left: position.left,
+                minWidth: Math.max(position.width, 160),
+                top: position.top,
+              }}
+              tabIndex={-1}
+            >
+              {options.length === 0 ? (
+                <p
+                  aria-disabled="true"
+                  aria-selected={false}
+                  className="px-2 py-1.5 text-sm text-brand"
+                  role="option"
+                >
+                  {noOptionsLabel ?? emptyLabel ?? "Sin opciones"}
+                </p>
+              ) : (
+                options.map((option) => (
+                  <button
+                    aria-selected={option.value === value}
+                    className={cellSelectOptionClass}
+                    data-value={option.value}
+                    key={option.value}
+                    onClick={() => choose(option.value)}
+                    role="option"
+                    type="button"
+                  >
+                    {option.value === value ? (
+                      <Check
+                        aria-hidden="true"
+                        className="size-3.5 shrink-0 text-brand"
+                      />
+                    ) : null}
+                    <span className="min-w-0 truncate">{option.label}</span>
+                  </button>
+                ))
+              )}
+              {onCreate ? (
+                <button
+                  aria-selected={false}
+                  className={cellSelectCreateClass}
+                  data-create-option="true"
+                  onClick={startCreate}
+                  role="option"
+                  type="button"
+                >
+                  <Plus aria-hidden="true" className="size-3.5 shrink-0" />
+                  <span className="min-w-0 truncate">{createLabel}</span>
+                </button>
+              ) : null}
+            </div>,
+            document.body,
+          )
+        : null}
+    </div>
   );
 }
 

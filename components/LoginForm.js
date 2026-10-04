@@ -97,7 +97,7 @@ export default function LoginForm() {
 
   return (
     <section
-      className="w-full max-w-md rounded-xl bg-transparent p-0 sm:p-0"
+      className="w-full max-w-md rounded-xl bg-transparent p-0 sm:p-0 lg:max-w-lg"
       aria-labelledby="login-title"
     >
       <div

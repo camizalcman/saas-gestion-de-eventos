@@ -18,7 +18,7 @@ export default function StepIndicator({ currentStep }) {
             <div key={step.id} className="flex flex-1 items-center last:flex-none">
               <div className="flex flex-col items-center gap-2">
                 <div
-                  className={`grid size-9 place-items-center rounded-full border text-sm font-semibold transition ${
+                  className={`grid size-9 place-items-center rounded-full border text-xs font-semibold transition ${
                     isActive
                       ? "border-secondary bg-secondary text-surface"
                       : isDone

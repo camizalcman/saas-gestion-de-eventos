@@ -5,7 +5,7 @@ import SupplierCard from "@/components/suppliers/SupplierCard";
 import SupplierAddButton from "@/components/suppliers/SupplierAddButton";
 import SupplierDeleteButton from "@/components/suppliers/SupplierDeleteButton";
 import SupplierEditModal from "@/components/suppliers/SupplierEditModal";
-import SupplierFiltersToggle from "@/components/suppliers/SupplierFiltersToggle";
+import SupplierFilters from "@/components/suppliers/SupplierFilters";
 import SupplierSearchBar from "@/components/suppliers/SupplierSearchBar";
 import SupplierModal from "@/components/suppliers/SupplierModal";
 import { getActiveEvent } from "@/lib/events/active";
@@ -76,12 +76,12 @@ export default async function SuppliersPage({ searchParams }) {
               </div>
 
               {isAdmin ? (
-                <div className="flex flex-col gap-2 w-[20%]">
+                <div className="flex w-full shrink-0 flex-col gap-2 sm:w-56 sm:items-end">
                   <SupplierModal
                     action={createSupplierAction}
                     useFirebaseStorage={process.env.FIREBASE_STORAGE === "true"}
                   />
-                  <p className="text-sm leading-6 text-brand text-right">
+                  <p className="text-sm leading-6 text-brand sm:text-right">
                     Este proveedor quedara disponible en la galeria general.
                   </p>
                 </div>
@@ -92,11 +92,12 @@ export default async function SuppliersPage({ searchParams }) {
       </header>
 
       <section className="mt-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0 flex-1">
-                <SupplierFiltersToggle filters={filters} />
+                <SupplierFilters filters={filters} key={JSON.stringify(filters)} />
               </div>
               <SupplierSearchBar
+                key={JSON.stringify(filters)}
                 defaultValue={filters.search}
                 category={filters.category}
                 province={filters.province}
