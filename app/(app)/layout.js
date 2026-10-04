@@ -20,7 +20,7 @@ export default async function AppLayout({ children }) {
   const activeEvent = await getActiveEvent(user, events);
 
   return (
-    <div className="flex min-h-screen flex-col bg-surface text-ink">
+    <div className="flex min-h-screen flex-col bg-surface text-ink lg:flex-row">
       <AppSidebar
         activeEventId={activeEvent?.id || null}
         events={events.map((event) => ({

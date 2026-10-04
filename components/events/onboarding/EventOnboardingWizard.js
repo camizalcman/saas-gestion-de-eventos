@@ -56,8 +56,8 @@ export default function EventOnboardingWizard({ useFirebaseStorage }) {
   }
 
   return (
-    <div className="grid h-full min-h-0 max-h-full w-full grid-cols-1 overflow-hidden bg-surface text-ink md:grid-cols-2">
-      <div className="relative hidden h-full max-h-screen overflow-hidden md:block">
+    <div className="grid h-full min-h-0 max-h-full w-full grid-cols-1 overflow-hidden bg-surface text-ink lg:grid-cols-2">
+      <div className="relative hidden h-full max-h-screen overflow-hidden lg:block">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           alt="Celebración"
@@ -72,7 +72,7 @@ export default function EventOnboardingWizard({ useFirebaseStorage }) {
         </div>
       </div>
 
-      <div className="flex h-full min-h-0 max-h-full flex-col justify-center overflow-y-auto px-8 py-4 md:px-12 lg:px-16">
+      <div className="flex h-full min-h-0 max-h-full flex-col justify-center overflow-y-auto px-8 pt-20 pb-4 md:px-12 lg:px-16 lg:pt-4">
         <div className="mx-auto w-full max-w-xl">
           {created ? (
             <div className="grid justify-items-center gap-6 py-10 text-center">
