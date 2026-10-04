@@ -14,7 +14,6 @@ export default function EventOnboardingWizard({ useFirebaseStorage }) {
   const [created, setCreated] = useState(false);
   const [form, setForm] = useState({
     title: "",
-    description: "",
     eventType: "",
     customEventType: "",
     protagonists: "",
@@ -38,7 +37,6 @@ export default function EventOnboardingWizard({ useFirebaseStorage }) {
     try {
       const formData = new FormData();
       formData.set("title", form.title);
-      formData.set("description", form.description);
       formData.set("eventType", form.eventType);
       formData.set("customEventType", form.customEventType);
       formData.set("protagonists", form.protagonists);

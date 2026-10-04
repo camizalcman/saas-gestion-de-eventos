@@ -44,7 +44,6 @@ export default async function PublicEventPage({ params }) {
             <img alt={event.title} className="max-h-[520px] w-full object-cover" src={event.imageUrl} />
           </div>
         ) : null}
-        {event.description ? <p className="mt-6 whitespace-pre-wrap overflow-wrap-anywhere text-base leading-8 text-zinc-300">{event.description}</p> : null}
       </article>
     </main>
   );

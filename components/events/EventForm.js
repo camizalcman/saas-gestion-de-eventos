@@ -98,10 +98,6 @@ export default function EventForm({
         <input className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="title" defaultValue={event?.title || ""} disabled={loading} required minLength={3} />
       </label>
       <label className="grid gap-2 text-sm font-medium text-ink">
-        <span>Descripcion</span>
-        <textarea className="min-h-28 resize-y rounded-md border border-accent bg-surface px-3 py-3 text-ink outline-none focus:border-secondary" name="description" defaultValue={event?.description || ""} disabled={loading} />
-      </label>
-      <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Tipo de evento</span>
         <select className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="eventType" value={eventType} onChange={(e) => setEventType(e.target.value)} disabled={loading}>
           <option value="">Seleccionar tipo...</option>

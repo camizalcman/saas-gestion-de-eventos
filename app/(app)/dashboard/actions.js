@@ -131,7 +131,6 @@ export async function selectEvent(formData) {
 
 function parseEventForm(formData) {
   const title = requiredText(formData.get("title"), { label: "El titulo", min: 3, max: 120 });
-  const description = optionalText(formData.get("description"), { label: "La descripcion", max: 5000 });
   const date = datetimeInput(formData.get("date"), { label: "La fecha" });
   const location = optionalText(formData.get("location"), { label: "La ubicacion", max: 250 });
   const imageUrl = pathOrUrl(formData.get("imageUrl"), { label: "La imagen del evento", max: 1000 });
@@ -146,7 +145,6 @@ function parseEventForm(formData) {
 
   return {
     title,
-    description,
     date,
     location,
     published: booleanInput(formData.get("published")),
