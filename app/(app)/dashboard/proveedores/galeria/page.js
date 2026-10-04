@@ -76,12 +76,12 @@ export default async function SuppliersPage({ searchParams }) {
               </div>
 
               {isAdmin ? (
-                <div className="flex flex-col gap-2 w-[20%]">
+                <div className="flex w-full shrink-0 flex-col gap-2 sm:w-56 sm:items-end">
                   <SupplierModal
                     action={createSupplierAction}
                     useFirebaseStorage={process.env.FIREBASE_STORAGE === "true"}
                   />
-                  <p className="text-sm leading-6 text-brand text-right">
+                  <p className="text-sm leading-6 text-brand sm:text-right">
                     Este proveedor quedara disponible en la galeria general.
                   </p>
                 </div>
