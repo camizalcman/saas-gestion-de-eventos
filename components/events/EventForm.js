@@ -21,9 +21,9 @@ function getLocalImageInputValue(imageUrl, imageBasePath) {
   return value.startsWith(prefix) ? value.slice(prefix.length) : value;
 }
 
-function normalizeDateTimeInputValue(value) {
-  const text = String(value || "");
-  return /^\d{4}-\d{2}-\d{2}$/.test(text) ? `${text}T00:00` : text;
+function splitDateTime(value) {
+  const [date = "", time = ""] = String(value || "").split("T");
+  return { date, time: time.slice(0, 5) };
 }
 
 export default function EventForm({
@@ -39,6 +39,7 @@ export default function EventForm({
   const [previewUrl, setPreviewUrl] = useState(event?.imageUrl || "");
   const [objectPreviewUrl, setObjectPreviewUrl] = useState("");
   const cleanImageBasePath = useMemo(() => imageBasePath, []);
+  const eventDateTime = splitDateTime(event?.date);
 
   useEffect(() => () => {
     if (objectPreviewUrl) URL.revokeObjectURL(objectPreviewUrl);
@@ -116,10 +117,16 @@ export default function EventForm({
         <span>Protagonistas</span>
         <input className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="protagonists" defaultValue={event?.protagonists?.join(", ") || ""} disabled={loading} placeholder="Separados por coma" />
       </label>
-      <label className="grid gap-2 text-sm font-medium text-ink">
-        <span>Fecha y hora</span>
-        <input className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="date" type="datetime-local" defaultValue={normalizeDateTimeInputValue(event?.date)} disabled={loading} />
-      </label>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="grid gap-2 text-sm font-medium text-ink">
+          <span>Fecha</span>
+          <input className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="date" type="date" defaultValue={eventDateTime.date} disabled={loading} />
+        </label>
+        <label className="grid gap-2 text-sm font-medium text-ink">
+          <span>Horario</span>
+          <input className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="time" type="time" defaultValue={eventDateTime.time} disabled={loading} />
+        </label>
+      </div>
       <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Ubicacion</span>
         <input className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary" name="location" defaultValue={event?.location || ""} disabled={loading} />

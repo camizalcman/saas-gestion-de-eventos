@@ -18,16 +18,29 @@ export default function Step2Details({ form, updateField, onBack, onNext }) {
         />
       </label>
 
-      <label className="grid gap-2 text-sm font-medium text-ink">
-        <span>Fecha del evento</span>
-        <input
-          className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary"
-          name="date"
-          type="datetime-local"
-          value={form.date}
-          onChange={(e) => updateField("date", e.target.value)}
-        />
-      </label>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="grid gap-2 text-sm font-medium text-ink">
+          <span>Fecha del evento</span>
+          <input
+            className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary"
+            name="date"
+            type="date"
+            value={form.date}
+            onChange={(e) => updateField("date", e.target.value)}
+          />
+        </label>
+
+        <label className="grid gap-2 text-sm font-medium text-ink">
+          <span>Horario</span>
+          <input
+            className="h-11 rounded-md border border-accent bg-surface px-3 text-ink outline-none focus:border-secondary"
+            name="time"
+            type="time"
+            value={form.time}
+            onChange={(e) => updateField("time", e.target.value)}
+          />
+        </label>
+      </div>
 
       <label className="grid gap-2 text-sm font-medium text-ink">
         <span>Ubicación</span>

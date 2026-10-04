@@ -18,6 +18,7 @@ export default function EventOnboardingWizard({ availableImages }) {
     customEventType: "",
     protagonists: "",
     date: "",
+    time: "",
     location: "",
     imageUrl: "",
   });
@@ -40,6 +41,7 @@ export default function EventOnboardingWizard({ availableImages }) {
       formData.set("customEventType", form.customEventType);
       formData.set("protagonists", form.protagonists);
       formData.set("date", form.date);
+      formData.set("time", form.time);
       formData.set("location", form.location);
       formData.set("imageUrl", form.imageUrl);
       formData.set("imagePath", "");

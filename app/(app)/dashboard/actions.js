@@ -129,9 +129,15 @@ export async function selectEvent(formData) {
   revalidatePath("/", "layout");
 }
 
+function joinDateAndTime(date, time) {
+  const datePart = String(date ?? "").trim();
+  const timePart = String(time ?? "").trim();
+  return datePart && timePart ? `${datePart}T${timePart}` : datePart;
+}
+
 function parseEventForm(formData) {
   const title = requiredText(formData.get("title"), { label: "El titulo", min: 3, max: 120 });
-  const date = datetimeInput(formData.get("date"), { label: "La fecha" });
+  const date = datetimeInput(joinDateAndTime(formData.get("date"), formData.get("time")), { label: "La fecha" });
   const location = optionalText(formData.get("location"), { label: "La ubicacion", max: 250 });
   const imageUrl = pathOrUrl(formData.get("imageUrl"), { label: "La imagen del evento", max: 1000 });
   const imagePath = storagePath(formData.get("imagePath"), { label: "La imagen del evento" });
