@@ -1,4 +1,4 @@
-# Gestion de eventos
+# Special Day - Gestión de eventos
 
 Aplicacion web SaaS para planificar y administrar eventos desde un unico lugar. El sistema permite crear eventos, organizar invitados, administrar proveedores, controlar el presupuesto, armar un cronograma y generar una invitacion digital publicable.
 
